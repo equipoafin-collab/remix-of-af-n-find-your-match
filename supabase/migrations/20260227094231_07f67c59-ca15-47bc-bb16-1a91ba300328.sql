@@ -1,0 +1,1 @@
+ALTER TABLE public.perfiles ADD COLUMN email text, ADD COLUMN telefono text;

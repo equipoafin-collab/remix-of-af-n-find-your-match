@@ -1,0 +1,1 @@
+ALTER TABLE public.perfiles ADD COLUMN estatura integer, ADD COLUMN peso integer;

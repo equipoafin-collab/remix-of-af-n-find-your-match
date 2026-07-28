@@ -1,0 +1,1 @@
+ALTER TABLE public.disc_results ADD COLUMN telefono text DEFAULT NULL;

@@ -1,0 +1,1 @@
+ALTER TABLE public.perfiles ADD COLUMN genero text NULL DEFAULT NULL;

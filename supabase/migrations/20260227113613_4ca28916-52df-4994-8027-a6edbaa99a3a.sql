@@ -1,0 +1,1 @@
+ALTER TABLE public.perfiles ADD COLUMN busca_genero text DEFAULT 'Ambos';
