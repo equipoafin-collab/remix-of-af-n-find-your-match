@@ -8,16 +8,16 @@ Backend: **Lovable Cloud** (Supabase gestionado por Lovable, project_id en `supa
 - La hoja de ruta es `docs/PLAN_BACKOFFICE.md`. Lee su **sección 0** antes de tocar nada.
 - Implementa **una sola tarea por petición** (ej. `T0.1`), en el orden del plan. Si una dependencia no está marcada `[x]`, para y avisa.
 - Al terminar una tarea:
-  1. `npm run build`, `npm run lint` y `npm test` deben pasar.
+  1. `npm run build`, `npm run typecheck`, `npm run lint` y `npm test` deben pasar (`vite build` no comprueba tipos; por eso existe `typecheck`).
   2. Marca la casilla de la tarea en el plan y añade una línea al **Registro de cambios** (sección 7).
   3. Commit con el formato `T0.1: descripción corta` (no hagas push salvo que se pida).
   4. Resume al usuario qué ha cambiado y si hay pasos manuales (ver "Base de datos").
 
 ## Comandos
-- `npm install` · `npm run dev` · `npm run build` · `npm run lint` · `npm test`
+- `npm install` · `npm run dev` · `npm run build` · `npm run typecheck` · `npm run lint` · `npm test`
 
 ## Stack y convenciones
-- Vite + React 18 + TypeScript + Tailwind + shadcn/ui (`src/components/ui`, no modificar salvo necesidad), React Router 6, TanStack Query, Supabase JS, Edge Functions en Deno (`supabase/functions`).
+- Vite + React 18 + TypeScript + Tailwind + shadcn/ui (`src/components/ui`, no modificar salvo necesidad; excluido del lint), React Router 6, TanStack Query, Supabase JS, Edge Functions en Deno (`supabase/functions`).
 - IA: Lovable AI Gateway (`https://ai.gateway.lovable.dev/v1/chat/completions`, secreto `LOVABLE_API_KEY`). Solo desde Edge Functions, nunca desde el navegador. Respuestas en JSON validado.
 - Nombres de tablas/columnas y textos de UI en **español, snake_case**. Código TS en camelCase.
 - Estilo visual: el de `src/components/admin/AdminLayout.tsx` y `src/pages/admin/*`.
