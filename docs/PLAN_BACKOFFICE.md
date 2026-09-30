@@ -20,7 +20,7 @@
    - Idioma de UI y de nombres de tablas/columnas: **español, snake_case**. Código (funciones/variables TS): camelCase.
    - Estilo visual: el ya existente en `src/components/admin/AdminLayout.tsx` y `src/pages/admin/*` (tarjetas `bg-card border border-border rounded-2xl`, color de acento `gold`, fuentes `font-display` / `font-body`).
    - **Migraciones**: un fichero nuevo por tarea en `supabase/migrations/AAAAMMDDHHMMSS_descripcion.sql`. Nunca edites migraciones antiguas. Toda tabla nueva lleva RLS activado y políticas solo-admin (`public.has_role(auth.uid(), 'admin')`) salvo que se indique lo contrario.
-   - Tras cada migración, **regenera** `src/integrations/supabase/types.ts` (en Lovable es automático; en local `supabase gen types typescript`). No uses `(supabase as any)` en código nuevo.
+   - Tras cada migración, **actualiza a mano** `src/integrations/supabase/types.ts` de forma coherente con la migración (en local no hay CLI de Supabase; Lovable lo regenera al aplicarla). No uses `(supabase as any)` en código nuevo.
    - Acceso a datos en el frontend mediante **hooks de TanStack Query** en `src/hooks/admin/` (ej. `useCliente(id)`, `useTareas(filtros)`), no con `useEffect` + `useState` sueltos.
    - Lógica de negocio pura (cálculos, matching, reglas) en `src/lib/` con **tests en Vitest** (`src/lib/__tests__/`).
    - Toda llamada a IA se hace **desde Edge Functions**, nunca desde el navegador. La respuesta de la IA se pide en JSON estricto y se valida (zod o validación manual) antes de guardarla.
@@ -263,8 +263,8 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
 
 - [ ] **T0.1 · Tipos y limpieza**
   - Objetivo: poder construir sin `any`.
-  - Cambios: regenerar `types.ts`; eliminar `(supabase as any)` en `PerfilDetalle.tsx` y `Pagos.tsx`; crear `src/types/admin.ts` con tipos derivados (`Perfil = Tables<'perfiles'>`, etc.).
-  - Aceptación: `npm run build` y `npm run lint` sin errores; no queda `supabase as any` en `src/pages/admin`.
+  - Cambios: `types.ts` ya está al día con las migraciones (no hay que regenerarlo); eliminar `(supabase as any)` en `PerfilDetalle.tsx` y `Pagos.tsx`; crear `src/types/admin.ts` con tipos derivados (`Perfil = Tables<'perfiles'>`, etc.); dejar el lint en verde: quitar los `any` explícitos de `src/pages/**` y `supabase/functions/compatibility-report`, poner llaves en los `case` de `Perfil.tsx` y cambiar el `require` de `tailwind.config.ts` por `import`. `src/components/ui` está excluido del lint (shadcn).
+  - Aceptación: `npm run build`, `npm run typecheck` y `npm run lint` sin errores (se admiten los warnings `react-refresh`); no queda `supabase as any` en `src/`.
 
 - [ ] **T0.2 · Seguridad y privacidad**
   - Cambios (migración):
@@ -560,3 +560,4 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | Fecha | Tarea | Cambio |
 |---|---|---|
 | 30/09/2026 | — | Creación del plan a partir del análisis del repositorio y del PDF de funcionalidades. |
+| 30/09/2026 | — | Ajustes previos: `types.ts` se actualiza a mano, script `npm run typecheck`, `src/components/ui` fuera del lint y alcance de T0.1 ampliado para dejar el lint en verde. |
