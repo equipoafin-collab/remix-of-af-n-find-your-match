@@ -1,9 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Search, Filter, ChevronRight, MapPin } from "lucide-react";
-
-import type { Perfil } from "@/types/admin";
+import { usePerfiles } from "@/hooks/admin/usePerfiles";
 import FotoPerfil from "@/components/admin/FotoPerfil";
 
 const ESTADOS = ["activo", "pendiente", "pausado", "rechazado"];
@@ -24,8 +22,7 @@ const estadoBadge = (e: string | null) => {
 };
 
 const PerfilesList = () => {
-  const [perfiles, setPerfiles] = useState<Perfil[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: perfiles = [], isLoading: loading } = usePerfiles();
   const [q, setQ] = useState("");
   const [genero, setGenero] = useState<string>("all");
   const [ciudad, setCiudad] = useState<string>("all");
@@ -33,14 +30,6 @@ const PerfilesList = () => {
   const [hijos, setHijos] = useState<string>("all");
   const [tabaco, setTabaco] = useState<string>("all");
   const [religion, setReligion] = useState<string>("all");
-
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase.from("perfiles").select("*").order("created_at", { ascending: false });
-      setPerfiles(data || []);
-      setLoading(false);
-    })();
-  }, []);
 
   const ciudades = useMemo(() => Array.from(new Set(perfiles.map((p) => p.ciudad).filter(Boolean))).sort(), [perfiles]);
   const religiones = useMemo(() => Array.from(new Set(perfiles.map((p) => p.religion).filter(Boolean))).sort(), [perfiles]);

@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft, MapPin, Cake, User, Heart, Cigarette, Wine, Briefcase, Sparkles,
   ShieldAlert, Save, Loader2, Trophy, AlertTriangle, type LucideIcon,
 } from "lucide-react";
 import { findMatchesFor, type MatchSuggestion } from "@/lib/profileMatching";
 import { toast } from "@/hooks/use-toast";
+import { usePerfil, usePerfiles, useUpdatePerfil } from "@/hooks/admin/usePerfiles";
 
 import type { Perfil } from "@/types/admin";
 import FotoPerfil from "@/components/admin/FotoPerfil";
@@ -39,44 +39,68 @@ const Scale = ({ label, value }: { label: string; value: number | null }) => (
   </div>
 );
 
+// Se monta con key={perfil.id}: el formulario arranca con los valores guardados
+// y no se pisa si React Query refresca el perfil mientras se edita.
+const EstadoYNotas = ({ perfil }: { perfil: Perfil }) => {
+  const [estado, setEstado] = useState(perfil.estado_perfil || "activo");
+  const [notas, setNotas] = useState(perfil.notas_admin || "");
+  const updatePerfil = useUpdatePerfil();
+
+  const guardar = () =>
+    updatePerfil.mutate(
+      { id: perfil.id, cambios: { estado_perfil: estado, notas_admin: notas } },
+      {
+        onSuccess: () => toast({ title: "Guardado", description: "Cambios aplicados." }),
+        onError: (error) => toast({ title: "Error", description: error.message, variant: "destructive" }),
+      },
+    );
+
+  return (
+    <section className="bg-card border border-border rounded-2xl p-5 space-y-4">
+      <h3 className="font-display text-sm font-semibold text-foreground">Estado y notas internas</h3>
+      <div className="grid sm:grid-cols-[200px_1fr] gap-4 items-start">
+        <div>
+          <label className="font-body text-xs text-muted-foreground uppercase tracking-wider">Estado del perfil</label>
+          <select
+            value={estado}
+            onChange={(e) => setEstado(e.target.value)}
+            className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm"
+          >
+            {["activo", "pendiente", "pausado", "rechazado"].map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="font-body text-xs text-muted-foreground uppercase tracking-wider">Notas privadas (solo admin)</label>
+          <textarea
+            value={notas}
+            onChange={(e) => setNotas(e.target.value)}
+            rows={4}
+            placeholder="Ej: Muy implicado, busca matrimonio pronto, excelente candidato…"
+            className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm resize-y"
+          />
+        </div>
+      </div>
+      <button
+        onClick={guardar}
+        disabled={updatePerfil.isPending}
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-foreground text-background font-body text-sm font-semibold hover:opacity-90 disabled:opacity-50"
+      >
+        {updatePerfil.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar cambios
+      </button>
+    </section>
+  );
+};
+
 const PerfilDetalle = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [perfil, setPerfil] = useState<Perfil | null>(null);
-  const [pool, setPool] = useState<Perfil[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [estado, setEstado] = useState<string>("activo");
-  const [notas, setNotas] = useState("");
-  const [saving, setSaving] = useState(false);
+  const { data: perfil, isLoading: loading } = usePerfil(id);
+  const { data: pool = [] } = usePerfiles();
   const [showMatches, setShowMatches] = useState(false);
   const [calculating, setCalculating] = useState(false);
   const [matches, setMatches] = useState<MatchSuggestion[]>([]);
-
-  useEffect(() => {
-    (async () => {
-      if (!id) return;
-      const [{ data: one }, { data: all }] = await Promise.all([
-        supabase.from("perfiles").select("*").eq("id", id).maybeSingle(),
-        supabase.from("perfiles").select("*"),
-      ]);
-      setPerfil(one);
-      setPool(all || []);
-      if (one) {
-        setEstado(one.estado_perfil || "activo");
-        setNotas(one.notas_admin || "");
-      }
-      setLoading(false);
-    })();
-  }, [id]);
-
-  const guardar = async () => {
-    if (!id) return;
-    setSaving(true);
-    const { error } = await supabase.from("perfiles").update({ estado_perfil: estado, notas_admin: notas }).eq("id", id);
-    setSaving(false);
-    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
-    else toast({ title: "Guardado", description: "Cambios aplicados." });
-  };
 
   const buscarPareja = () => {
     if (!perfil) return;
@@ -246,40 +270,7 @@ const PerfilDetalle = () => {
       </Section>
 
       {/* Estado + notas admin */}
-      <section className="bg-card border border-border rounded-2xl p-5 space-y-4">
-        <h3 className="font-display text-sm font-semibold text-foreground">Estado y notas internas</h3>
-        <div className="grid sm:grid-cols-[200px_1fr] gap-4 items-start">
-          <div>
-            <label className="font-body text-xs text-muted-foreground uppercase tracking-wider">Estado del perfil</label>
-            <select
-              value={estado}
-              onChange={(e) => setEstado(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm"
-            >
-              {["activo", "pendiente", "pausado", "rechazado"].map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="font-body text-xs text-muted-foreground uppercase tracking-wider">Notas privadas (solo admin)</label>
-            <textarea
-              value={notas}
-              onChange={(e) => setNotas(e.target.value)}
-              rows={4}
-              placeholder="Ej: Muy implicado, busca matrimonio pronto, excelente candidato…"
-              className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm resize-y"
-            />
-          </div>
-        </div>
-        <button
-          onClick={guardar}
-          disabled={saving}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-foreground text-background font-body text-sm font-semibold hover:opacity-90 disabled:opacity-50"
-        >
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar cambios
-        </button>
-      </section>
+      <EstadoYNotas key={p.id} perfil={p} />
     </div>
   );
 };
