@@ -6,6 +6,15 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+interface DiscResumen {
+  primary_style: string;
+  secondary_style: string;
+  percent_d: number;
+  percent_i: number;
+  percent_s: number;
+  percent_c: number;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -46,8 +55,8 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Could not fetch profiles" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const p1 = profiles.find((p: any) => p.id === profile_id_1);
-    const p2 = profiles.find((p: any) => p.id === profile_id_2);
+    const p1 = profiles.find((p) => p.id === profile_id_1);
+    const p2 = profiles.find((p) => p.id === profile_id_2);
 
     // Fetch DISC results for both profiles (match by email or name)
     const emails = [p1.email, p2.email].filter(Boolean);
@@ -63,15 +72,15 @@ serve(async (req) => {
         ].join(",")
       );
 
-    const findDisc = (perfil: any) =>
+    const findDisc = (perfil: { email: string | null; nombre_completo: string }) =>
       discResults?.find(
-        (d: any) => (perfil.email && d.email === perfil.email) || d.name === perfil.nombre_completo
+        (d) => (perfil.email && d.email === perfil.email) || d.name === perfil.nombre_completo
       );
 
     const disc1 = findDisc(p1);
     const disc2 = findDisc(p2);
 
-    const formatDisc = (d: any) => {
+    const formatDisc = (d?: DiscResumen) => {
       if (!d) return "No ha completado el test DISC.";
       return `Perfil DISC: Principal=${d.primary_style} (${d.percent_d}% D, ${d.percent_i}% I, ${d.percent_s}% S, ${d.percent_c}% C), Secundario=${d.secondary_style}`;
     };

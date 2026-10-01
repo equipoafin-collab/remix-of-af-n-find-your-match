@@ -1,20 +1,20 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { usePerfiles } from "@/hooks/admin/usePerfiles";
+import { usePagos } from "@/hooks/admin/usePagos";
+import { useConteoDisc } from "@/hooks/admin/useConteoDisc";
 import {
-  Users, UserCheck, Clock, TrendingUp, Heart, CreditCard, Sparkles, ArrowRight,
+  Users, UserCheck, Clock, TrendingUp, Heart, CreditCard, Sparkles, ArrowRight, type LucideIcon,
 } from "lucide-react";
 
-interface Counts {
-  total: number;
-  activos: number;
-  pendientes: number;
-  ultimos30: number;
-  pagos: number;
-  leads: number;
+interface StatCardProps {
+  icon: LucideIcon;
+  label: string;
+  value: number | string;
+  hint?: string;
+  color?: string;
 }
 
-const StatCard = ({ icon: Icon, label, value, hint, color = "text-foreground" }: any) => (
+const StatCard = ({ icon: Icon, label, value, hint, color = "text-foreground" }: StatCardProps) => (
   <div className="bg-card border border-border rounded-2xl p-5">
     <div className="flex items-center justify-between mb-2">
       <p className="font-body text-xs text-muted-foreground uppercase tracking-wider">{label}</p>
@@ -26,29 +26,21 @@ const StatCard = ({ icon: Icon, label, value, hint, color = "text-foreground" }:
 );
 
 const AdminDashboardHome = () => {
-  const [counts, setCounts] = useState<Counts>({ total: 0, activos: 0, pendientes: 0, ultimos30: 0, pagos: 0, leads: 0 });
-  const [loading, setLoading] = useState(true);
+  const perfiles = usePerfiles();
+  const pagos = usePagos();
+  const discs = useConteoDisc();
+  const loading = perfiles.isLoading || pagos.isLoading || discs.isLoading;
 
-  useEffect(() => {
-    (async () => {
-      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      const [{ data: perfiles }, paid, leads] = await Promise.all([
-        supabase.from("perfiles").select("id,estado_perfil,created_at"),
-        supabase.from("paid_users").select("id", { count: "exact", head: true }),
-        supabase.from("disc_results").select("id", { count: "exact", head: true }),
-      ]);
-      const all = perfiles || [];
-      setCounts({
-        total: all.length,
-        activos: all.filter((p: any) => (p.estado_perfil || "activo") === "activo").length,
-        pendientes: all.filter((p: any) => p.estado_perfil === "pendiente").length,
-        ultimos30: all.filter((p: any) => p.created_at >= since).length,
-        pagos: paid.count || 0,
-        leads: leads.count || 0,
-      });
-      setLoading(false);
-    })();
-  }, []);
+  const all = perfiles.data ?? [];
+  const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const counts = {
+    total: all.length,
+    activos: all.filter((p) => (p.estado_perfil || "activo") === "activo").length,
+    pendientes: all.filter((p) => p.estado_perfil === "pendiente").length,
+    ultimos30: all.filter((p) => p.created_at >= since).length,
+    pagos: pagos.data?.length ?? 0,
+    leads: discs.data ?? 0,
+  };
 
   const conversion = counts.leads > 0 ? Math.round((counts.pagos / counts.leads) * 100) : 0;
 

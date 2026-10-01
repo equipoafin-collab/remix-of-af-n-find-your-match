@@ -1,24 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Tables } from "@/integrations/supabase/types";
 import { Search, Filter, ChevronRight, MapPin } from "lucide-react";
-
-type Perfil = Tables<"perfiles">;
+import { usePerfiles } from "@/hooks/admin/usePerfiles";
+import FotoPerfil from "@/components/admin/FotoPerfil";
 
 const ESTADOS = ["activo", "pendiente", "pausado", "rechazado"];
-
-const Avatar = ({ p }: { p: Perfil }) => {
-  if (p.foto_url) {
-    return <img src={p.foto_url} alt={p.nombre_completo} className="w-10 h-10 rounded-full object-cover border border-border" />;
-  }
-  const initials = p.nombre_completo.trim().split(/\s+/).slice(0, 2).map((n) => n[0]).join("").toUpperCase();
-  return (
-    <div className="w-10 h-10 rounded-full bg-gold/20 text-foreground flex items-center justify-center font-display text-sm font-semibold">
-      {initials}
-    </div>
-  );
-};
 
 const estadoBadge = (e: string | null) => {
   const v = e || "activo";
@@ -36,8 +22,7 @@ const estadoBadge = (e: string | null) => {
 };
 
 const PerfilesList = () => {
-  const [perfiles, setPerfiles] = useState<Perfil[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: perfiles = [], isLoading: loading } = usePerfiles();
   const [q, setQ] = useState("");
   const [genero, setGenero] = useState<string>("all");
   const [ciudad, setCiudad] = useState<string>("all");
@@ -46,19 +31,11 @@ const PerfilesList = () => {
   const [tabaco, setTabaco] = useState<string>("all");
   const [religion, setReligion] = useState<string>("all");
 
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase.from("perfiles").select("*").order("created_at", { ascending: false });
-      setPerfiles(data || []);
-      setLoading(false);
-    })();
-  }, []);
-
   const ciudades = useMemo(() => Array.from(new Set(perfiles.map((p) => p.ciudad).filter(Boolean))).sort(), [perfiles]);
-  const religiones = useMemo(() => Array.from(new Set(perfiles.map((p: any) => p.religion).filter(Boolean))).sort(), [perfiles]);
+  const religiones = useMemo(() => Array.from(new Set(perfiles.map((p) => p.religion).filter(Boolean))).sort(), [perfiles]);
 
   const filtered = useMemo(() => {
-    return perfiles.filter((p: any) => {
+    return perfiles.filter((p) => {
       if (genero !== "all" && p.genero !== genero) return false;
       if (ciudad !== "all" && p.ciudad !== ciudad) return false;
       if (estado !== "all" && (p.estado_perfil || "activo") !== estado) return false;
@@ -123,11 +100,11 @@ const PerfilesList = () => {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((p: any) => (
+              {filtered.map((p) => (
                 <tr key={p.id} className="border-t border-border hover:bg-muted/40 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <Avatar p={p} />
+                      <FotoPerfil path={p.foto_url} nombre={p.nombre_completo} className="w-10 h-10 rounded-full text-sm" />
                       <div>
                         <p className="font-body text-sm font-medium text-foreground">{p.nombre_completo}</p>
                         <p className="font-body text-xs text-muted-foreground">{p.email}</p>

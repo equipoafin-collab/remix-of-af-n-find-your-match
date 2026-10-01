@@ -261,30 +261,34 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
 
 ### FASE 0 — Cimientos y saneamiento
 
-- [ ] **T0.1 · Tipos y limpieza**
+- [x] **T0.1 · Tipos y limpieza**
   - Objetivo: poder construir sin `any`.
   - Cambios: `types.ts` ya está al día con las migraciones (no hay que regenerarlo); eliminar `(supabase as any)` en `PerfilDetalle.tsx` y `Pagos.tsx`; crear `src/types/admin.ts` con tipos derivados (`Perfil = Tables<'perfiles'>`, etc.); dejar el lint en verde: quitar los `any` explícitos de `src/pages/**` y `supabase/functions/compatibility-report`, poner llaves en los `case` de `Perfil.tsx` y cambiar el `require` de `tailwind.config.ts` por `import`. `src/components/ui` está excluido del lint (shadcn).
   - Aceptación: `npm run build`, `npm run typecheck` y `npm run lint` sin errores (se admiten los warnings `react-refresh`); no queda `supabase as any` en `src/`.
+  > Nota de implementación: `src/types/admin.ts` exporta `Perfil`, `PaidUser`, `DiscResult` y `PlanTipo`. En `compatibility-report` el cliente Supabase sigue sin tipar (Deno); solo se tipan los parámetros explícitos (`DiscResumen`).
 
-- [ ] **T0.2 · Seguridad y privacidad**
+- [x] **T0.2 · Seguridad y privacidad**
   - Cambios (migración):
     - `fotos-perfil` → privado; lectura solo admin; subida anónima limitada a imágenes (`image/*`, ≤ 5 MB) con ruta `perfiles/<uuid>.<ext>`. En `Perfil.tsx` guardar la **ruta** en `foto_url` (no la URL pública) y en admin mostrar con `createSignedUrl`. Crear helper `src/lib/storage.ts` → `getSignedUrl(bucket, path)`.
     - Arreglar `antecedentes`: política INSERT anónima permitida solo en carpeta `user_*/` y solo `application/pdf`; SELECT solo admin. (Alternativa mejor si hay tiempo: enlace con token por cliente.)
     - Crear bucket privado `videos-sesiones` (solo admin: select/insert/update/delete).
     - Crear tabla `auditoria` + función `registrar_auditoria(accion, entidad, entidad_id)`.
   - Aceptación: una URL pública antigua de foto ya no es accesible sin firma; subida desde `/perfil/documentos` funciona sin sesión; un usuario no-admin no puede leer ningún bucket.
+  > Nota de implementación: tamaño y tipo MIME se limitan en la configuración de cada bucket (`file_size_limit`, `allowed_mime_types`), no en la política; la de `antecedentes` exige además extensión `.pdf`. Las fotos antiguas siguen en la raíz del bucket: la migración solo convierte `foto_url` de URL pública a ruta. En `/perfil/documentos` la carpeta se sanea con `claveSegura` (Storage no admite tildes) y se sube sin `upsert`, porque la subida anónima solo tiene INSERT. `registrar_auditoria` exige rol admin; los procesos de servidor (service role, cron) insertan en `auditoria` directamente. `videos-sesiones` admite 500 MB, pero el límite global de subida del proyecto puede ser menor: revisarlo en T2.3. En el admin, las fotos se pintan con `FotoPerfil` (URL firmada vía `useSignedUrl`).
 
-- [ ] **T0.3 · Capa de datos con React Query**
+- [x] **T0.3 · Capa de datos con React Query**
   - Cambios: `src/hooks/admin/` con `usePerfiles`, `usePerfil(id)`, `useUpdatePerfil`. Migrar `Dashboard`, `PerfilesList`, `PerfilDetalle`, `Pagos` a estos hooks. Invalidar queries tras mutaciones.
   - Aceptación: mismas pantallas funcionando; al guardar en la ficha, el listado refleja el cambio sin recargar.
+  > Nota de implementación: además de `usePerfiles`/`usePerfil`/`useUpdatePerfil` hay `usePagos`/`useCrearPago`/`useEliminarPago` y `useConteoDisc`. Las claves de perfiles cuelgan de `["perfiles"]`, así que invalidar ese prefijo refresca listado, fichas y Dashboard (que reutiliza la caché de `usePerfiles` en vez de su propia consulta). El formulario de estado/notas de la ficha es un subcomponente con `key={perfil.id}` para que un refetch no pise lo que se está escribiendo.
 
-- [ ] **T0.4 · Tests del matching actual**
+- [x] **T0.4 · Tests del matching actual**
   - Cambios: `src/lib/__tests__/profileMatching.test.ts` con perfiles de ejemplo (fixtures en `src/lib/__tests__/fixtures.ts`): género, edad, hijos, religión, política excluyen; misma ciudad suma; ranking ordenado.
   - Aceptación: `npm test` en verde con ≥ 10 casos.
 
-- [ ] **T0.5 · Tabla `configuracion`**
+- [x] **T0.5 · Tabla `configuracion`**
   - Cambios: migración con tabla y valores por defecto de la sección 3.3 y los pesos actuales (`WEIGHTS`). Hook `useConfiguracion()` y helper servidor para leerla.
   - Aceptación: valores visibles en consola/SQL; hook devuelve objeto tipado.
+  > Nota de implementación: claves `sesiones_por_plan`, `umbral_pocas_sesiones`, `dias_sin_seguimiento`, `umbral_alta_compatibilidad`, `dias_feedback`, `num_sugerencias` y `pesos_algoritmo` (JSON en camelCase para casar con `WEIGHTS`, ahora exportado). Tipo y valores por defecto en `src/lib/configuracion.ts` (`construirConfiguracion` rellena las claves que falten); el helper de servidor es `supabase/functions/_shared/configuracion.ts` → `leerConfiguracion(supabase)`. El nº de candidatos que re-rankea la IA (15) y el peso reglas/IA (0,5/0,5) se añadirán en T5.2, que es quien los usa.
 
 ### FASE 1 — Cliente único: estados, plan y sesiones contratadas
 
@@ -561,3 +565,8 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 |---|---|---|
 | 30/09/2026 | — | Creación del plan a partir del análisis del repositorio y del PDF de funcionalidades. |
 | 30/09/2026 | — | Ajustes previos: `types.ts` se actualiza a mano, script `npm run typecheck`, `src/components/ui` fuera del lint y alcance de T0.1 ampliado para dejar el lint en verde. |
+| 01/10/2026 | T0.1 | Tipos derivados en `src/types/admin.ts`, fuera los `any`/`supabase as any`, llaves en `case` de `Perfil.tsx` e `import` en `tailwind.config.ts`: lint con 0 errores. |
+| 01/10/2026 | T0.2 | Buckets `fotos-perfil` y `antecedentes` privados con subida anónima acotada, bucket `videos-sesiones` solo admin, tabla `auditoria` + `registrar_auditoria`; fotos en admin con URL firmada. |
+| 01/10/2026 | T0.3 | Hooks de TanStack Query en `src/hooks/admin/` (perfiles, pagos, conteo DISC); Dashboard, Perfiles, Ficha y Pagos ya no llaman a Supabase directamente. |
+| 01/10/2026 | T0.4 | 15 tests de `profileMatching` (filtros de género, edad, hijos, religión y política; ciudad, objetivos, avisos; ranking y pares) con fixtures `crearPerfil`, `ana` y `luis`. |
+| 01/10/2026 | T0.5 | Tabla `configuracion` (clave/valor, solo admin) con los valores por defecto de 3.3 y los pesos del matching; `useConfiguracion()` tipado y `leerConfiguracion()` para Edge Functions. |

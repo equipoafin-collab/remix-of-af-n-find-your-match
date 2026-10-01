@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Upload, FileText, ShieldCheck, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { claveSegura } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 
@@ -28,10 +29,11 @@ const PerfilDocumentos = () => {
     }
 
     setLoading(true);
-    const filePath = `user_${userId.trim()}/${Date.now()}_${file.name}`;
+    const filePath = `user_${claveSegura(userId)}/${Date.now()}.pdf`;
+    // Sin upsert: la subida anónima solo tiene permiso de INSERT.
     const { error } = await supabase.storage
       .from("antecedentes")
-      .upload(filePath, file, { cacheControl: "3600", upsert: true });
+      .upload(filePath, file, { cacheControl: "3600", upsert: false, contentType: "application/pdf" });
     setLoading(false);
 
     if (error) {

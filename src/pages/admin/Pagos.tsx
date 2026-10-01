@@ -1,17 +1,8 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 import { Plus, Trash2, ExternalLink, CreditCard } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-
-interface PaidUser {
-  id: string;
-  nombre_completo: string;
-  email: string;
-  telefono: string | null;
-  plan: "esencial" | "premium";
-  notas: string | null;
-  created_at: string;
-}
+import type { PlanTipo } from "@/types/admin";
+import { useCrearPago, useEliminarPago, usePagos } from "@/hooks/admin/usePagos";
 
 const PLAN_BADGE: Record<string, string> = {
   esencial: "bg-blue-50 text-blue-700 border-blue-200",
@@ -19,43 +10,41 @@ const PLAN_BADGE: Record<string, string> = {
 };
 
 const Pagos = () => {
-  const [paid, setPaid] = useState<PaidUser[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: paid = [], isLoading: loading } = usePagos();
+  const crearPago = useCrearPago();
+  const eliminarPago = useEliminarPago();
   const [showAdd, setShowAdd] = useState(false);
   const [filter, setFilter] = useState<"all" | "esencial" | "premium">("all");
-  const [form, setForm] = useState({ nombre_completo: "", email: "", telefono: "", plan: "esencial" as "esencial" | "premium", notas: "" });
+  const [form, setForm] = useState({ nombre_completo: "", email: "", telefono: "", plan: "esencial" as PlanTipo, notas: "" });
 
-  const load = async () => {
-    const { data } = await supabase.from("paid_users").select("*").order("created_at", { ascending: false });
-    setPaid((data as any) || []);
-    setLoading(false);
-  };
-
-  useEffect(() => { load(); }, []);
-
-  const add = async () => {
+  const add = () => {
     if (!form.nombre_completo.trim() || !form.email.trim()) {
       toast({ title: "Faltan datos", description: "Nombre y email son obligatorios", variant: "destructive" });
       return;
     }
-    const { error } = await (supabase as any).from("paid_users").insert({
-      nombre_completo: form.nombre_completo.trim(),
-      email: form.email.trim(),
-      telefono: form.telefono.trim() || null,
-      plan: form.plan,
-      notas: form.notas.trim() || null,
-    });
-    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
-    setForm({ nombre_completo: "", email: "", telefono: "", plan: "esencial", notas: "" });
-    setShowAdd(false);
-    load();
+    crearPago.mutate(
+      {
+        nombre_completo: form.nombre_completo.trim(),
+        email: form.email.trim(),
+        telefono: form.telefono.trim() || null,
+        plan: form.plan,
+        notas: form.notas.trim() || null,
+      },
+      {
+        onSuccess: () => {
+          setForm({ nombre_completo: "", email: "", telefono: "", plan: "esencial", notas: "" });
+          setShowAdd(false);
+        },
+        onError: (error) => toast({ title: "Error", description: error.message, variant: "destructive" }),
+      },
+    );
   };
 
-  const del = async (id: string) => {
+  const del = (id: string) => {
     if (!confirm("¿Eliminar este cliente?")) return;
-    const { error } = await (supabase as any).from("paid_users").delete().eq("id", id);
-    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
-    load();
+    eliminarPago.mutate(id, {
+      onError: (error) => toast({ title: "Error", description: error.message, variant: "destructive" }),
+    });
   };
 
   const filtered = paid.filter((p) => filter === "all" || p.plan === filter);
@@ -94,13 +83,13 @@ const Pagos = () => {
             <input placeholder="Nombre completo" value={form.nombre_completo} onChange={(e) => setForm({ ...form, nombre_completo: e.target.value })} className="px-3 py-2 rounded-lg border border-border bg-background font-body text-sm" />
             <input placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="px-3 py-2 rounded-lg border border-border bg-background font-body text-sm" />
             <input placeholder="Teléfono" value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} className="px-3 py-2 rounded-lg border border-border bg-background font-body text-sm" />
-            <select value={form.plan} onChange={(e) => setForm({ ...form, plan: e.target.value as any })} className="px-3 py-2 rounded-lg border border-border bg-background font-body text-sm">
+            <select value={form.plan} onChange={(e) => setForm({ ...form, plan: e.target.value as PlanTipo })} className="px-3 py-2 rounded-lg border border-border bg-background font-body text-sm">
               <option value="esencial">Esencial</option>
               <option value="premium">Premium</option>
             </select>
           </div>
           <textarea placeholder="Notas" value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} rows={2} className="w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm resize-y" />
-          <button onClick={add} className="px-4 py-2 rounded-xl bg-foreground text-background font-body text-sm font-semibold">Guardar</button>
+          <button onClick={add} disabled={crearPago.isPending} className="px-4 py-2 rounded-xl bg-foreground text-background font-body text-sm font-semibold disabled:opacity-50">Guardar</button>
         </div>
       )}
 

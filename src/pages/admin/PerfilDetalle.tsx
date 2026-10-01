@@ -1,24 +1,24 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Tables } from "@/integrations/supabase/types";
 import {
   ArrowLeft, MapPin, Cake, User, Heart, Cigarette, Wine, Briefcase, Sparkles,
-  ShieldAlert, Save, Loader2, Trophy, AlertTriangle,
+  ShieldAlert, Save, Loader2, Trophy, AlertTriangle, type LucideIcon,
 } from "lucide-react";
-import { findMatchesFor, type PerfilForMatching, type MatchSuggestion } from "@/lib/profileMatching";
+import { findMatchesFor, type MatchSuggestion } from "@/lib/profileMatching";
 import { toast } from "@/hooks/use-toast";
+import { usePerfil, usePerfiles, useUpdatePerfil } from "@/hooks/admin/usePerfiles";
 
-type Perfil = Tables<"perfiles">;
+import type { Perfil } from "@/types/admin";
+import FotoPerfil from "@/components/admin/FotoPerfil";
 
-const Field = ({ label, value }: { label: string; value: any }) => (
+const Field = ({ label, value }: { label: string; value: ReactNode }) => (
   <div>
     <p className="font-body text-[11px] uppercase tracking-wider text-muted-foreground">{label}</p>
     <p className="font-body text-sm text-foreground mt-0.5">{value || <span className="text-muted-foreground/60">—</span>}</p>
   </div>
 );
 
-const Section = ({ title, icon: Icon, children }: any) => (
+const Section = ({ title, icon: Icon, children }: { title: string; icon: LucideIcon; children: ReactNode }) => (
   <section className="bg-card border border-border rounded-2xl p-5">
     <h3 className="font-display text-sm font-semibold text-foreground flex items-center gap-2 mb-4">
       <Icon className="w-4 h-4 text-gold" /> {title}
@@ -39,51 +39,75 @@ const Scale = ({ label, value }: { label: string; value: number | null }) => (
   </div>
 );
 
+// Se monta con key={perfil.id}: el formulario arranca con los valores guardados
+// y no se pisa si React Query refresca el perfil mientras se edita.
+const EstadoYNotas = ({ perfil }: { perfil: Perfil }) => {
+  const [estado, setEstado] = useState(perfil.estado_perfil || "activo");
+  const [notas, setNotas] = useState(perfil.notas_admin || "");
+  const updatePerfil = useUpdatePerfil();
+
+  const guardar = () =>
+    updatePerfil.mutate(
+      { id: perfil.id, cambios: { estado_perfil: estado, notas_admin: notas } },
+      {
+        onSuccess: () => toast({ title: "Guardado", description: "Cambios aplicados." }),
+        onError: (error) => toast({ title: "Error", description: error.message, variant: "destructive" }),
+      },
+    );
+
+  return (
+    <section className="bg-card border border-border rounded-2xl p-5 space-y-4">
+      <h3 className="font-display text-sm font-semibold text-foreground">Estado y notas internas</h3>
+      <div className="grid sm:grid-cols-[200px_1fr] gap-4 items-start">
+        <div>
+          <label className="font-body text-xs text-muted-foreground uppercase tracking-wider">Estado del perfil</label>
+          <select
+            value={estado}
+            onChange={(e) => setEstado(e.target.value)}
+            className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm"
+          >
+            {["activo", "pendiente", "pausado", "rechazado"].map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="font-body text-xs text-muted-foreground uppercase tracking-wider">Notas privadas (solo admin)</label>
+          <textarea
+            value={notas}
+            onChange={(e) => setNotas(e.target.value)}
+            rows={4}
+            placeholder="Ej: Muy implicado, busca matrimonio pronto, excelente candidato…"
+            className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm resize-y"
+          />
+        </div>
+      </div>
+      <button
+        onClick={guardar}
+        disabled={updatePerfil.isPending}
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-foreground text-background font-body text-sm font-semibold hover:opacity-90 disabled:opacity-50"
+      >
+        {updatePerfil.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar cambios
+      </button>
+    </section>
+  );
+};
+
 const PerfilDetalle = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [perfil, setPerfil] = useState<Perfil | null>(null);
-  const [pool, setPool] = useState<Perfil[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [estado, setEstado] = useState<string>("activo");
-  const [notas, setNotas] = useState("");
-  const [saving, setSaving] = useState(false);
+  const { data: perfil, isLoading: loading } = usePerfil(id);
+  const { data: pool = [] } = usePerfiles();
   const [showMatches, setShowMatches] = useState(false);
   const [calculating, setCalculating] = useState(false);
   const [matches, setMatches] = useState<MatchSuggestion[]>([]);
-
-  useEffect(() => {
-    (async () => {
-      if (!id) return;
-      const [{ data: one }, { data: all }] = await Promise.all([
-        supabase.from("perfiles").select("*").eq("id", id).maybeSingle(),
-        supabase.from("perfiles").select("*"),
-      ]);
-      setPerfil(one as Perfil | null);
-      setPool((all as Perfil[]) || []);
-      if (one) {
-        setEstado((one as any).estado_perfil || "activo");
-        setNotas((one as any).notas_admin || "");
-      }
-      setLoading(false);
-    })();
-  }, [id]);
-
-  const guardar = async () => {
-    if (!id) return;
-    setSaving(true);
-    const { error } = await (supabase as any).from("perfiles").update({ estado_perfil: estado, notas_admin: notas }).eq("id", id);
-    setSaving(false);
-    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
-    else toast({ title: "Guardado", description: "Cambios aplicados." });
-  };
 
   const buscarPareja = () => {
     if (!perfil) return;
     setCalculating(true);
     setShowMatches(true);
     setTimeout(() => {
-      const results = findMatchesFor(perfil as unknown as PerfilForMatching, pool as unknown as PerfilForMatching[], 20);
+      const results = findMatchesFor(perfil, pool, 20);
       setMatches(results);
       setCalculating(false);
     }, 50);
@@ -91,7 +115,7 @@ const PerfilDetalle = () => {
 
   const calidad = useMemo(() => {
     if (!perfil) return null;
-    const p: any = perfil;
+    const p = perfil;
     let score = 0;
     if (p.foto_url) score += 15;
     if (p.hobbies) score += 10;
@@ -113,7 +137,7 @@ const PerfilDetalle = () => {
   if (loading) return <div className="p-8 font-body text-muted-foreground">Cargando perfil…</div>;
   if (!perfil) return <div className="p-8 font-body text-muted-foreground">Perfil no encontrado.</div>;
 
-  const p: any = perfil;
+  const p = perfil;
 
   return (
     <div className="p-8 space-y-6 max-w-6xl">
@@ -123,13 +147,7 @@ const PerfilDetalle = () => {
 
       {/* Header */}
       <div className="bg-card border border-border rounded-2xl p-6 flex items-start gap-5 flex-wrap">
-        {p.foto_url ? (
-          <img src={p.foto_url} alt={p.nombre_completo} className="w-24 h-24 rounded-2xl object-cover border border-border" />
-        ) : (
-          <div className="w-24 h-24 rounded-2xl bg-gold/20 flex items-center justify-center font-display text-2xl font-bold">
-            {p.nombre_completo.trim().split(/\s+/).slice(0, 2).map((n: string) => n[0]).join("").toUpperCase()}
-          </div>
-        )}
+        <FotoPerfil path={p.foto_url} nombre={p.nombre_completo} className="w-24 h-24 rounded-2xl text-2xl" />
         <div className="flex-1 min-w-[200px]">
           <h1 className="font-display text-2xl font-bold text-foreground">{p.nombre_completo}</h1>
           <p className="font-body text-sm text-muted-foreground mt-1 flex items-center gap-3 flex-wrap">
@@ -165,18 +183,12 @@ const PerfilDetalle = () => {
           ) : (
             <div className="grid md:grid-cols-2 gap-3">
               {matches.map((m) => {
-                const other = m.perfilB as any;
+                const other = m.perfilB;
                 const color = m.score >= 80 ? "text-emerald-600 border-emerald-200 bg-emerald-50" : m.score >= 60 ? "text-amber-700 border-amber-200 bg-amber-50" : "text-rose-700 border-rose-200 bg-rose-50";
                 return (
                   <Link key={other.id} to={`/admin/perfiles/${other.id}`} className="block bg-background border border-border rounded-xl p-4 hover:border-gold transition-colors">
                     <div className="flex items-center gap-3">
-                      {other.foto_url ? (
-                        <img src={other.foto_url} alt="" className="w-12 h-12 rounded-full object-cover border border-border" />
-                      ) : (
-                        <div className="w-12 h-12 rounded-full bg-gold/20 flex items-center justify-center font-display text-sm font-bold">
-                          {other.nombre_completo.trim().split(/\s+/).slice(0, 2).map((n: string) => n[0]).join("").toUpperCase()}
-                        </div>
-                      )}
+                      <FotoPerfil path={other.foto_url} nombre={other.nombre_completo} className="w-12 h-12 rounded-full text-sm" />
                       <div className="flex-1 min-w-0">
                         <p className="font-body text-sm font-semibold text-foreground truncate">{other.nombre_completo}</p>
                         <p className="font-body text-xs text-muted-foreground">{other.edad} años · {other.ciudad}</p>
@@ -258,40 +270,7 @@ const PerfilDetalle = () => {
       </Section>
 
       {/* Estado + notas admin */}
-      <section className="bg-card border border-border rounded-2xl p-5 space-y-4">
-        <h3 className="font-display text-sm font-semibold text-foreground">Estado y notas internas</h3>
-        <div className="grid sm:grid-cols-[200px_1fr] gap-4 items-start">
-          <div>
-            <label className="font-body text-xs text-muted-foreground uppercase tracking-wider">Estado del perfil</label>
-            <select
-              value={estado}
-              onChange={(e) => setEstado(e.target.value)}
-              className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm"
-            >
-              {["activo", "pendiente", "pausado", "rechazado"].map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="font-body text-xs text-muted-foreground uppercase tracking-wider">Notas privadas (solo admin)</label>
-            <textarea
-              value={notas}
-              onChange={(e) => setNotas(e.target.value)}
-              rows={4}
-              placeholder="Ej: Muy implicado, busca matrimonio pronto, excelente candidato…"
-              className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm resize-y"
-            />
-          </div>
-        </div>
-        <button
-          onClick={guardar}
-          disabled={saving}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-foreground text-background font-body text-sm font-semibold hover:opacity-90 disabled:opacity-50"
-        >
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar cambios
-        </button>
-      </section>
+      <EstadoYNotas key={p.id} perfil={p} />
     </div>
   );
 };
