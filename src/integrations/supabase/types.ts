@@ -41,6 +41,21 @@ export type Database = {
         }
         Relationships: []
       }
+      configuracion: {
+        Row: {
+          clave: string
+          valor: Json
+        }
+        Insert: {
+          clave: string
+          valor: Json
+        }
+        Update: {
+          clave?: string
+          valor?: Json
+        }
+        Relationships: []
+      }
       disc_results: {
         Row: {
           compatibility_tip_1: string | null

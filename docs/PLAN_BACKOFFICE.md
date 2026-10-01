@@ -285,9 +285,10 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
   - Cambios: `src/lib/__tests__/profileMatching.test.ts` con perfiles de ejemplo (fixtures en `src/lib/__tests__/fixtures.ts`): género, edad, hijos, religión, política excluyen; misma ciudad suma; ranking ordenado.
   - Aceptación: `npm test` en verde con ≥ 10 casos.
 
-- [ ] **T0.5 · Tabla `configuracion`**
+- [x] **T0.5 · Tabla `configuracion`**
   - Cambios: migración con tabla y valores por defecto de la sección 3.3 y los pesos actuales (`WEIGHTS`). Hook `useConfiguracion()` y helper servidor para leerla.
   - Aceptación: valores visibles en consola/SQL; hook devuelve objeto tipado.
+  > Nota de implementación: claves `sesiones_por_plan`, `umbral_pocas_sesiones`, `dias_sin_seguimiento`, `umbral_alta_compatibilidad`, `dias_feedback`, `num_sugerencias` y `pesos_algoritmo` (JSON en camelCase para casar con `WEIGHTS`, ahora exportado). Tipo y valores por defecto en `src/lib/configuracion.ts` (`construirConfiguracion` rellena las claves que falten); el helper de servidor es `supabase/functions/_shared/configuracion.ts` → `leerConfiguracion(supabase)`. El nº de candidatos que re-rankea la IA (15) y el peso reglas/IA (0,5/0,5) se añadirán en T5.2, que es quien los usa.
 
 ### FASE 1 — Cliente único: estados, plan y sesiones contratadas
 
@@ -568,3 +569,4 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 01/10/2026 | T0.2 | Buckets `fotos-perfil` y `antecedentes` privados con subida anónima acotada, bucket `videos-sesiones` solo admin, tabla `auditoria` + `registrar_auditoria`; fotos en admin con URL firmada. |
 | 01/10/2026 | T0.3 | Hooks de TanStack Query en `src/hooks/admin/` (perfiles, pagos, conteo DISC); Dashboard, Perfiles, Ficha y Pagos ya no llaman a Supabase directamente. |
 | 01/10/2026 | T0.4 | 15 tests de `profileMatching` (filtros de género, edad, hijos, religión y política; ciudad, objetivos, avisos; ranking y pares) con fixtures `crearPerfil`, `ana` y `luis`. |
+| 01/10/2026 | T0.5 | Tabla `configuracion` (clave/valor, solo admin) con los valores por defecto de 3.3 y los pesos del matching; `useConfiguracion()` tipado y `leerConfiguracion()` para Edge Functions. |

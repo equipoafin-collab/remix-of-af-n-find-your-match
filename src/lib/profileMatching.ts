@@ -239,7 +239,7 @@ function buildInsights(a: PerfilForMatching, b: PerfilForMatching, bd: MatchSugg
   return { highlights, warnings };
 }
 
-const WEIGHTS = {
+export const WEIGHTS = {
   objetivos: 0.25,
   valores: 0.20,
   estiloVida: 0.20,
