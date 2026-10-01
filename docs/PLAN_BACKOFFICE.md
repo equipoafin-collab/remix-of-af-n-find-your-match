@@ -281,7 +281,7 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
   - Aceptación: mismas pantallas funcionando; al guardar en la ficha, el listado refleja el cambio sin recargar.
   > Nota de implementación: además de `usePerfiles`/`usePerfil`/`useUpdatePerfil` hay `usePagos`/`useCrearPago`/`useEliminarPago` y `useConteoDisc`. Las claves de perfiles cuelgan de `["perfiles"]`, así que invalidar ese prefijo refresca listado, fichas y Dashboard (que reutiliza la caché de `usePerfiles` en vez de su propia consulta). El formulario de estado/notas de la ficha es un subcomponente con `key={perfil.id}` para que un refetch no pise lo que se está escribiendo.
 
-- [ ] **T0.4 · Tests del matching actual**
+- [x] **T0.4 · Tests del matching actual**
   - Cambios: `src/lib/__tests__/profileMatching.test.ts` con perfiles de ejemplo (fixtures en `src/lib/__tests__/fixtures.ts`): género, edad, hijos, religión, política excluyen; misma ciudad suma; ranking ordenado.
   - Aceptación: `npm test` en verde con ≥ 10 casos.
 
@@ -567,3 +567,4 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 01/10/2026 | T0.1 | Tipos derivados en `src/types/admin.ts`, fuera los `any`/`supabase as any`, llaves en `case` de `Perfil.tsx` e `import` en `tailwind.config.ts`: lint con 0 errores. |
 | 01/10/2026 | T0.2 | Buckets `fotos-perfil` y `antecedentes` privados con subida anónima acotada, bucket `videos-sesiones` solo admin, tabla `auditoria` + `registrar_auditoria`; fotos en admin con URL firmada. |
 | 01/10/2026 | T0.3 | Hooks de TanStack Query en `src/hooks/admin/` (perfiles, pagos, conteo DISC); Dashboard, Perfiles, Ficha y Pagos ya no llaman a Supabase directamente. |
+| 01/10/2026 | T0.4 | 15 tests de `profileMatching` (filtros de género, edad, hijos, religión y política; ciudad, objetivos, avisos; ranking y pares) con fixtures `crearPerfil`, `ana` y `luis`. |
