@@ -195,6 +195,7 @@ const Perfil = () => {
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [form, setForm] = useState<FormData>(initialForm);
+  const [fotoPreview, setFotoPreview] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [consent, setConsent] = useState(false);
   const [discResult, setDiscResult] = useState<DiscResult | null>(null);
@@ -471,8 +472,8 @@ const Perfil = () => {
                   </div>
                   <FieldGroup label="Foto de perfil (opcional)">
                     <div className="flex items-center gap-3">
-                      {form.foto_url && (
-                        <img src={form.foto_url} alt="" className="w-16 h-16 rounded-full object-cover border border-border" />
+                      {fotoPreview && (
+                        <img src={fotoPreview} alt="" className="w-16 h-16 rounded-full object-cover border border-border" />
                       )}
                       <input
                         type="file"
@@ -485,14 +486,15 @@ const Perfil = () => {
                             return;
                           }
                           const ext = file.name.split(".").pop() || "jpg";
-                          const path = `${crypto.randomUUID()}.${ext}`;
+                          // El bucket es privado: se guarda la ruta, no una URL pública.
+                          const path = `perfiles/${crypto.randomUUID()}.${ext.toLowerCase()}`;
                           const { error } = await supabase.storage.from("fotos-perfil").upload(path, file, { cacheControl: "3600", upsert: false });
                           if (error) {
                             toast({ title: "Error al subir foto", description: error.message, variant: "destructive" });
                             return;
                           }
-                          const { data } = supabase.storage.from("fotos-perfil").getPublicUrl(path);
-                          update("foto_url", data.publicUrl);
+                          update("foto_url", path);
+                          setFotoPreview(URL.createObjectURL(file));
                         }}
                         className="text-sm font-body text-muted-foreground file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-gold/15 file:text-foreground file:font-medium hover:file:bg-gold/25"
                       />

@@ -9,6 +9,7 @@ import { findMatchesFor, type MatchSuggestion } from "@/lib/profileMatching";
 import { toast } from "@/hooks/use-toast";
 
 import type { Perfil } from "@/types/admin";
+import FotoPerfil from "@/components/admin/FotoPerfil";
 
 const Field = ({ label, value }: { label: string; value: ReactNode }) => (
   <div>
@@ -122,13 +123,7 @@ const PerfilDetalle = () => {
 
       {/* Header */}
       <div className="bg-card border border-border rounded-2xl p-6 flex items-start gap-5 flex-wrap">
-        {p.foto_url ? (
-          <img src={p.foto_url} alt={p.nombre_completo} className="w-24 h-24 rounded-2xl object-cover border border-border" />
-        ) : (
-          <div className="w-24 h-24 rounded-2xl bg-gold/20 flex items-center justify-center font-display text-2xl font-bold">
-            {p.nombre_completo.trim().split(/\s+/).slice(0, 2).map((n: string) => n[0]).join("").toUpperCase()}
-          </div>
-        )}
+        <FotoPerfil path={p.foto_url} nombre={p.nombre_completo} className="w-24 h-24 rounded-2xl text-2xl" />
         <div className="flex-1 min-w-[200px]">
           <h1 className="font-display text-2xl font-bold text-foreground">{p.nombre_completo}</h1>
           <p className="font-body text-sm text-muted-foreground mt-1 flex items-center gap-3 flex-wrap">
@@ -169,13 +164,7 @@ const PerfilDetalle = () => {
                 return (
                   <Link key={other.id} to={`/admin/perfiles/${other.id}`} className="block bg-background border border-border rounded-xl p-4 hover:border-gold transition-colors">
                     <div className="flex items-center gap-3">
-                      {other.foto_url ? (
-                        <img src={other.foto_url} alt="" className="w-12 h-12 rounded-full object-cover border border-border" />
-                      ) : (
-                        <div className="w-12 h-12 rounded-full bg-gold/20 flex items-center justify-center font-display text-sm font-bold">
-                          {other.nombre_completo.trim().split(/\s+/).slice(0, 2).map((n: string) => n[0]).join("").toUpperCase()}
-                        </div>
-                      )}
+                      <FotoPerfil path={other.foto_url} nombre={other.nombre_completo} className="w-12 h-12 rounded-full text-sm" />
                       <div className="flex-1 min-w-0">
                         <p className="font-body text-sm font-semibold text-foreground truncate">{other.nombre_completo}</p>
                         <p className="font-body text-xs text-muted-foreground">{other.edad} años · {other.ciudad}</p>

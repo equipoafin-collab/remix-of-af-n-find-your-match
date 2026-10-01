@@ -267,13 +267,14 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
   - Aceptación: `npm run build`, `npm run typecheck` y `npm run lint` sin errores (se admiten los warnings `react-refresh`); no queda `supabase as any` en `src/`.
   > Nota de implementación: `src/types/admin.ts` exporta `Perfil`, `PaidUser`, `DiscResult` y `PlanTipo`. En `compatibility-report` el cliente Supabase sigue sin tipar (Deno); solo se tipan los parámetros explícitos (`DiscResumen`).
 
-- [ ] **T0.2 · Seguridad y privacidad**
+- [x] **T0.2 · Seguridad y privacidad**
   - Cambios (migración):
     - `fotos-perfil` → privado; lectura solo admin; subida anónima limitada a imágenes (`image/*`, ≤ 5 MB) con ruta `perfiles/<uuid>.<ext>`. En `Perfil.tsx` guardar la **ruta** en `foto_url` (no la URL pública) y en admin mostrar con `createSignedUrl`. Crear helper `src/lib/storage.ts` → `getSignedUrl(bucket, path)`.
     - Arreglar `antecedentes`: política INSERT anónima permitida solo en carpeta `user_*/` y solo `application/pdf`; SELECT solo admin. (Alternativa mejor si hay tiempo: enlace con token por cliente.)
     - Crear bucket privado `videos-sesiones` (solo admin: select/insert/update/delete).
     - Crear tabla `auditoria` + función `registrar_auditoria(accion, entidad, entidad_id)`.
   - Aceptación: una URL pública antigua de foto ya no es accesible sin firma; subida desde `/perfil/documentos` funciona sin sesión; un usuario no-admin no puede leer ningún bucket.
+  > Nota de implementación: tamaño y tipo MIME se limitan en la configuración de cada bucket (`file_size_limit`, `allowed_mime_types`), no en la política; la de `antecedentes` exige además extensión `.pdf`. Las fotos antiguas siguen en la raíz del bucket: la migración solo convierte `foto_url` de URL pública a ruta. En `/perfil/documentos` la carpeta se sanea con `claveSegura` (Storage no admite tildes) y se sube sin `upsert`, porque la subida anónima solo tiene INSERT. `registrar_auditoria` exige rol admin; los procesos de servidor (service role, cron) insertan en `auditoria` directamente. `videos-sesiones` admite 500 MB, pero el límite global de subida del proyecto puede ser menor: revisarlo en T2.3. En el admin, las fotos se pintan con `FotoPerfil` (URL firmada vía `useSignedUrl`).
 
 - [ ] **T0.3 · Capa de datos con React Query**
   - Cambios: `src/hooks/admin/` con `usePerfiles`, `usePerfil(id)`, `useUpdatePerfil`. Migrar `Dashboard`, `PerfilesList`, `PerfilDetalle`, `Pagos` a estos hooks. Invalidar queries tras mutaciones.
@@ -563,3 +564,4 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 30/09/2026 | — | Creación del plan a partir del análisis del repositorio y del PDF de funcionalidades. |
 | 30/09/2026 | — | Ajustes previos: `types.ts` se actualiza a mano, script `npm run typecheck`, `src/components/ui` fuera del lint y alcance de T0.1 ampliado para dejar el lint en verde. |
 | 01/10/2026 | T0.1 | Tipos derivados en `src/types/admin.ts`, fuera los `any`/`supabase as any`, llaves en `case` de `Perfil.tsx` e `import` en `tailwind.config.ts`: lint con 0 errores. |
+| 01/10/2026 | T0.2 | Buckets `fotos-perfil` y `antecedentes` privados con subida anónima acotada, bucket `videos-sesiones` solo admin, tabla `auditoria` + `registrar_auditoria`; fotos en admin con URL firmada. |

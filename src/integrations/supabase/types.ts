@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      auditoria: {
+        Row: {
+          accion: string
+          created_at: string
+          entidad: string
+          entidad_id: string | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          accion: string
+          created_at?: string
+          entidad: string
+          entidad_id?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          accion?: string
+          created_at?: string
+          entidad?: string
+          entidad_id?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       disc_results: {
         Row: {
           compatibility_tip_1: string | null
@@ -316,6 +343,14 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      registrar_auditoria: {
+        Args: {
+          _accion: string
+          _entidad: string
+          _entidad_id?: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

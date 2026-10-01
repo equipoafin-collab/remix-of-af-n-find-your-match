@@ -4,20 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Search, Filter, ChevronRight, MapPin } from "lucide-react";
 
 import type { Perfil } from "@/types/admin";
+import FotoPerfil from "@/components/admin/FotoPerfil";
 
 const ESTADOS = ["activo", "pendiente", "pausado", "rechazado"];
-
-const Avatar = ({ p }: { p: Perfil }) => {
-  if (p.foto_url) {
-    return <img src={p.foto_url} alt={p.nombre_completo} className="w-10 h-10 rounded-full object-cover border border-border" />;
-  }
-  const initials = p.nombre_completo.trim().split(/\s+/).slice(0, 2).map((n) => n[0]).join("").toUpperCase();
-  return (
-    <div className="w-10 h-10 rounded-full bg-gold/20 text-foreground flex items-center justify-center font-display text-sm font-semibold">
-      {initials}
-    </div>
-  );
-};
 
 const estadoBadge = (e: string | null) => {
   const v = e || "activo";
@@ -126,7 +115,7 @@ const PerfilesList = () => {
                 <tr key={p.id} className="border-t border-border hover:bg-muted/40 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <Avatar p={p} />
+                      <FotoPerfil path={p.foto_url} nombre={p.nombre_completo} className="w-10 h-10 rounded-full text-sm" />
                       <div>
                         <p className="font-body text-sm font-medium text-foreground">{p.nombre_completo}</p>
                         <p className="font-body text-xs text-muted-foreground">{p.email}</p>
