@@ -217,7 +217,7 @@ const Perfil = () => {
 
   const validateStep = (): string | null => {
     switch (step) {
-      case 1:
+      case 1: {
         if (!form.nombre_completo.trim()) return "El nombre es obligatorio";
         if (form.nombre_completo.trim().length > 100) return "Máximo 100 caracteres";
         if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) return "Introduce un email válido";
@@ -227,7 +227,8 @@ const Perfil = () => {
         if (!form.ciudad.trim()) return "La ciudad es obligatoria";
         if (!form.genero) return "Selecciona tu género";
         return null;
-      case 2:
+      }
+      case 2: {
         if (!form.tipo_relacion) return "Selecciona el tipo de relación";
         if (!form.busca_genero) return "Selecciona a quién buscas";
         if (!form.hijos) return "Selecciona tu situación respecto a hijos";
@@ -237,6 +238,7 @@ const Perfil = () => {
         if (!form.edad_min_busca || isNaN(eMin) || eMin < 18) return "Edad mínima debe ser al menos 18";
         if (!form.edad_max_busca || isNaN(eMax) || eMax > 99 || eMax < eMin) return "Edad máxima inválida";
         return null;
+      }
       case 3:
         if (!form.importa_vestir) return "Indica si te importa la forma de vestir";
         if (form.importa_vestir === "si" && !form.estilo_vestir) return "Selecciona tu estilo al vestir";
@@ -332,7 +334,7 @@ const Perfil = () => {
       foto_url: form.foto_url || null,
       disc_respuestas: disc.respuestas,
       disc_perfil: disc.perfil,
-    } as any);
+    });
     setSubmitting(false);
     if (dbError) {
       toast({ title: "Error", description: "No se pudo guardar. Inténtalo de nuevo.", variant: "destructive" });

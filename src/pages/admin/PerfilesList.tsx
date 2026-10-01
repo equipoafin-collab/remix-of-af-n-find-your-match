@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Tables } from "@/integrations/supabase/types";
 import { Search, Filter, ChevronRight, MapPin } from "lucide-react";
 
-type Perfil = Tables<"perfiles">;
+import type { Perfil } from "@/types/admin";
 
 const ESTADOS = ["activo", "pendiente", "pausado", "rechazado"];
 
@@ -55,10 +54,10 @@ const PerfilesList = () => {
   }, []);
 
   const ciudades = useMemo(() => Array.from(new Set(perfiles.map((p) => p.ciudad).filter(Boolean))).sort(), [perfiles]);
-  const religiones = useMemo(() => Array.from(new Set(perfiles.map((p: any) => p.religion).filter(Boolean))).sort(), [perfiles]);
+  const religiones = useMemo(() => Array.from(new Set(perfiles.map((p) => p.religion).filter(Boolean))).sort(), [perfiles]);
 
   const filtered = useMemo(() => {
-    return perfiles.filter((p: any) => {
+    return perfiles.filter((p) => {
       if (genero !== "all" && p.genero !== genero) return false;
       if (ciudad !== "all" && p.ciudad !== ciudad) return false;
       if (estado !== "all" && (p.estado_perfil || "activo") !== estado) return false;
@@ -123,7 +122,7 @@ const PerfilesList = () => {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((p: any) => (
+              {filtered.map((p) => (
                 <tr key={p.id} className="border-t border-border hover:bg-muted/40 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">

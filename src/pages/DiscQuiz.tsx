@@ -276,7 +276,7 @@ const DiscQuiz = () => {
     const primary = DISC_DESCRIPTIONS[res.primary];
     const secondary = DISC_DESCRIPTIONS[res.secondary];
 
-    await supabase.from("disc_results" as any).insert({
+    await supabase.from("disc_results").insert({
       name: name.trim(),
       email: email.trim(),
       telefono: telefono.trim(),
@@ -304,7 +304,7 @@ const DiscQuiz = () => {
       compatibility_tip_1: primary.compatibility,
       compatibility_tip_2: primary.comunicacion,
       compatibility_tip_3: primary.actividades,
-    } as any);
+    });
 
     setResult(res);
     setSaving(false);

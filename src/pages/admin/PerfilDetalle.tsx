@@ -1,24 +1,23 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Tables } from "@/integrations/supabase/types";
 import {
   ArrowLeft, MapPin, Cake, User, Heart, Cigarette, Wine, Briefcase, Sparkles,
-  ShieldAlert, Save, Loader2, Trophy, AlertTriangle,
+  ShieldAlert, Save, Loader2, Trophy, AlertTriangle, type LucideIcon,
 } from "lucide-react";
-import { findMatchesFor, type PerfilForMatching, type MatchSuggestion } from "@/lib/profileMatching";
+import { findMatchesFor, type MatchSuggestion } from "@/lib/profileMatching";
 import { toast } from "@/hooks/use-toast";
 
-type Perfil = Tables<"perfiles">;
+import type { Perfil } from "@/types/admin";
 
-const Field = ({ label, value }: { label: string; value: any }) => (
+const Field = ({ label, value }: { label: string; value: ReactNode }) => (
   <div>
     <p className="font-body text-[11px] uppercase tracking-wider text-muted-foreground">{label}</p>
     <p className="font-body text-sm text-foreground mt-0.5">{value || <span className="text-muted-foreground/60">—</span>}</p>
   </div>
 );
 
-const Section = ({ title, icon: Icon, children }: any) => (
+const Section = ({ title, icon: Icon, children }: { title: string; icon: LucideIcon; children: ReactNode }) => (
   <section className="bg-card border border-border rounded-2xl p-5">
     <h3 className="font-display text-sm font-semibold text-foreground flex items-center gap-2 mb-4">
       <Icon className="w-4 h-4 text-gold" /> {title}
@@ -59,11 +58,11 @@ const PerfilDetalle = () => {
         supabase.from("perfiles").select("*").eq("id", id).maybeSingle(),
         supabase.from("perfiles").select("*"),
       ]);
-      setPerfil(one as Perfil | null);
-      setPool((all as Perfil[]) || []);
+      setPerfil(one);
+      setPool(all || []);
       if (one) {
-        setEstado((one as any).estado_perfil || "activo");
-        setNotas((one as any).notas_admin || "");
+        setEstado(one.estado_perfil || "activo");
+        setNotas(one.notas_admin || "");
       }
       setLoading(false);
     })();
@@ -72,7 +71,7 @@ const PerfilDetalle = () => {
   const guardar = async () => {
     if (!id) return;
     setSaving(true);
-    const { error } = await (supabase as any).from("perfiles").update({ estado_perfil: estado, notas_admin: notas }).eq("id", id);
+    const { error } = await supabase.from("perfiles").update({ estado_perfil: estado, notas_admin: notas }).eq("id", id);
     setSaving(false);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else toast({ title: "Guardado", description: "Cambios aplicados." });
@@ -83,7 +82,7 @@ const PerfilDetalle = () => {
     setCalculating(true);
     setShowMatches(true);
     setTimeout(() => {
-      const results = findMatchesFor(perfil as unknown as PerfilForMatching, pool as unknown as PerfilForMatching[], 20);
+      const results = findMatchesFor(perfil, pool, 20);
       setMatches(results);
       setCalculating(false);
     }, 50);
@@ -91,7 +90,7 @@ const PerfilDetalle = () => {
 
   const calidad = useMemo(() => {
     if (!perfil) return null;
-    const p: any = perfil;
+    const p = perfil;
     let score = 0;
     if (p.foto_url) score += 15;
     if (p.hobbies) score += 10;
@@ -113,7 +112,7 @@ const PerfilDetalle = () => {
   if (loading) return <div className="p-8 font-body text-muted-foreground">Cargando perfil…</div>;
   if (!perfil) return <div className="p-8 font-body text-muted-foreground">Perfil no encontrado.</div>;
 
-  const p: any = perfil;
+  const p = perfil;
 
   return (
     <div className="p-8 space-y-6 max-w-6xl">
@@ -165,7 +164,7 @@ const PerfilDetalle = () => {
           ) : (
             <div className="grid md:grid-cols-2 gap-3">
               {matches.map((m) => {
-                const other = m.perfilB as any;
+                const other = m.perfilB;
                 const color = m.score >= 80 ? "text-emerald-600 border-emerald-200 bg-emerald-50" : m.score >= 60 ? "text-amber-700 border-amber-200 bg-amber-50" : "text-rose-700 border-rose-200 bg-rose-50";
                 return (
                   <Link key={other.id} to={`/admin/perfiles/${other.id}`} className="block bg-background border border-border rounded-xl p-4 hover:border-gold transition-colors">

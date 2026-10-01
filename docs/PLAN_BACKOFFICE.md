@@ -261,10 +261,11 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
 
 ### FASE 0 — Cimientos y saneamiento
 
-- [ ] **T0.1 · Tipos y limpieza**
+- [x] **T0.1 · Tipos y limpieza**
   - Objetivo: poder construir sin `any`.
   - Cambios: `types.ts` ya está al día con las migraciones (no hay que regenerarlo); eliminar `(supabase as any)` en `PerfilDetalle.tsx` y `Pagos.tsx`; crear `src/types/admin.ts` con tipos derivados (`Perfil = Tables<'perfiles'>`, etc.); dejar el lint en verde: quitar los `any` explícitos de `src/pages/**` y `supabase/functions/compatibility-report`, poner llaves en los `case` de `Perfil.tsx` y cambiar el `require` de `tailwind.config.ts` por `import`. `src/components/ui` está excluido del lint (shadcn).
   - Aceptación: `npm run build`, `npm run typecheck` y `npm run lint` sin errores (se admiten los warnings `react-refresh`); no queda `supabase as any` en `src/`.
+  > Nota de implementación: `src/types/admin.ts` exporta `Perfil`, `PaidUser`, `DiscResult` y `PlanTipo`. En `compatibility-report` el cliente Supabase sigue sin tipar (Deno); solo se tipan los parámetros explícitos (`DiscResumen`).
 
 - [ ] **T0.2 · Seguridad y privacidad**
   - Cambios (migración):
@@ -561,3 +562,4 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 |---|---|---|
 | 30/09/2026 | — | Creación del plan a partir del análisis del repositorio y del PDF de funcionalidades. |
 | 30/09/2026 | — | Ajustes previos: `types.ts` se actualiza a mano, script `npm run typecheck`, `src/components/ui` fuera del lint y alcance de T0.1 ampliado para dejar el lint en verde. |
+| 01/10/2026 | T0.1 | Tipos derivados en `src/types/admin.ts`, fuera los `any`/`supabase as any`, llaves en `case` de `Perfil.tsx` e `import` en `tailwind.config.ts`: lint con 0 errores. |

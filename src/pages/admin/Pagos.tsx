@@ -2,16 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Trash2, ExternalLink, CreditCard } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-
-interface PaidUser {
-  id: string;
-  nombre_completo: string;
-  email: string;
-  telefono: string | null;
-  plan: "esencial" | "premium";
-  notas: string | null;
-  created_at: string;
-}
+import type { PaidUser, PlanTipo } from "@/types/admin";
 
 const PLAN_BADGE: Record<string, string> = {
   esencial: "bg-blue-50 text-blue-700 border-blue-200",
@@ -23,11 +14,11 @@ const Pagos = () => {
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [filter, setFilter] = useState<"all" | "esencial" | "premium">("all");
-  const [form, setForm] = useState({ nombre_completo: "", email: "", telefono: "", plan: "esencial" as "esencial" | "premium", notas: "" });
+  const [form, setForm] = useState({ nombre_completo: "", email: "", telefono: "", plan: "esencial" as PlanTipo, notas: "" });
 
   const load = async () => {
     const { data } = await supabase.from("paid_users").select("*").order("created_at", { ascending: false });
-    setPaid((data as any) || []);
+    setPaid(data || []);
     setLoading(false);
   };
 
@@ -38,7 +29,7 @@ const Pagos = () => {
       toast({ title: "Faltan datos", description: "Nombre y email son obligatorios", variant: "destructive" });
       return;
     }
-    const { error } = await (supabase as any).from("paid_users").insert({
+    const { error } = await supabase.from("paid_users").insert({
       nombre_completo: form.nombre_completo.trim(),
       email: form.email.trim(),
       telefono: form.telefono.trim() || null,
@@ -53,7 +44,7 @@ const Pagos = () => {
 
   const del = async (id: string) => {
     if (!confirm("¿Eliminar este cliente?")) return;
-    const { error } = await (supabase as any).from("paid_users").delete().eq("id", id);
+    const { error } = await supabase.from("paid_users").delete().eq("id", id);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     load();
   };
@@ -94,7 +85,7 @@ const Pagos = () => {
             <input placeholder="Nombre completo" value={form.nombre_completo} onChange={(e) => setForm({ ...form, nombre_completo: e.target.value })} className="px-3 py-2 rounded-lg border border-border bg-background font-body text-sm" />
             <input placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="px-3 py-2 rounded-lg border border-border bg-background font-body text-sm" />
             <input placeholder="Teléfono" value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} className="px-3 py-2 rounded-lg border border-border bg-background font-body text-sm" />
-            <select value={form.plan} onChange={(e) => setForm({ ...form, plan: e.target.value as any })} className="px-3 py-2 rounded-lg border border-border bg-background font-body text-sm">
+            <select value={form.plan} onChange={(e) => setForm({ ...form, plan: e.target.value as PlanTipo })} className="px-3 py-2 rounded-lg border border-border bg-background font-body text-sm">
               <option value="esencial">Esencial</option>
               <option value="premium">Premium</option>
             </select>

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Users, UserCheck, Clock, TrendingUp, Heart, CreditCard, Sparkles, ArrowRight,
+  Users, UserCheck, Clock, TrendingUp, Heart, CreditCard, Sparkles, ArrowRight, type LucideIcon,
 } from "lucide-react";
 
 interface Counts {
@@ -14,7 +14,15 @@ interface Counts {
   leads: number;
 }
 
-const StatCard = ({ icon: Icon, label, value, hint, color = "text-foreground" }: any) => (
+interface StatCardProps {
+  icon: LucideIcon;
+  label: string;
+  value: number | string;
+  hint?: string;
+  color?: string;
+}
+
+const StatCard = ({ icon: Icon, label, value, hint, color = "text-foreground" }: StatCardProps) => (
   <div className="bg-card border border-border rounded-2xl p-5">
     <div className="flex items-center justify-between mb-2">
       <p className="font-body text-xs text-muted-foreground uppercase tracking-wider">{label}</p>
@@ -40,9 +48,9 @@ const AdminDashboardHome = () => {
       const all = perfiles || [];
       setCounts({
         total: all.length,
-        activos: all.filter((p: any) => (p.estado_perfil || "activo") === "activo").length,
-        pendientes: all.filter((p: any) => p.estado_perfil === "pendiente").length,
-        ultimos30: all.filter((p: any) => p.created_at >= since).length,
+        activos: all.filter((p) => (p.estado_perfil || "activo") === "activo").length,
+        pendientes: all.filter((p) => p.estado_perfil === "pendiente").length,
+        ultimos30: all.filter((p) => p.created_at >= since).length,
         pagos: paid.count || 0,
         leads: leads.count || 0,
       });
