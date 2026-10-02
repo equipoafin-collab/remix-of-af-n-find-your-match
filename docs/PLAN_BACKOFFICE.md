@@ -371,13 +371,15 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
   - Aceptación: la psicóloga solo tiene que revisar y guardar; el historial muestra cada resumen desplegable.
   > Nota de implementación: `PanelResumen` dentro de cada sesión realizada de la pestaña Sesiones (se abre solo al marcarla realizada; la etiqueta del resumen la despliega y pliega). Las notas se guardan en `notas_brutas` antes de llamar a la función; regenerar un resumen ya revisado pide confirmación. Cada lista se edita como texto, una línea por punto, y al guardar se limpia con el mismo `validarResumen` de la Edge Function. "Guardar como revisado" (`useGuardarResumen`, en `src/hooks/admin/useResumenSesion.ts`) sella `resumen_revisado_at` y `perfiles.ultimo_seguimiento_at` con dos updates (marcado `ponytail:`). `ResumenSesion` pasa a `type` para encajar en `Json` sin casts. Probado en producción en la sesión de prueba: regenerar desde la UI, editar una lista y guardar como revisado.
 
-- [ ] **T3.4 · Evolución del cliente** · Depende de T3.3
+- [x] **T3.4 · Evolución del cliente** · Depende de T3.3
   - Cambios: en Resumen, línea temporal compacta con el estado emocional y avances de cada sesión revisada.
   - Aceptación: se ve la evolución de las últimas sesiones de un vistazo.
+  > Nota de implementación: `EvolucionCliente` en Resumen, entre las preguntas clave y el vídeo: las 6 últimas sesiones con resumen revisado (la más reciente marcada como "última", que cubre el "último resumen de sesión" de T2.1), con estado emocional y avances, y enlace a la pestaña Sesiones. Sin consultas nuevas: reutiliza `useSesiones`.
 
 - [ ] **T3.5 · (Opcional) Transcripción automática** · Depende de T3.2
   - Cambios: Edge Function que, a partir de un audio/vídeo subido, genera la transcripción (modelo con entrada de audio disponible en el gateway) y la guarda en `notas_brutas`.
   - Aceptación: subir audio → transcripción → botón generar resumen.
+  > Pospuesta (opcional): la Fase 3 se cierra sin ella; la psicóloga pega sus notas o la transcripción a mano.
 
 ### FASE 4 — Cuestionario clave y motor de matching v3 (servidor + persistencia)
 
@@ -597,3 +599,4 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 03/10/2026 | T3.2 | Edge Function `resumen-sesion` (borrador validado en `sesiones.resumen_ia`, auditado) y código común de las funciones en `_shared/`; probada en producción. |
 | 03/10/2026 | — | `src/integrations/supabase` fuera del lint: Lovable añadió `previewAuthStorage.ts` con un error de lint y rompió el CI de `main`. Los tipos que regeneró Lovable coinciden con los escritos a mano. |
 | 03/10/2026 | T3.3 | Panel de notas y resumen en cada sesión realizada: generar/regenerar con IA, editar por sección y guardar como revisado (sella revisión y seguimiento). |
+| 03/10/2026 | T3.4 | Línea temporal "Evolución" en Resumen con el estado emocional y los avances de las últimas sesiones revisadas. T3.5 (opcional) pospuesta. |
