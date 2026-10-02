@@ -330,24 +330,27 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
 
 ### FASE 2 — Ficha del cliente (una sola pantalla con todo)
 
-- [ ] **T2.1 · Nuevo layout de ficha con pestañas** · Depende de T1.4
+- [x] **T2.1 · Nuevo layout de ficha con pestañas** · Depende de T1.4
   - Cambios: dividir `PerfilDetalle.tsx` en componentes dentro de `src/components/admin/ficha/`. Cabecera fija con: foto, nombre, edad, zona, **badge de estado**, **badge de plan**, **sesiones realizadas/contratadas/pendientes** (barra), **próxima cita**, contador de tareas pendientes y alertas.
   - Pestañas: **Resumen** · **Sugerencias IA** · **Sesiones** · **Matches** · **Tareas** · **Notas** · **Cuestionario** · **Documentos**.
   - "Cuestionario" contiene las secciones actuales de datos; "Resumen" muestra las 5 preguntas clave, último resumen de sesión, próximas tareas y vídeo.
   - Aceptación: toda la información actual sigue visible; la cabecera muestra plan y estado siempre.
+  > Nota de implementación: componentes en `src/components/admin/ficha/` (`CabeceraFicha`, `ResumenTab`, `SugerenciasTab`, `NotasTab`, `CuestionarioTab`, `DocumentosTab`, `Campos`); la lista de pestañas es `PESTANAS` en `PerfilDetalle.tsx` y la activa va en `?tab=` para poder enlazarla. Sesiones, Matches y Tareas salen deshabilitadas hasta T3.1/T6.1/T6.2 (basta con darles `Contenido`); los contadores de tareas y alertas de la cabecera llegan con T6.2/T7.1, y en Resumen el último resumen, las próximas tareas y el vídeo con T3.3/T6.2/T2.3. `usePerfil` lee ahora de `v_clientes` (devuelve `Cliente`). La cabecera es `sticky` e incluye el selector de estado y la casilla "revisado" (se guarda al marcarla); la nota única `notas_admin` pasa a la pestaña Notas. Documentos lista los PDF de `antecedentes` cuya carpeta `user_<email o nombre>` casa con el perfil sin mayúsculas (`esCarpetaDelPerfil`, con tests) y los abre con URL firmada.
 
-- [ ] **T2.2 · Notas privadas con historial** · Depende de T2.1
+- [x] **T2.2 · Notas privadas con historial** · Depende de T2.1
   - Cambios: tabla `notas_privadas`; migrar `notas_admin` existente como primera nota. Pestaña Notas: lista cronológica, crear/editar/borrar, vincular opcionalmente a una sesión. Al crear nota → actualizar `ultimo_seguimiento_at`.
   - Aceptación: notas persistentes, ordenadas, solo visibles para admin.
-  > Pendiente de T1.5: ampliar `cambiar_estado_cliente` para que deje una nota automática con el cambio y el motivo (ya está en `auditoria.detalle`).
+  > Nota de implementación: `notas_privadas` lleva además `automatica` (notas del sistema); `created_by` por defecto `auth.uid()`; `ON DELETE CASCADE` desde `perfiles` y `SET NULL` desde `sesiones`; contenido vacío rechazado por `CHECK`. `notas_admin` se copia una sola vez, al crear la tabla (reaplicar no resucita notas borradas), y la copia no cuenta como seguimiento. El trigger `notas_seguimiento` pone `ultimo_seguimiento_at` al crear una nota manual. Hecho lo pendiente de T1.5: `cambiar_estado_cliente` deja una nota automática "Cambio de estado: X → Y. Motivo: …". La pestaña Notas lista de la más reciente a la más antigua, con crear/editar/borrar y selector de sesión (solo si el cliente tiene sesiones; `useSesiones` lo reutilizará T3.1). `notas_admin` ya no se escribe desde la UI.
 
-- [ ] **T2.3 · Vídeo de la primera sesión** · Depende de T0.2, T2.1
+- [x] **T2.3 · Vídeo de la primera sesión** · Depende de T0.2, T2.1
   - Cambios: en Resumen, bloque "Vídeo de presentación": subir (barra de progreso), reproducir (`<video>` con URL firmada de 1 h), reemplazar, eliminar. Ruta `videos-sesiones/<perfil_id>/presentacion.<ext>` guardada en `perfiles.video_presentacion_path`.
   - Aceptación: se sube y reproduce; la URL caduca; un no-admin no puede acceder.
+  > Nota de implementación: sin migración (el bucket y la columna ya existían). supabase-js no informa del progreso, así que `subirConProgreso` (`src/lib/storage.ts`) sube con `XMLHttpRequest` a la API REST de Storage con la sesión de la admin (`x-upsert`). Validación de formato y tamaño en `src/lib/video.ts` (con tests). Al reemplazar con otra extensión se borra el fichero anterior, y se pide una firma nueva para que el navegador no reproduzca el vídeo viejo. El límite global de subida del proyecto no se puede consultar desde local: si es menor de 500 MB, la subida falla con un 413 que la UI explica. Comprobado por API que un anónimo no puede firmar, listar ni leer en público el bucket.
 
-- [ ] **T2.4 · Editar plan y sesiones contratadas desde la ficha** · Depende de T1.2
+- [x] **T2.4 · Editar plan y sesiones contratadas desde la ficha** · Depende de T1.2
   - Cambios: diálogo "Plan" (tipo, fecha inicio/fin, sesiones contratadas, con sugerencia automática según plan y meses).
   - Aceptación: cambios reflejados en cabecera, listado y vista.
+  > Nota de implementación: sin migración. Botón "Plan" junto a la etiqueta del plan en la cabecera (`EditarPlan`), que además muestra las fechas del plan. Al cambiar plan o fechas se propone `sesiones_por_plan[plan] × meses` (`src/lib/plan.ts`, con tests; meses = días entre fechas, ambas incluidas, / 30,44, redondeado y mínimo 1) y se puede ajustar a mano; al dar de alta un plan el inicio por defecto es hoy. "Sin plan" devuelve el perfil a lead. Fechas al revés o sesiones no enteras bloquean el guardado (solo en el formulario: no hay `CHECK` en BD). Guarda con `useUpdatePerfil`, que refresca cabecera, listado y `v_clientes`.
 
 ### FASE 3 — Sesiones y resumen automático con IA
 
@@ -583,3 +586,7 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 02/10/2026 | T1.4 | Listado sobre `v_clientes` con paginación en servidor (25), búsqueda `ilike`, columnas Plan, Sesiones y Próxima cita, y filtros de plan/cliente/lead y estado combinables. |
 | 02/10/2026 | T1.5 | Función `cambiar_estado_cliente` (solo admin, auditada con motivo en `auditoria.detalle`, puntos de ampliación para T2.2/T4.1/T6.2/T7.1) y selector de estado con diálogo de confirmación en la ficha. |
 | 02/10/2026 | — | CI en GitHub Actions (typecheck, lint, test y build en cada PR y push a `main`), instalando con `bun.lock`. |
+| 02/10/2026 | T2.1 | Ficha dividida en cabecera fija (plan, estado, sesiones, próxima cita, cambio de estado) y pestañas Resumen, Sugerencias IA, Notas, Cuestionario y Documentos (Sesiones, Matches y Tareas deshabilitadas hasta su fase). |
+| 02/10/2026 | T2.2 | Tabla `notas_privadas` (solo admin) con `notas_admin` copiada como primera nota, trigger de `ultimo_seguimiento_at`, nota automática en cada cambio de estado y pestaña Notas con historial, edición, borrado y vínculo a sesión. |
+| 02/10/2026 | T2.3 | Bloque "Vídeo de presentación" en Resumen: subir con barra de progreso, reproducir con URL firmada de 1 h, reemplazar y eliminar (`videos-sesiones/<perfil_id>/presentacion.<ext>`). |
+| 02/10/2026 | T2.4 | Diálogo "Plan" en la cabecera de la ficha (tipo, inicio, fin y sesiones contratadas) con sugerencia automática de sesiones según el plan y los meses. |

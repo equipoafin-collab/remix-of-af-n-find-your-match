@@ -3,6 +3,8 @@ import type { Enums, Tables } from "@/integrations/supabase/types";
 export type Perfil = Tables<"perfiles">;
 export type Pago = Tables<"pagos">;
 export type DiscResult = Tables<"disc_results">;
+export type Nota = Tables<"notas_privadas">;
+export type Sesion = Tables<"sesiones">;
 export type PlanTipo = Enums<"plan_tipo">;
 export type EstadoCliente = Enums<"estado_cliente">;
 
