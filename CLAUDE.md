@@ -15,6 +15,7 @@ Backend: **Lovable Cloud** (Supabase gestionado por Lovable, project_id en `supa
 
 ## Comandos
 - `npm install` · `npm run dev` · `npm run build` · `npm run typecheck` · `npm run lint` · `npm test`
+- CI (`.github/workflows/ci.yml`) ejecuta typecheck, lint, test y build en cada PR y push a `main`. Instala con `bun install --frozen-lockfile`: `bun.lock` es el lockfile válido (el `package-lock.json` está desincronizado). Para añadir dependencias usa `bun add`, o el CI fallará.
 
 ## Stack y convenciones
 - Vite + React 18 + TypeScript + Tailwind + shadcn/ui (`src/components/ui`, no modificar salvo necesidad; excluido del lint), React Router 6, TanStack Query, Supabase JS, Edge Functions en Deno (`supabase/functions`).
