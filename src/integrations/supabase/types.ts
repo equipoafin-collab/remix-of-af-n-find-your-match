@@ -155,6 +155,51 @@ export type Database = {
         }
         Relationships: []
       }
+      notas_privadas: {
+        Row: {
+          automatica: boolean
+          contenido: string
+          created_at: string
+          created_by: string | null
+          id: string
+          perfil_id: string
+          sesion_id: string | null
+        }
+        Insert: {
+          automatica?: boolean
+          contenido: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          perfil_id: string
+          sesion_id?: string | null
+        }
+        Update: {
+          automatica?: boolean
+          contenido?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          perfil_id?: string
+          sesion_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notas_privadas_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notas_privadas_sesion_id_fkey"
+            columns: ["sesion_id"]
+            isOneToOne: false
+            referencedRelation: "sesiones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pagos: {
         Row: {
           created_at: string

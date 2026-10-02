@@ -52,6 +52,10 @@ export function useCambiarEstado() {
       });
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
+    // La función deja también una nota automática.
+    onSuccess: () => Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
+      queryClient.invalidateQueries({ queryKey: ["notas"] }),
+    ]),
   });
 }
