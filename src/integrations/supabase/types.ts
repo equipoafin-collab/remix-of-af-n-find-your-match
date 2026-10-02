@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           accion: string
           created_at: string
+          detalle: Json | null
           entidad: string
           entidad_id: string | null
           id: string
@@ -26,6 +27,7 @@ export type Database = {
         Insert: {
           accion: string
           created_at?: string
+          detalle?: Json | null
           entidad: string
           entidad_id?: string | null
           id?: string
@@ -34,6 +36,7 @@ export type Database = {
         Update: {
           accion?: string
           created_at?: string
+          detalle?: Json | null
           entidad?: string
           entidad_id?: string | null
           id?: string
@@ -152,38 +155,56 @@ export type Database = {
         }
         Relationships: []
       }
-      paid_users: {
+      pagos: {
         Row: {
           created_at: string
           email: string
+          fecha: string
           id: string
+          importe: number | null
           nombre_completo: string
           notas: string | null
-          plan: string
+          perfil_id: string | null
+          plan: Database["public"]["Enums"]["plan_tipo"]
           telefono: string | null
         }
         Insert: {
           created_at?: string
           email: string
+          fecha?: string
           id?: string
+          importe?: number | null
           nombre_completo: string
           notas?: string | null
-          plan: string
+          perfil_id?: string | null
+          plan: Database["public"]["Enums"]["plan_tipo"]
           telefono?: string | null
         }
         Update: {
           created_at?: string
           email?: string
+          fecha?: string
           id?: string
+          importe?: number | null
           nombre_completo?: string
           notas?: string | null
-          plan?: string
+          perfil_id?: string | null
+          plan?: Database["public"]["Enums"]["plan_tipo"]
           telefono?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pagos_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       perfiles: {
         Row: {
+          acepta_otras_zonas: boolean
           alcohol: string | null
           ambicion_profesional: number
           aprendizaje_ultima_relacion: string
@@ -195,10 +216,13 @@ export type Database = {
           deseo_familia: number
           disc_perfil: string | null
           disc_respuestas: Json | null
+          disc_result_id: string | null
           edad: number
           edad_max_busca: number | null
           edad_min_busca: number | null
           email: string | null
+          estado_cambiado_at: string
+          estado_cliente: Database["public"]["Enums"]["estado_cliente"]
           estado_perfil: string
           estatura: number | null
           estilo_vestir: string | null
@@ -219,19 +243,29 @@ export type Database = {
           nombre_completo: string
           notas_admin: string | null
           peso: number | null
+          plan: Database["public"]["Enums"]["plan_tipo"] | null
+          plan_fin: string | null
+          plan_inicio: string | null
           politica_pareja: string | null
           relacion_sana: string
           religion: string | null
           religion_pareja: string | null
+          revisado: boolean
           sentirse_querido: string[] | null
+          sesiones_contratadas: number
           tabaco: string
           tatuajes_pareja: string | null
           telefono: string | null
           tiene_tatuajes: boolean | null
           tipo_relacion: string
+          ultimo_seguimiento_at: string | null
+          valores_importantes: string[]
           vida_en_10_anios: string
+          video_presentacion_path: string | null
+          zona: string | null
         }
         Insert: {
+          acepta_otras_zonas?: boolean
           alcohol?: string | null
           ambicion_profesional: number
           aprendizaje_ultima_relacion: string
@@ -243,10 +277,13 @@ export type Database = {
           deseo_familia: number
           disc_perfil?: string | null
           disc_respuestas?: Json | null
+          disc_result_id?: string | null
           edad: number
           edad_max_busca?: number | null
           edad_min_busca?: number | null
           email?: string | null
+          estado_cambiado_at?: string
+          estado_cliente?: Database["public"]["Enums"]["estado_cliente"]
           estado_perfil?: string
           estatura?: number | null
           estilo_vestir?: string | null
@@ -267,19 +304,29 @@ export type Database = {
           nombre_completo: string
           notas_admin?: string | null
           peso?: number | null
+          plan?: Database["public"]["Enums"]["plan_tipo"] | null
+          plan_fin?: string | null
+          plan_inicio?: string | null
           politica_pareja?: string | null
           relacion_sana: string
           religion?: string | null
           religion_pareja?: string | null
+          revisado?: boolean
           sentirse_querido?: string[] | null
+          sesiones_contratadas?: number
           tabaco: string
           tatuajes_pareja?: string | null
           telefono?: string | null
           tiene_tatuajes?: boolean | null
           tipo_relacion: string
+          ultimo_seguimiento_at?: string | null
+          valores_importantes?: string[]
           vida_en_10_anios: string
+          video_presentacion_path?: string | null
+          zona?: string | null
         }
         Update: {
+          acepta_otras_zonas?: boolean
           alcohol?: string | null
           ambicion_profesional?: number
           aprendizaje_ultima_relacion?: string
@@ -291,10 +338,13 @@ export type Database = {
           deseo_familia?: number
           disc_perfil?: string | null
           disc_respuestas?: Json | null
+          disc_result_id?: string | null
           edad?: number
           edad_max_busca?: number | null
           edad_min_busca?: number | null
           email?: string | null
+          estado_cambiado_at?: string
+          estado_cliente?: Database["public"]["Enums"]["estado_cliente"]
           estado_perfil?: string
           estatura?: number | null
           estilo_vestir?: string | null
@@ -315,19 +365,89 @@ export type Database = {
           nombre_completo?: string
           notas_admin?: string | null
           peso?: number | null
+          plan?: Database["public"]["Enums"]["plan_tipo"] | null
+          plan_fin?: string | null
+          plan_inicio?: string | null
           politica_pareja?: string | null
           relacion_sana?: string
           religion?: string | null
           religion_pareja?: string | null
+          revisado?: boolean
           sentirse_querido?: string[] | null
+          sesiones_contratadas?: number
           tabaco?: string
           tatuajes_pareja?: string | null
           telefono?: string | null
           tiene_tatuajes?: boolean | null
           tipo_relacion?: string
+          ultimo_seguimiento_at?: string | null
+          valores_importantes?: string[]
           vida_en_10_anios?: string
+          video_presentacion_path?: string | null
+          zona?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "perfiles_disc_result_id_fkey"
+            columns: ["disc_result_id"]
+            isOneToOne: false
+            referencedRelation: "disc_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sesiones: {
+        Row: {
+          created_at: string
+          duracion_min: number
+          estado: Database["public"]["Enums"]["sesion_estado"]
+          fecha_hora: string
+          id: string
+          notas_brutas: string | null
+          perfil_id: string
+          resumen_estado: Database["public"]["Enums"]["resumen_estado"]
+          resumen_ia: Json | null
+          resumen_revisado_at: string | null
+          tipo: Database["public"]["Enums"]["sesion_tipo"]
+          video_path: string | null
+        }
+        Insert: {
+          created_at?: string
+          duracion_min?: number
+          estado?: Database["public"]["Enums"]["sesion_estado"]
+          fecha_hora: string
+          id?: string
+          notas_brutas?: string | null
+          perfil_id: string
+          resumen_estado?: Database["public"]["Enums"]["resumen_estado"]
+          resumen_ia?: Json | null
+          resumen_revisado_at?: string | null
+          tipo?: Database["public"]["Enums"]["sesion_tipo"]
+          video_path?: string | null
+        }
+        Update: {
+          created_at?: string
+          duracion_min?: number
+          estado?: Database["public"]["Enums"]["sesion_estado"]
+          fecha_hora?: string
+          id?: string
+          notas_brutas?: string | null
+          perfil_id?: string
+          resumen_estado?: Database["public"]["Enums"]["resumen_estado"]
+          resumen_ia?: Json | null
+          resumen_revisado_at?: string | null
+          tipo?: Database["public"]["Enums"]["sesion_tipo"]
+          video_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sesiones_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -349,9 +469,83 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_clientes: {
+        Row: {
+          acepta_otras_zonas: boolean | null
+          alcohol: string | null
+          ambicion_profesional: number | null
+          aprendizaje_ultima_relacion: string | null
+          busca_genero: string | null
+          ciudad: string | null
+          conflicto: string[] | null
+          created_at: string | null
+          desea_casarse: string | null
+          deseo_familia: number | null
+          disc_perfil: string | null
+          disc_respuestas: Json | null
+          disc_result_id: string | null
+          edad: number | null
+          edad_max_busca: number | null
+          edad_min_busca: number | null
+          email: string | null
+          estado_cambiado_at: string | null
+          estado_cliente: Database["public"]["Enums"]["estado_cliente"] | null
+          estado_perfil: string | null
+          estatura: number | null
+          estilo_vestir: string | null
+          estilo_vestir_pareja: string | null
+          estilo_vida_activo: number | null
+          fin_de_semana: string | null
+          foto_url: string | null
+          genero: string | null
+          hijos: string | null
+          hobbies: string | null
+          id: string | null
+          ideologia: string | null
+          importa_politica: boolean | null
+          importa_religion: boolean | null
+          importa_vestir: boolean | null
+          necesidad_independencia: number | null
+          nivel_social: number | null
+          nombre_completo: string | null
+          notas_admin: string | null
+          peso: number | null
+          plan: Database["public"]["Enums"]["plan_tipo"] | null
+          plan_fin: string | null
+          plan_inicio: string | null
+          politica_pareja: string | null
+          proxima_cita: string | null
+          relacion_sana: string | null
+          religion: string | null
+          religion_pareja: string | null
+          revisado: boolean | null
+          sentirse_querido: string[] | null
+          sesiones_contratadas: number | null
+          sesiones_pendientes: number | null
+          sesiones_realizadas: number | null
+          tabaco: string | null
+          tatuajes_pareja: string | null
+          telefono: string | null
+          tiene_tatuajes: boolean | null
+          tipo_relacion: string | null
+          ultimo_seguimiento_at: string | null
+          valores_importantes: string[] | null
+          vida_en_10_anios: string | null
+          video_presentacion_path: string | null
+          zona: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      cambiar_estado_cliente: {
+        Args: {
+          _motivo?: string
+          _nuevo_estado: Database["public"]["Enums"]["estado_cliente"]
+          _perfil_id: string
+        }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -370,6 +564,11 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      estado_cliente: "activo" | "pausado" | "baja" | "finalizado"
+      plan_tipo: "esencial" | "premium"
+      resumen_estado: "sin_generar" | "borrador" | "revisado"
+      sesion_estado: "programada" | "realizada" | "cancelada" | "no_asistio"
+      sesion_tipo: "primera" | "seguimiento"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -498,6 +697,11 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      estado_cliente: ["activo", "pausado", "baja", "finalizado"],
+      plan_tipo: ["esencial", "premium"],
+      resumen_estado: ["sin_generar", "borrador", "revisado"],
+      sesion_estado: ["programada", "realizada", "cancelada", "no_asistio"],
+      sesion_tipo: ["primera", "seguimiento"],
     },
   },
 } as const

@@ -10,6 +10,8 @@ import { usePerfil, usePerfiles, useUpdatePerfil } from "@/hooks/admin/usePerfil
 
 import type { Perfil } from "@/types/admin";
 import FotoPerfil from "@/components/admin/FotoPerfil";
+import { EstadoBadge, PlanBadge, SinRevisarBadge } from "@/components/admin/Badges";
+import CambiarEstado from "@/components/admin/ficha/CambiarEstado";
 
 const Field = ({ label, value }: { label: string; value: ReactNode }) => (
   <div>
@@ -42,13 +44,13 @@ const Scale = ({ label, value }: { label: string; value: number | null }) => (
 // Se monta con key={perfil.id}: el formulario arranca con los valores guardados
 // y no se pisa si React Query refresca el perfil mientras se edita.
 const EstadoYNotas = ({ perfil }: { perfil: Perfil }) => {
-  const [estado, setEstado] = useState(perfil.estado_perfil || "activo");
+  const [revisado, setRevisado] = useState(perfil.revisado);
   const [notas, setNotas] = useState(perfil.notas_admin || "");
   const updatePerfil = useUpdatePerfil();
 
   const guardar = () =>
     updatePerfil.mutate(
-      { id: perfil.id, cambios: { estado_perfil: estado, notas_admin: notas } },
+      { id: perfil.id, cambios: { revisado, notas_admin: notas } },
       {
         onSuccess: () => toast({ title: "Guardado", description: "Cambios aplicados." }),
         onError: (error) => toast({ title: "Error", description: error.message, variant: "destructive" }),
@@ -60,16 +62,11 @@ const EstadoYNotas = ({ perfil }: { perfil: Perfil }) => {
       <h3 className="font-display text-sm font-semibold text-foreground">Estado y notas internas</h3>
       <div className="grid sm:grid-cols-[200px_1fr] gap-4 items-start">
         <div>
-          <label className="font-body text-xs text-muted-foreground uppercase tracking-wider">Estado del perfil</label>
-          <select
-            value={estado}
-            onChange={(e) => setEstado(e.target.value)}
-            className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm"
-          >
-            {["activo", "pendiente", "pausado", "rechazado"].map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
+          <CambiarEstado perfil={perfil} />
+          <label className="mt-3 flex items-center gap-2 font-body text-sm text-foreground">
+            <input type="checkbox" checked={revisado} onChange={(e) => setRevisado(e.target.checked)} className="accent-gold" />
+            Perfil revisado
+          </label>
         </div>
         <div>
           <label className="font-body text-xs text-muted-foreground uppercase tracking-wider">Notas privadas (solo admin)</label>
@@ -156,11 +153,16 @@ const PerfilDetalle = () => {
             <span className="inline-flex items-center gap-1"><User className="w-3.5 h-3.5" />{p.genero || "—"}</span>
             <span>Busca: {p.busca_genero || "—"}</span>
           </p>
-          {calidad && (
-            <span className={`inline-flex items-center gap-1 mt-2 px-2.5 py-1 rounded-full text-xs font-body font-medium border ${calidad.bg} ${calidad.color}`}>
-              <Trophy className="w-3 h-3" /> Calidad: {calidad.label}
-            </span>
-          )}
+          <div className="flex items-center gap-2 flex-wrap mt-2">
+            <PlanBadge plan={p.plan} />
+            <EstadoBadge estado={p.estado_cliente} />
+            {!p.revisado && <SinRevisarBadge />}
+            {calidad && (
+              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-body font-medium border ${calidad.bg} ${calidad.color}`}>
+                <Trophy className="w-3 h-3" /> Calidad: {calidad.label}
+              </span>
+            )}
+          </div>
         </div>
         <button
           onClick={buscarPareja}

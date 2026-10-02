@@ -292,28 +292,32 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
 
 ### FASE 1 — Cliente único: estados, plan y sesiones contratadas
 
-- [ ] **T1.1 · Estados y plan en `perfiles`** · Depende de T0.1
+- [x] **T1.1 · Estados y plan en `perfiles`** · Depende de T0.1
   - Cambios (migración):
     - Enums `estado_cliente` y `plan_tipo`; columnas de la tabla 3.1.
     - Migrar datos: `estado_perfil` `activo→activo`, `pendiente→activo + revisado=false`, `pausado→pausado`, `rechazado→baja`. Resto `revisado=true`.
     - Mantener `estado_perfil` temporalmente (deprecado) hasta T9.5.
     - Trigger `before update` que rellena `estado_cambiado_at`.
   - Aceptación: todos los perfiles tienen `estado_cliente`; la UI usa los 4 estados nuevos con badges (Activo verde, Pausado gris, Baja rojo, Finalizado azul).
+  > Nota de implementación: `estado_cliente`, `revisado` y `estado_cambiado_at` (= `created_at` en los perfiles existentes) solo se rellenan desde `estado_perfil` la primera vez que se aplica la migración, para que reaplicarla no pise cambios posteriores. La política de INSERT anónimo de `perfiles` ahora exige los campos del CRM a su valor por defecto (sin plan, sesiones 0, sin revisar…); la admin puede insertar cualquiera. `sesiones_contratadas` lleva `CHECK >= 0`. En la UI, `EstadoBadge`/`SinRevisarBadge` (`src/components/admin/EstadoBadge.tsx`); el listado añade el filtro "sin revisar", la ficha una casilla "Perfil revisado" y el Dashboard cuenta como pendientes los `revisado = false`. El selector de estado de la ficha sigue siendo un `select` simple hasta T1.5.
 
-- [ ] **T1.2 · Vincular pagos y DISC al perfil** · Depende de T1.1
+- [x] **T1.2 · Vincular pagos y DISC al perfil** · Depende de T1.1
   - Cambios: renombrar `paid_users` → `pagos` (o crear vista compatible), añadir `perfil_id` FK y rellenarla por email (case-insensitive). Para cada pago vinculado, copiar `plan` a `perfiles.plan`. Rellenar `perfiles.disc_result_id` por email. Listar en un informe SQL los que no casen para revisión manual.
   - Cambios UI: `Pagos.tsx` permite elegir el perfil al crear un pago (buscador) y muestra enlace a la ficha. Al crear/editar un pago se actualiza el plan del perfil.
   - Aceptación: un cliente de pago aparece con su plan en listado y ficha; no hay filas de pago nuevas sin `perfil_id`.
+  > Nota de implementación: `paid_users` se renombra a `pagos` (+ `perfil_id`, `importe`, `fecha`; `plan` pasa al enum `plan_tipo`) y queda una vista `paid_users` (`security_invoker`) para que el admin publicado siga leyendo hasta que se fusione la fase; **borrarla en T9.5**. Desde esa vista no se pueden crear pagos: `CHECK (perfil_id IS NOT NULL) NOT VALID` obliga a que todo pago nuevo tenga perfil sin tocar los antiguos sin casar. El plan del perfil lo fija un trigger (`pagos_copiar_plan`) al crear o editar un pago, no la UI. Emails casados con `lower(trim())`; si hay varios perfiles con el mismo email gana el más reciente (igual con DISC). El informe de pagos sin casar es el `SELECT` final de la migración; en `/admin/pagos` salen como "Sin perfil · Vincular" con buscador. Plan visible con `PlanBadge` ("Lead" si no tiene) en listado, ficha y pagos. Los DISC nuevos no se vinculan solos: queda para cuando se use `disc_result_id`.
 
-- [ ] **T1.3 · Vista `v_clientes` y contadores de sesiones** · Depende de T1.1 (la tabla `sesiones` se crea aquí, vacía, con el esquema de 3.1)
+- [x] **T1.3 · Vista `v_clientes` y contadores de sesiones** · Depende de T1.1 (la tabla `sesiones` se crea aquí, vacía, con el esquema de 3.1)
   - Cambios: crear tabla `sesiones` (solo esquema + RLS) y vista `v_clientes` con `sesiones_realizadas`, `sesiones_pendientes`, `proxima_cita`. (Las columnas de tareas/alertas/sugerencias se añaden a la vista en sus fases.)
   - Aceptación: consulta a `v_clientes` devuelve contadores correctos con datos de prueba.
+  > Nota de implementación: `tipo`, `estado` y `resumen_estado` de `sesiones` son enums (`sesion_tipo`, `sesion_estado`, `resumen_estado`); `duracion_min` por defecto 60; `ON DELETE CASCADE` desde `perfiles` (solo el borrado definitivo de T9.3 borra sesiones). `v_clientes` es `security_invoker` (aplica la RLS de quien consulta) y usa `p.*`, que se fija al crearla: si `perfiles` cambia de columnas (p. ej. T9.5) hay que hacer `DROP VIEW` + `CREATE`; las columnas nuevas de otras fases van al final con `CREATE OR REPLACE`. `sesiones_pendientes` no baja de 0 y `proxima_cita` solo cuenta sesiones `programada` futuras (las citas de matches se suman en T6.1). Probado en Postgres 15 local con datos de prueba.
 
-- [ ] **T1.4 · Listado de clientes actualizado** · Depende de T1.3
+- [x] **T1.4 · Listado de clientes actualizado** · Depende de T1.3
   - Cambios: `PerfilesList` lee de `v_clientes`; nuevas columnas **Plan** (badge siempre visible), **Sesiones (realizadas/contratadas)**, **Próxima cita**; filtros por plan, estado nuevo y "solo clientes / solo leads". Paginación en servidor (25 por página) y búsqueda con `ilike`.
   - Aceptación: filtros combinables; rendimiento correcto con 1.000 perfiles de prueba.
+  > Nota de implementación: hook `useClientes(filtros, pagina)` (`src/hooks/admin/useClientes.ts`, clave bajo `["perfiles"]`, `keepPreviousData`); el filtro de plan y el de "solo clientes / solo leads" son un único selector (clientes, esencial, premium, leads) porque miran la misma columna. Búsqueda `ilike` en nombre, email y ciudad con 300 ms de espera; `filtroBusqueda` (`src/lib/busqueda.ts`, con tests) pone el valor entre comillas para que comas y paréntesis no rompan el filtro `or` de PostgREST. Las opciones de ciudad y religión salen de `useOpcionesFiltro` (tope de 1.000 filas de PostgREST, marcado con `ponytail:`). Supabase tipa las columnas de una vista como anulables, así que el hook devuelve `Cliente` (`Perfil` + contadores, en `src/types/admin.ts`). Rendimiento medido en Postgres 15 local con 1.000 perfiles y 2.000 sesiones: página, `count` y filtros combinados < 2 ms.
 
-- [ ] **T1.5 · Reglas de cambio de estado** · Depende de T1.1
+- [x] **T1.5 · Reglas de cambio de estado** · Depende de T1.1
   - Cambios: función SQL `cambiar_estado_cliente(perfil_id, nuevo_estado, motivo)` que:
     - **Baja**: marca `cancelada` todas sus `tareas` pendientes, `caducada` sus `match_sugerencias` pendientes (y las que le tienen como candidato), cierra alertas abiertas. **No borra nada.**
     - **Pausado / Finalizado**: caduca sugerencias pendientes donde aparece como candidato; conserva tareas.
@@ -322,6 +326,7 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
   - (Las tablas tareas/alertas/sugerencias se crean en fases posteriores: la función debe comprobar su existencia o implementarse aquí y **ampliarse** en T4.1 y T7.1 — dejar comentario `-- AMPLIAR EN T4.1/T7.1`.)
   - UI: selector de estado en la ficha con diálogo de confirmación que explica las consecuencias.
   - Aceptación: pasar a Baja y volver a Activo conserva sesiones, notas y matches.
+  > Nota de implementación: `cambiar_estado_cliente(_perfil_id, _nuevo_estado, _motivo)` es `SECURITY DEFINER` con comprobación de admin dentro (porque `auditoria` no admite INSERT directo), bloquea la fila, no hace nada si el estado no cambia y registra `{ de, a, motivo }` en la nueva columna `auditoria.detalle`. `notas_privadas` aún no existe, así que la nota automática queda para T2.2; las tareas se cancelan desde T6.2 (no T4.1/T7.1). Todo marcado con `-- AMPLIAR EN …` en la función. La ficha ya no cambia el estado con un update directo: `CambiarEstado` (`src/components/admin/ficha/`) abre un diálogo con las consecuencias y un motivo opcional y llama a la función vía `useCambiarEstado`; "Guardar cambios" guarda solo revisado y notas. Probado en Postgres 15 local: Baja → Activo conserva sesiones y plan; no-admin, anónimo y perfil inexistente fallan.
 
 ### FASE 2 — Ficha del cliente (una sola pantalla con todo)
 
@@ -334,6 +339,7 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
 - [ ] **T2.2 · Notas privadas con historial** · Depende de T2.1
   - Cambios: tabla `notas_privadas`; migrar `notas_admin` existente como primera nota. Pestaña Notas: lista cronológica, crear/editar/borrar, vincular opcionalmente a una sesión. Al crear nota → actualizar `ultimo_seguimiento_at`.
   - Aceptación: notas persistentes, ordenadas, solo visibles para admin.
+  > Pendiente de T1.5: ampliar `cambiar_estado_cliente` para que deje una nota automática con el cambio y el motivo (ya está en `auditoria.detalle`).
 
 - [ ] **T2.3 · Vídeo de la primera sesión** · Depende de T0.2, T2.1
   - Cambios: en Resumen, bloque "Vídeo de presentación": subir (barra de progreso), reproducir (`<video>` con URL firmada de 1 h), reemplazar, eliminar. Ruta `videos-sesiones/<perfil_id>/presentacion.<ext>` guardada en `perfiles.video_presentacion_path`.
@@ -435,6 +441,7 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
 - [ ] **T6.2 · Tareas (tabla + UI básica)** · Depende de T1.1
   - Cambios: tabla `tareas` (3.1). Pestaña **Tareas** en la ficha y panel global `/admin/tareas` (nueva ruta y entrada de menú, sustituye a "Seguimiento" o se añade al menú): filtros por tipo/estado/vencimiento, marcar completada, crear tarea manual. Las tareas pendientes **no desaparecen hasta completarse o cancelarse**; vencidas en rojo.
   - Aceptación: CRUD funcionando; `tareas_pendientes` añadido a `v_clientes`.
+  > Pendiente de T1.5: ampliar `cambiar_estado_cliente` para que Baja cancele las tareas pendientes.
 
 - [ ] **T6.3 · Informe de compatibilidad integrado** · Depende de T6.1
   - Cambios: mover la funcionalidad de `CompatibilityDashboard.tsx` a un botón **"Generar informe"** dentro de cada match. Llama a `compatibility-report` (ampliado para incluir preguntas clave y contexto de T5.1), guarda en `matches.informe`, permite editar, exportar PDF (reutilizar jsPDF) y **marcar como enviado** (`informe_enviado_at`). Redirigir `/compatibilidad` → `/admin`.
@@ -570,3 +577,8 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 01/10/2026 | T0.3 | Hooks de TanStack Query en `src/hooks/admin/` (perfiles, pagos, conteo DISC); Dashboard, Perfiles, Ficha y Pagos ya no llaman a Supabase directamente. |
 | 01/10/2026 | T0.4 | 15 tests de `profileMatching` (filtros de género, edad, hijos, religión y política; ciudad, objetivos, avisos; ranking y pares) con fixtures `crearPerfil`, `ana` y `luis`. |
 | 01/10/2026 | T0.5 | Tabla `configuracion` (clave/valor, solo admin) con los valores por defecto de 3.3 y los pesos del matching; `useConfiguracion()` tipado y `leerConfiguracion()` para Edge Functions. |
+| 02/10/2026 | T1.1 | Enums `estado_cliente`/`plan_tipo` y columnas de cliente en `perfiles` (estados migrados desde `estado_perfil`, trigger de `estado_cambiado_at`, INSERT anónimo sin campos del CRM); badges de los 4 estados en listado, ficha y Dashboard. |
+| 02/10/2026 | T1.2 | `paid_users` → `pagos` con `perfil_id` (casado por email), `importe` y `fecha`; trigger que copia el plan al perfil; `disc_result_id` rellenado por email; Pagos con buscador de perfil, vincular pagos antiguos y enlace a la ficha; badge de plan en listado y ficha. |
+| 02/10/2026 | T1.3 | Tabla `sesiones` (esquema de 3.1, RLS solo admin) y vista `v_clientes` (`security_invoker`) con `sesiones_realizadas`, `sesiones_pendientes` y `proxima_cita`. |
+| 02/10/2026 | T1.4 | Listado sobre `v_clientes` con paginación en servidor (25), búsqueda `ilike`, columnas Plan, Sesiones y Próxima cita, y filtros de plan/cliente/lead y estado combinables. |
+| 02/10/2026 | T1.5 | Función `cambiar_estado_cliente` (solo admin, auditada con motivo en `auditoria.detalle`, puntos de ampliación para T2.2/T4.1/T6.2/T7.1) y selector de estado con diálogo de confirmación en la ficha. |

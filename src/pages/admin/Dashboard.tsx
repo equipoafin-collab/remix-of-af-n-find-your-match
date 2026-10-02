@@ -35,8 +35,8 @@ const AdminDashboardHome = () => {
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const counts = {
     total: all.length,
-    activos: all.filter((p) => (p.estado_perfil || "activo") === "activo").length,
-    pendientes: all.filter((p) => p.estado_perfil === "pendiente").length,
+    activos: all.filter((p) => p.estado_cliente === "activo").length,
+    pendientes: all.filter((p) => !p.revisado).length,
     ultimos30: all.filter((p) => p.created_at >= since).length,
     pagos: pagos.data?.length ?? 0,
     leads: discs.data ?? 0,
