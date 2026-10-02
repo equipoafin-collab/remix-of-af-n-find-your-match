@@ -342,9 +342,10 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
   - Aceptación: notas persistentes, ordenadas, solo visibles para admin.
   > Nota de implementación: `notas_privadas` lleva además `automatica` (notas del sistema); `created_by` por defecto `auth.uid()`; `ON DELETE CASCADE` desde `perfiles` y `SET NULL` desde `sesiones`; contenido vacío rechazado por `CHECK`. `notas_admin` se copia una sola vez, al crear la tabla (reaplicar no resucita notas borradas), y la copia no cuenta como seguimiento. El trigger `notas_seguimiento` pone `ultimo_seguimiento_at` al crear una nota manual. Hecho lo pendiente de T1.5: `cambiar_estado_cliente` deja una nota automática "Cambio de estado: X → Y. Motivo: …". La pestaña Notas lista de la más reciente a la más antigua, con crear/editar/borrar y selector de sesión (solo si el cliente tiene sesiones; `useSesiones` lo reutilizará T3.1). `notas_admin` ya no se escribe desde la UI.
 
-- [ ] **T2.3 · Vídeo de la primera sesión** · Depende de T0.2, T2.1
+- [x] **T2.3 · Vídeo de la primera sesión** · Depende de T0.2, T2.1
   - Cambios: en Resumen, bloque "Vídeo de presentación": subir (barra de progreso), reproducir (`<video>` con URL firmada de 1 h), reemplazar, eliminar. Ruta `videos-sesiones/<perfil_id>/presentacion.<ext>` guardada en `perfiles.video_presentacion_path`.
   - Aceptación: se sube y reproduce; la URL caduca; un no-admin no puede acceder.
+  > Nota de implementación: sin migración (el bucket y la columna ya existían). supabase-js no informa del progreso, así que `subirConProgreso` (`src/lib/storage.ts`) sube con `XMLHttpRequest` a la API REST de Storage con la sesión de la admin (`x-upsert`). Validación de formato y tamaño en `src/lib/video.ts` (con tests). Al reemplazar con otra extensión se borra el fichero anterior, y se pide una firma nueva para que el navegador no reproduzca el vídeo viejo. El límite global de subida del proyecto no se puede consultar desde local: si es menor de 500 MB, la subida falla con un 413 que la UI explica. Comprobado por API que un anónimo no puede firmar, listar ni leer en público el bucket.
 
 - [ ] **T2.4 · Editar plan y sesiones contratadas desde la ficha** · Depende de T1.2
   - Cambios: diálogo "Plan" (tipo, fecha inicio/fin, sesiones contratadas, con sugerencia automática según plan y meses).
@@ -586,3 +587,4 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 02/10/2026 | — | CI en GitHub Actions (typecheck, lint, test y build en cada PR y push a `main`), instalando con `bun.lock`. |
 | 02/10/2026 | T2.1 | Ficha dividida en cabecera fija (plan, estado, sesiones, próxima cita, cambio de estado) y pestañas Resumen, Sugerencias IA, Notas, Cuestionario y Documentos (Sesiones, Matches y Tareas deshabilitadas hasta su fase). |
 | 02/10/2026 | T2.2 | Tabla `notas_privadas` (solo admin) con `notas_admin` copiada como primera nota, trigger de `ultimo_seguimiento_at`, nota automática en cada cambio de estado y pestaña Notas con historial, edición, borrado y vínculo a sesión. |
+| 02/10/2026 | T2.3 | Bloque "Vídeo de presentación" en Resumen: subir con barra de progreso, reproducir con URL firmada de 1 h, reemplazar y eliminar (`videos-sesiones/<perfil_id>/presentacion.<ext>`). |
