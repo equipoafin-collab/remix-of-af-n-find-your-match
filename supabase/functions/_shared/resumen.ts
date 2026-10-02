@@ -1,14 +1,14 @@
 // Sin dependencias de Deno: el frontend importa el tipo y Vitest prueba la validación.
 
-/** sesiones.resumen_ia (sección 3.1 del plan). */
-export interface ResumenSesion {
+/** sesiones.resumen_ia (sección 3.1 del plan). `type` y no `interface` para que encaje en el tipo Json de Supabase. */
+export type ResumenSesion = {
   estado_emocional: string;
   temas_tratados: string[];
   avances: string[];
   objetivos: string[];
   proximos_pasos: string[];
   preferencias_detectadas: string[];
-}
+};
 
 const LISTAS_OBLIGATORIAS = ["temas_tratados", "avances", "objetivos", "proximos_pasos"] as const;
 

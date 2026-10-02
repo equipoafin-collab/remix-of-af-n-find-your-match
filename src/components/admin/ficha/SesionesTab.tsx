@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Loader2, Video } from "lucide-react";
+import { Plus, Loader2, Video, ChevronDown } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Constants } from "@/integrations/supabase/types";
 import { useActualizarSesion, useCrearSesion, useSesiones } from "@/hooks/admin/useSesiones";
 import type { Perfil, Sesion } from "@/types/admin";
+import PanelResumen from "./PanelResumen";
 
 type Estado = Sesion["estado"];
 
@@ -97,34 +98,54 @@ const NuevaSesion = ({ perfil, hayPrimera, cerrar }: { perfil: Perfil; hayPrimer
 
 const FilaSesion = ({ sesion, perfil }: { sesion: Sesion; perfil: Perfil }) => {
   const actualizar = useActualizarSesion();
+  const [abierta, setAbierta] = useState(false);
   const estado = actualizar.isPending && actualizar.variables?.cambios.estado ? actualizar.variables.cambios.estado : sesion.estado;
 
+  const cambiarEstado = (nuevo: Estado) =>
+    actualizar.mutate(
+      { id: sesion.id, cambios: { estado: nuevo } },
+      // Al marcarla realizada se abre el panel para pegar las notas y generar el resumen.
+      { onSuccess: () => nuevo === "realizada" && setAbierta(true), onError },
+    );
+
   return (
-    <li className="px-5 py-3 border-t border-border flex items-center gap-3 flex-wrap">
-      <div className="flex-1 min-w-[220px]">
-        <p className="font-body text-sm font-medium text-foreground">
-          {new Date(sesion.fecha_hora).toLocaleString("es-ES", { weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-        </p>
-        <p className="font-body text-xs text-muted-foreground mt-0.5 flex items-center gap-2 flex-wrap">
-          {sesion.duracion_min} min
-          {sesion.tipo === "primera" && <span className={`${badge} bg-gold/15 text-foreground border-gold/40`}>Primera sesión</span>}
-          {sesion.tipo === "primera" && perfil.video_presentacion_path && (
-            <Link to="?tab=resumen" className="inline-flex items-center gap-1 text-gold hover:underline">
-              <Video className="w-3 h-3" /> Vídeo
-            </Link>
-          )}
-        </p>
+    <li className="px-5 py-3 border-t border-border">
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex-1 min-w-[220px]">
+          <p className="font-body text-sm font-medium text-foreground">
+            {new Date(sesion.fecha_hora).toLocaleString("es-ES", { weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+          </p>
+          <p className="font-body text-xs text-muted-foreground mt-0.5 flex items-center gap-2 flex-wrap">
+            {sesion.duracion_min} min
+            {sesion.tipo === "primera" && <span className={`${badge} bg-gold/15 text-foreground border-gold/40`}>Primera sesión</span>}
+            {sesion.tipo === "primera" && perfil.video_presentacion_path && (
+              <Link to="?tab=resumen" className="inline-flex items-center gap-1 text-gold hover:underline">
+                <Video className="w-3 h-3" /> Vídeo
+              </Link>
+            )}
+          </p>
+        </div>
+        {estado === "realizada" && (
+          <button
+            onClick={() => setAbierta(!abierta)}
+            className={`${badge} inline-flex items-center gap-1 hover:opacity-80 ${RESUMEN[sesion.resumen_estado].color}`}
+            title={abierta ? "Ocultar notas y resumen" : "Ver notas y resumen"}
+          >
+            {RESUMEN[sesion.resumen_estado].label}
+            <ChevronDown className={`w-3 h-3 transition-transform ${abierta ? "rotate-180" : ""}`} />
+          </button>
+        )}
+        <select
+          value={estado}
+          disabled={actualizar.isPending}
+          onChange={(e) => cambiarEstado(e.target.value as Estado)}
+          className={`${badge} py-1 ${ESTADO[estado].color}`}
+          title="Cambiar estado"
+        >
+          {Constants.public.Enums.sesion_estado.map((e) => <option key={e} value={e}>{ESTADO[e].label}</option>)}
+        </select>
       </div>
-      {estado === "realizada" && <span className={`${badge} ${RESUMEN[sesion.resumen_estado].color}`}>{RESUMEN[sesion.resumen_estado].label}</span>}
-      <select
-        value={estado}
-        disabled={actualizar.isPending}
-        onChange={(e) => actualizar.mutate({ id: sesion.id, cambios: { estado: e.target.value as Estado } }, { onError })}
-        className={`${badge} py-1 ${ESTADO[estado].color}`}
-        title="Cambiar estado"
-      >
-        {Constants.public.Enums.sesion_estado.map((e) => <option key={e} value={e}>{ESTADO[e].label}</option>)}
-      </select>
+      {abierta && estado === "realizada" && <PanelResumen sesion={sesion} />}
     </li>
   );
 };
