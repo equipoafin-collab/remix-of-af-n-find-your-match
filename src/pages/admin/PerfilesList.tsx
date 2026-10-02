@@ -3,23 +3,11 @@ import { Link } from "react-router-dom";
 import { Search, Filter, ChevronRight, MapPin } from "lucide-react";
 import { usePerfiles } from "@/hooks/admin/usePerfiles";
 import FotoPerfil from "@/components/admin/FotoPerfil";
+import { EstadoBadge, SinRevisarBadge } from "@/components/admin/EstadoBadge";
+import { Constants } from "@/integrations/supabase/types";
 
-const ESTADOS = ["activo", "pendiente", "pausado", "rechazado"];
-
-const estadoBadge = (e: string | null) => {
-  const v = e || "activo";
-  const colors: Record<string, string> = {
-    activo: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    pendiente: "bg-amber-50 text-amber-700 border-amber-200",
-    pausado: "bg-slate-50 text-slate-700 border-slate-200",
-    rechazado: "bg-rose-50 text-rose-700 border-rose-200",
-  };
-  return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-body font-medium border ${colors[v] || colors.activo}`}>
-      {v}
-    </span>
-  );
-};
+const SIN_REVISAR = "sin revisar";
+const ESTADOS = [...Constants.public.Enums.estado_cliente, SIN_REVISAR];
 
 const PerfilesList = () => {
   const { data: perfiles = [], isLoading: loading } = usePerfiles();
@@ -38,7 +26,9 @@ const PerfilesList = () => {
     return perfiles.filter((p) => {
       if (genero !== "all" && p.genero !== genero) return false;
       if (ciudad !== "all" && p.ciudad !== ciudad) return false;
-      if (estado !== "all" && (p.estado_perfil || "activo") !== estado) return false;
+      if (estado === SIN_REVISAR) {
+        if (p.revisado) return false;
+      } else if (estado !== "all" && p.estado_cliente !== estado) return false;
       if (hijos !== "all" && p.hijos !== hijos) return false;
       if (tabaco !== "all" && p.tabaco !== tabaco) return false;
       if (religion !== "all" && p.religion !== religion) return false;
@@ -117,7 +107,12 @@ const PerfilesList = () => {
                   </td>
                   <td className="px-4 py-3 font-body text-sm text-muted-foreground">{p.genero || "—"}</td>
                   <td className="px-4 py-3 font-body text-sm text-muted-foreground">{p.busca_genero || "—"}</td>
-                  <td className="px-4 py-3">{estadoBadge(p.estado_perfil)}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-1">
+                      <EstadoBadge estado={p.estado_cliente} />
+                      {!p.revisado && <SinRevisarBadge />}
+                    </div>
+                  </td>
                   <td className="px-4 py-3 font-body text-xs text-muted-foreground">
                     {new Date(p.created_at).toLocaleDateString("es-ES")}
                   </td>

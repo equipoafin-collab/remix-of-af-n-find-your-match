@@ -292,13 +292,14 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
 
 ### FASE 1 — Cliente único: estados, plan y sesiones contratadas
 
-- [ ] **T1.1 · Estados y plan en `perfiles`** · Depende de T0.1
+- [x] **T1.1 · Estados y plan en `perfiles`** · Depende de T0.1
   - Cambios (migración):
     - Enums `estado_cliente` y `plan_tipo`; columnas de la tabla 3.1.
     - Migrar datos: `estado_perfil` `activo→activo`, `pendiente→activo + revisado=false`, `pausado→pausado`, `rechazado→baja`. Resto `revisado=true`.
     - Mantener `estado_perfil` temporalmente (deprecado) hasta T9.5.
     - Trigger `before update` que rellena `estado_cambiado_at`.
   - Aceptación: todos los perfiles tienen `estado_cliente`; la UI usa los 4 estados nuevos con badges (Activo verde, Pausado gris, Baja rojo, Finalizado azul).
+  > Nota de implementación: `estado_cliente`, `revisado` y `estado_cambiado_at` (= `created_at` en los perfiles existentes) solo se rellenan desde `estado_perfil` la primera vez que se aplica la migración, para que reaplicarla no pise cambios posteriores. La política de INSERT anónimo de `perfiles` ahora exige los campos del CRM a su valor por defecto (sin plan, sesiones 0, sin revisar…); la admin puede insertar cualquiera. `sesiones_contratadas` lleva `CHECK >= 0`. En la UI, `EstadoBadge`/`SinRevisarBadge` (`src/components/admin/EstadoBadge.tsx`); el listado añade el filtro "sin revisar", la ficha una casilla "Perfil revisado" y el Dashboard cuenta como pendientes los `revisado = false`. El selector de estado de la ficha sigue siendo un `select` simple hasta T1.5.
 
 - [ ] **T1.2 · Vincular pagos y DISC al perfil** · Depende de T1.1
   - Cambios: renombrar `paid_users` → `pagos` (o crear vista compatible), añadir `perfil_id` FK y rellenarla por email (case-insensitive). Para cada pago vinculado, copiar `plan` a `perfiles.plan`. Rellenar `perfiles.disc_result_id` por email. Listar en un informe SQL los que no casen para revisión manual.
@@ -570,3 +571,4 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 01/10/2026 | T0.3 | Hooks de TanStack Query en `src/hooks/admin/` (perfiles, pagos, conteo DISC); Dashboard, Perfiles, Ficha y Pagos ya no llaman a Supabase directamente. |
 | 01/10/2026 | T0.4 | 15 tests de `profileMatching` (filtros de género, edad, hijos, religión y política; ciudad, objetivos, avisos; ranking y pares) con fixtures `crearPerfil`, `ana` y `luis`. |
 | 01/10/2026 | T0.5 | Tabla `configuracion` (clave/valor, solo admin) con los valores por defecto de 3.3 y los pesos del matching; `useConfiguracion()` tipado y `leerConfiguracion()` para Edge Functions. |
+| 02/10/2026 | T1.1 | Enums `estado_cliente`/`plan_tipo` y columnas de cliente en `perfiles` (estados migrados desde `estado_perfil`, trigger de `estado_cambiado_at`, INSERT anónimo sin campos del CRM); badges de los 4 estados en listado, ficha y Dashboard. |
