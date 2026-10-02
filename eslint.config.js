@@ -5,8 +5,9 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  // src/components/ui es código generado por shadcn: no se modifica ni se lintea.
-  { ignores: ["dist", "src/components/ui"] },
+  // Código generado, no se modifica ni se lintea: src/components/ui (shadcn) y
+  // src/integrations/supabase (Lovable lo regenera: client.ts, previewAuthStorage.ts, types.ts).
+  { ignores: ["dist", "src/components/ui", "src/integrations/supabase"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],

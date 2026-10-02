@@ -594,3 +594,4 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 02/10/2026 | T2.4 | Diálogo "Plan" en la cabecera de la ficha (tipo, inicio, fin y sesiones contratadas) con sugerencia automática de sesiones según el plan y los meses. |
 | 03/10/2026 | T3.1 | Pestaña Sesiones (programar/registrar, cambiar estado, primera sesión con enlace al vídeo), una sola primera por cliente y la sesión realizada cuenta como seguimiento. |
 | 03/10/2026 | T3.2 | Edge Function `resumen-sesion` (borrador validado en `sesiones.resumen_ia`, auditado) y código común de las funciones en `_shared/`; probada en producción. |
+| 03/10/2026 | — | `src/integrations/supabase` fuera del lint: Lovable añadió `previewAuthStorage.ts` con un error de lint y rompió el CI de `main`. Los tipos que regeneró Lovable coinciden con los escritos a mano. |

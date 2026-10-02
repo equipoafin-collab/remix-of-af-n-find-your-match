@@ -32,7 +32,7 @@ Backend: **Lovable Cloud** (Supabase gestionado por Lovable, project_id en `supa
 - Toda tabla nueva: RLS activado + políticas solo admin con `public.has_role(auth.uid(), 'admin')`, salvo que el plan diga otra cosa.
 - SQL idempotente cuando sea posible (`IF NOT EXISTS`, `ON CONFLICT DO NOTHING`).
 - `src/integrations/supabase/types.ts` lo genera Lovable. Si una tarea añade tablas/columnas, actualiza ese fichero a mano de forma coherente con la migración para que compile; Lovable lo regenerará después.
-- `src/integrations/supabase/client.ts` y `.env` no se tocan.
+- `src/integrations/supabase/client.ts`, `previewAuthStorage.ts` y `.env` no se tocan. Esa carpeta la regenera Lovable (commits "Lovable update" en `main` tras cada fusión, también de `types.ts`) y está fuera del lint: haz `git pull` de `main` antes de seguir.
 - Al terminar una tarea con migración, avisa al usuario: **"Aplica esta migración en Lovable"** e indica el nombre del fichero.
 
 ## Seguridad y datos sensibles
