@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
-import type { EstadoCliente } from "@/types/admin";
+import type { Cliente, EstadoCliente } from "@/types/admin";
 
 // ["perfiles"] es el prefijo común: invalidarlo refresca listado y fichas.
 export function usePerfiles() {
@@ -15,13 +15,14 @@ export function usePerfiles() {
   });
 }
 
+// Lee de v_clientes para tener también los contadores de sesiones y la próxima cita.
 export function usePerfil(id: string | undefined) {
   return useQuery({
     queryKey: ["perfiles", id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("perfiles").select("*").eq("id", id as string).maybeSingle();
+      const { data, error } = await supabase.from("v_clientes").select("*").eq("id", id as string).maybeSingle();
       if (error) throw error;
-      return data;
+      return data as Cliente | null;
     },
     enabled: !!id,
   });

@@ -330,11 +330,12 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
 
 ### FASE 2 — Ficha del cliente (una sola pantalla con todo)
 
-- [ ] **T2.1 · Nuevo layout de ficha con pestañas** · Depende de T1.4
+- [x] **T2.1 · Nuevo layout de ficha con pestañas** · Depende de T1.4
   - Cambios: dividir `PerfilDetalle.tsx` en componentes dentro de `src/components/admin/ficha/`. Cabecera fija con: foto, nombre, edad, zona, **badge de estado**, **badge de plan**, **sesiones realizadas/contratadas/pendientes** (barra), **próxima cita**, contador de tareas pendientes y alertas.
   - Pestañas: **Resumen** · **Sugerencias IA** · **Sesiones** · **Matches** · **Tareas** · **Notas** · **Cuestionario** · **Documentos**.
   - "Cuestionario" contiene las secciones actuales de datos; "Resumen" muestra las 5 preguntas clave, último resumen de sesión, próximas tareas y vídeo.
   - Aceptación: toda la información actual sigue visible; la cabecera muestra plan y estado siempre.
+  > Nota de implementación: componentes en `src/components/admin/ficha/` (`CabeceraFicha`, `ResumenTab`, `SugerenciasTab`, `NotasTab`, `CuestionarioTab`, `DocumentosTab`, `Campos`); la lista de pestañas es `PESTANAS` en `PerfilDetalle.tsx` y la activa va en `?tab=` para poder enlazarla. Sesiones, Matches y Tareas salen deshabilitadas hasta T3.1/T6.1/T6.2 (basta con darles `Contenido`); los contadores de tareas y alertas de la cabecera llegan con T6.2/T7.1, y en Resumen el último resumen, las próximas tareas y el vídeo con T3.3/T6.2/T2.3. `usePerfil` lee ahora de `v_clientes` (devuelve `Cliente`). La cabecera es `sticky` e incluye el selector de estado y la casilla "revisado" (se guarda al marcarla); la nota única `notas_admin` pasa a la pestaña Notas. Documentos lista los PDF de `antecedentes` cuya carpeta `user_<email o nombre>` casa con el perfil sin mayúsculas (`esCarpetaDelPerfil`, con tests) y los abre con URL firmada.
 
 - [ ] **T2.2 · Notas privadas con historial** · Depende de T2.1
   - Cambios: tabla `notas_privadas`; migrar `notas_admin` existente como primera nota. Pestaña Notas: lista cronológica, crear/editar/borrar, vincular opcionalmente a una sesión. Al crear nota → actualizar `ultimo_seguimiento_at`.
@@ -583,3 +584,4 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 02/10/2026 | T1.4 | Listado sobre `v_clientes` con paginación en servidor (25), búsqueda `ilike`, columnas Plan, Sesiones y Próxima cita, y filtros de plan/cliente/lead y estado combinables. |
 | 02/10/2026 | T1.5 | Función `cambiar_estado_cliente` (solo admin, auditada con motivo en `auditoria.detalle`, puntos de ampliación para T2.2/T4.1/T6.2/T7.1) y selector de estado con diálogo de confirmación en la ficha. |
 | 02/10/2026 | — | CI en GitHub Actions (typecheck, lint, test y build en cada PR y push a `main`), instalando con `bun.lock`. |
+| 02/10/2026 | T2.1 | Ficha dividida en cabecera fija (plan, estado, sesiones, próxima cita, cambio de estado) y pestañas Resumen, Sugerencias IA, Notas, Cuestionario y Documentos (Sesiones, Matches y Tareas deshabilitadas hasta su fase). |
