@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           accion: string
           created_at: string
+          detalle: Json | null
           entidad: string
           entidad_id: string | null
           id: string
@@ -26,6 +27,7 @@ export type Database = {
         Insert: {
           accion: string
           created_at?: string
+          detalle?: Json | null
           entidad: string
           entidad_id?: string | null
           id?: string
@@ -34,6 +36,7 @@ export type Database = {
         Update: {
           accion?: string
           created_at?: string
+          detalle?: Json | null
           entidad?: string
           entidad_id?: string | null
           id?: string
@@ -535,6 +538,14 @@ export type Database = {
       }
     }
     Functions: {
+      cambiar_estado_cliente: {
+        Args: {
+          _motivo?: string
+          _nuevo_estado: Database["public"]["Enums"]["estado_cliente"]
+          _perfil_id: string
+        }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
