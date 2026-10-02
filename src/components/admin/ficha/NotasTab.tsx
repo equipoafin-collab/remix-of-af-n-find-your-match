@@ -15,7 +15,7 @@ const nombreSesion = (s: Sesion) =>
 
 const campo = "w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm";
 
-// Solo aparece si el cliente tiene sesiones (se registran desde T3.1).
+// Solo aparece si el cliente tiene sesiones.
 const SelectorSesion = ({ sesiones, value, onChange }: { sesiones: Sesion[]; value: string | null; onChange: (id: string | null) => void }) =>
   sesiones.length === 0 ? null : (
     <select value={value ?? ""} onChange={(e) => onChange(e.target.value || null)} className={`${campo} sm:w-64`}>
