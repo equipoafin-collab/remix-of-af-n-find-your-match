@@ -1,54 +1,55 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Filter, ChevronRight, MapPin } from "lucide-react";
-import { usePerfiles } from "@/hooks/admin/usePerfiles";
+import { Search, Filter, ChevronRight, ChevronLeft, MapPin } from "lucide-react";
+import {
+  POR_PAGINA, SIN_REVISAR, SOLO_CLIENTES, SOLO_LEADS, TODOS,
+  useClientes, useOpcionesFiltro, type FiltrosClientes,
+} from "@/hooks/admin/useClientes";
 import FotoPerfil from "@/components/admin/FotoPerfil";
 import { EstadoBadge, PlanBadge, SinRevisarBadge } from "@/components/admin/Badges";
 import { Constants } from "@/integrations/supabase/types";
 
-const SIN_REVISAR = "sin revisar";
 const ESTADOS = [...Constants.public.Enums.estado_cliente, SIN_REVISAR];
+const PLANES = [SOLO_CLIENTES, ...Constants.public.Enums.plan_tipo, SOLO_LEADS];
+
+const FILTROS_INICIALES: FiltrosClientes = {
+  busqueda: "", genero: TODOS, ciudad: TODOS, estado: TODOS, plan: TODOS, hijos: TODOS, tabaco: TODOS, religion: TODOS,
+};
+
+const fechaCita = (iso: string) =>
+  new Date(iso).toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 
 const PerfilesList = () => {
-  const { data: perfiles = [], isLoading: loading } = usePerfiles();
-  const [q, setQ] = useState("");
-  const [genero, setGenero] = useState<string>("all");
-  const [ciudad, setCiudad] = useState<string>("all");
-  const [estado, setEstado] = useState<string>("all");
-  const [hijos, setHijos] = useState<string>("all");
-  const [tabaco, setTabaco] = useState<string>("all");
-  const [religion, setReligion] = useState<string>("all");
+  const [texto, setTexto] = useState("");
+  const [filtros, setFiltros] = useState(FILTROS_INICIALES);
+  const [pagina, setPagina] = useState(0);
+  const { data, isLoading: loading, isFetching, error } = useClientes(filtros, pagina);
+  const { data: opciones } = useOpcionesFiltro();
+  const clientes = data?.clientes ?? [];
+  const total = data?.total ?? 0;
+  const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
 
-  const ciudades = useMemo(() => Array.from(new Set(perfiles.map((p) => p.ciudad).filter(Boolean))).sort(), [perfiles]);
-  const religiones = useMemo(() => Array.from(new Set(perfiles.map((p) => p.religion).filter(Boolean))).sort(), [perfiles]);
+  const filtrar = (campo: keyof FiltrosClientes) => (valor: string) => {
+    setFiltros((f) => ({ ...f, [campo]: valor }));
+    setPagina(0);
+  };
 
-  const filtered = useMemo(() => {
-    return perfiles.filter((p) => {
-      if (genero !== "all" && p.genero !== genero) return false;
-      if (ciudad !== "all" && p.ciudad !== ciudad) return false;
-      if (estado === SIN_REVISAR) {
-        if (p.revisado) return false;
-      } else if (estado !== "all" && p.estado_cliente !== estado) return false;
-      if (hijos !== "all" && p.hijos !== hijos) return false;
-      if (tabaco !== "all" && p.tabaco !== tabaco) return false;
-      if (religion !== "all" && p.religion !== religion) return false;
-      if (q.trim()) {
-        const s = q.toLowerCase();
-        const blob = `${p.nombre_completo} ${p.email || ""} ${p.ciudad}`.toLowerCase();
-        if (!blob.includes(s)) return false;
-      }
-      return true;
-    });
-  }, [perfiles, q, genero, ciudad, estado, hijos, tabaco, religion]);
+  // La búsqueda se lanza 300 ms después de dejar de escribir.
+  useEffect(() => {
+    if (texto === filtros.busqueda) return;
+    const t = setTimeout(() => {
+      setFiltros((f) => ({ ...f, busqueda: texto }));
+      setPagina(0);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [texto, filtros.busqueda]);
 
   return (
     <div className="p-8 space-y-6">
       <header className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground">Perfiles</h1>
-          <p className="font-body text-sm text-muted-foreground mt-1">
-            {filtered.length} de {perfiles.length} perfiles
-          </p>
+          <p className="font-body text-sm text-muted-foreground mt-1">{total} perfiles</p>
         </div>
       </header>
 
@@ -57,40 +58,43 @@ const PerfilesList = () => {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
+            value={texto}
+            onChange={(e) => setTexto(e.target.value)}
             placeholder="Buscar por nombre, email o ciudad…"
             className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-border bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-gold/40"
           />
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Filter className="w-4 h-4 text-muted-foreground" />
-          <Select label="Género" value={genero} onChange={setGenero} options={["Hombre", "Mujer", "Otro"]} />
-          <Select label="Ciudad" value={ciudad} onChange={setCiudad} options={ciudades} />
-          <Select label="Estado" value={estado} onChange={setEstado} options={ESTADOS} />
-          <Select label="Hijos" value={hijos} onChange={setHijos} options={["Tengo", "Quiero tener", "No quiero tener"]} />
-          <Select label="Tabaco" value={tabaco} onChange={setTabaco} options={["No fumo", "Ocasional", "Habitual"]} />
-          <Select label="Religión" value={religion} onChange={setReligion} options={religiones} />
+          <Select label="Plan" value={filtros.plan} onChange={filtrar("plan")} options={PLANES} />
+          <Select label="Estado" value={filtros.estado} onChange={filtrar("estado")} options={ESTADOS} />
+          <Select label="Género" value={filtros.genero} onChange={filtrar("genero")} options={["Hombre", "Mujer", "Otro"]} />
+          <Select label="Ciudad" value={filtros.ciudad} onChange={filtrar("ciudad")} options={opciones?.ciudades ?? []} />
+          <Select label="Hijos" value={filtros.hijos} onChange={filtrar("hijos")} options={["Tengo", "Quiero tener", "No quiero tener"]} />
+          <Select label="Tabaco" value={filtros.tabaco} onChange={filtrar("tabaco")} options={["No fumo", "Ocasional", "Habitual"]} />
+          <Select label="Religión" value={filtros.religion} onChange={filtrar("religion")} options={opciones?.religiones ?? []} />
         </div>
       </div>
 
       {/* Tabla */}
-      <div className="border border-border rounded-2xl overflow-hidden bg-card">
-        {loading ? (
+      <div className={`border border-border rounded-2xl overflow-x-auto bg-card transition-opacity ${isFetching && !loading ? "opacity-60" : ""}`}>
+        {error ? (
+          <p className="p-8 text-center font-body text-sm text-rose-700">No se pudieron cargar los perfiles: {error.message}</p>
+        ) : loading ? (
           <p className="p-8 text-center font-body text-sm text-muted-foreground">Cargando perfiles…</p>
-        ) : filtered.length === 0 ? (
+        ) : clientes.length === 0 ? (
           <p className="p-8 text-center font-body text-sm text-muted-foreground">No hay perfiles que coincidan</p>
         ) : (
           <table className="w-full">
             <thead>
               <tr className="bg-muted">
-                {["Persona", "Edad", "Ciudad", "Género", "Busca", "Plan", "Estado", "Alta", ""].map((h) => (
-                  <th key={h} className="text-left px-4 py-3 font-body text-xs font-semibold text-muted-foreground uppercase">{h}</th>
+                {["Persona", "Edad", "Ciudad", "Género", "Busca", "Plan", "Sesiones", "Próxima cita", "Estado", "Alta", ""].map((h) => (
+                  <th key={h} className="text-left px-4 py-3 font-body text-xs font-semibold text-muted-foreground uppercase whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {filtered.map((p) => (
+              {clientes.map((p) => (
                 <tr key={p.id} className="border-t border-border hover:bg-muted/40 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
@@ -108,6 +112,12 @@ const PerfilesList = () => {
                   <td className="px-4 py-3 font-body text-sm text-muted-foreground">{p.genero || "—"}</td>
                   <td className="px-4 py-3 font-body text-sm text-muted-foreground">{p.busca_genero || "—"}</td>
                   <td className="px-4 py-3"><PlanBadge plan={p.plan} /></td>
+                  <td className="px-4 py-3 font-body text-sm text-muted-foreground tabular-nums">
+                    {p.plan || p.sesiones_contratadas > 0 ? `${p.sesiones_realizadas}/${p.sesiones_contratadas}` : "—"}
+                  </td>
+                  <td className="px-4 py-3 font-body text-xs text-muted-foreground whitespace-nowrap">
+                    {p.proxima_cita ? fechaCita(p.proxima_cita) : "—"}
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
                       <EstadoBadge estado={p.estado_cliente} />
@@ -128,6 +138,27 @@ const PerfilesList = () => {
           </table>
         )}
       </div>
+
+      {/* Paginación */}
+      {total > POR_PAGINA && (
+        <div className="flex items-center justify-end gap-3 font-body text-sm text-muted-foreground">
+          <span>Página {pagina + 1} de {paginas}</span>
+          <button
+            onClick={() => setPagina((n) => n - 1)}
+            disabled={pagina === 0}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-card hover:text-foreground disabled:opacity-40"
+          >
+            <ChevronLeft className="w-4 h-4" /> Anterior
+          </button>
+          <button
+            onClick={() => setPagina((n) => n + 1)}
+            disabled={pagina + 1 >= paginas}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-card hover:text-foreground disabled:opacity-40"
+          >
+            Siguiente <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
     </div>
   );
 };
@@ -138,7 +169,7 @@ const Select = ({ label, value, onChange, options }: { label: string; value: str
     onChange={(e) => onChange(e.target.value)}
     className="px-3 py-1.5 rounded-lg border border-border bg-background font-body text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-gold/40"
   >
-    <option value="all">{label}: Todos</option>
+    <option value={TODOS}>{label}: Todos</option>
     {options.map((o) => <option key={o} value={o}>{label}: {o}</option>)}
   </select>
 );
