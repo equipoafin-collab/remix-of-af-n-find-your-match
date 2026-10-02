@@ -582,3 +582,4 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 02/10/2026 | T1.3 | Tabla `sesiones` (esquema de 3.1, RLS solo admin) y vista `v_clientes` (`security_invoker`) con `sesiones_realizadas`, `sesiones_pendientes` y `proxima_cita`. |
 | 02/10/2026 | T1.4 | Listado sobre `v_clientes` con paginación en servidor (25), búsqueda `ilike`, columnas Plan, Sesiones y Próxima cita, y filtros de plan/cliente/lead y estado combinables. |
 | 02/10/2026 | T1.5 | Función `cambiar_estado_cliente` (solo admin, auditada con motivo en `auditoria.detalle`, puntos de ampliación para T2.2/T4.1/T6.2/T7.1) y selector de estado con diálogo de confirmación en la ficha. |
+| 02/10/2026 | — | CI en GitHub Actions (typecheck, lint, test y build en cada PR y push a `main`), instalando con `bun.lock`. |
