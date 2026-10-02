@@ -6,6 +6,7 @@ import FotoPerfil from "@/components/admin/FotoPerfil";
 import { EstadoBadge, PlanBadge, SinRevisarBadge } from "@/components/admin/Badges";
 import type { Cliente, Perfil } from "@/types/admin";
 import CambiarEstado from "./CambiarEstado";
+import EditarPlan from "./EditarPlan";
 
 const calidadPerfil = (p: Perfil) => {
   let score = 0;
@@ -25,6 +26,9 @@ const calidadPerfil = (p: Perfil) => {
   if (score >= 40) return { label: "Medio", color: "text-amber-600", bg: "bg-amber-50 border-amber-200" };
   return { label: "Bajo", color: "text-rose-600", bg: "bg-rose-50 border-rose-200" };
 };
+
+// Fechas YYYY-MM-DD: se formatean como fecha local para que no cambie de día por la zona horaria.
+const fechaCorta = (fecha: string) => new Date(`${fecha}T00:00`).toLocaleDateString("es-ES");
 
 const Revisado = ({ perfil }: { perfil: Perfil }) => {
   const updatePerfil = useUpdatePerfil();
@@ -70,6 +74,7 @@ const CabeceraFicha = ({ cliente: p }: { cliente: Cliente }) => {
           </p>
           <div className="flex items-center gap-2 flex-wrap mt-2">
             <PlanBadge plan={p.plan} />
+            <EditarPlan cliente={p} />
             <EstadoBadge estado={p.estado_cliente} />
             {!p.revisado && <SinRevisarBadge />}
             <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-body font-medium border ${calidad.bg} ${calidad.color}`}>
@@ -92,6 +97,11 @@ const CabeceraFicha = ({ cliente: p }: { cliente: Cliente }) => {
               </>
             ) : (
               <p className="font-body text-sm text-muted-foreground mt-0.5">Sin plan contratado</p>
+            )}
+            {(p.plan_inicio || p.plan_fin) && (
+              <p className="font-body text-xs text-muted-foreground mt-1">
+                Plan: {p.plan_inicio ? fechaCorta(p.plan_inicio) : "…"} – {p.plan_fin ? fechaCorta(p.plan_fin) : "…"}
+              </p>
             )}
           </div>
           <div>

@@ -347,9 +347,10 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
   - Aceptación: se sube y reproduce; la URL caduca; un no-admin no puede acceder.
   > Nota de implementación: sin migración (el bucket y la columna ya existían). supabase-js no informa del progreso, así que `subirConProgreso` (`src/lib/storage.ts`) sube con `XMLHttpRequest` a la API REST de Storage con la sesión de la admin (`x-upsert`). Validación de formato y tamaño en `src/lib/video.ts` (con tests). Al reemplazar con otra extensión se borra el fichero anterior, y se pide una firma nueva para que el navegador no reproduzca el vídeo viejo. El límite global de subida del proyecto no se puede consultar desde local: si es menor de 500 MB, la subida falla con un 413 que la UI explica. Comprobado por API que un anónimo no puede firmar, listar ni leer en público el bucket.
 
-- [ ] **T2.4 · Editar plan y sesiones contratadas desde la ficha** · Depende de T1.2
+- [x] **T2.4 · Editar plan y sesiones contratadas desde la ficha** · Depende de T1.2
   - Cambios: diálogo "Plan" (tipo, fecha inicio/fin, sesiones contratadas, con sugerencia automática según plan y meses).
   - Aceptación: cambios reflejados en cabecera, listado y vista.
+  > Nota de implementación: sin migración. Botón "Plan" junto a la etiqueta del plan en la cabecera (`EditarPlan`), que además muestra las fechas del plan. Al cambiar plan o fechas se propone `sesiones_por_plan[plan] × meses` (`src/lib/plan.ts`, con tests; meses = días entre fechas, ambas incluidas, / 30,44, redondeado y mínimo 1) y se puede ajustar a mano; al dar de alta un plan el inicio por defecto es hoy. "Sin plan" devuelve el perfil a lead. Fechas al revés o sesiones no enteras bloquean el guardado (solo en el formulario: no hay `CHECK` en BD). Guarda con `useUpdatePerfil`, que refresca cabecera, listado y `v_clientes`.
 
 ### FASE 3 — Sesiones y resumen automático con IA
 
@@ -588,3 +589,4 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 02/10/2026 | T2.1 | Ficha dividida en cabecera fija (plan, estado, sesiones, próxima cita, cambio de estado) y pestañas Resumen, Sugerencias IA, Notas, Cuestionario y Documentos (Sesiones, Matches y Tareas deshabilitadas hasta su fase). |
 | 02/10/2026 | T2.2 | Tabla `notas_privadas` (solo admin) con `notas_admin` copiada como primera nota, trigger de `ultimo_seguimiento_at`, nota automática en cada cambio de estado y pestaña Notas con historial, edición, borrado y vínculo a sesión. |
 | 02/10/2026 | T2.3 | Bloque "Vídeo de presentación" en Resumen: subir con barra de progreso, reproducir con URL firmada de 1 h, reemplazar y eliminar (`videos-sesiones/<perfil_id>/presentacion.<ext>`). |
+| 02/10/2026 | T2.4 | Diálogo "Plan" en la cabecera de la ficha (tipo, inicio, fin y sesiones contratadas) con sugerencia automática de sesiones según el plan y los meses. |
