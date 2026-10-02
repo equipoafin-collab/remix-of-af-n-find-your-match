@@ -1,10 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { corsHeaders, json } from "../_shared/http.ts";
+import { exigirAdmin } from "../_shared/auth.ts";
+import { ErrorIA, pedirJSON } from "../_shared/ia.ts";
 
 interface DiscResumen {
   primary_style: string;
@@ -19,30 +16,13 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
-
-    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-
-    // Verify admin role
-    const anonClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(authHeader.replace("Bearer ", ""));
-    if (claimsError || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
-    const userId = claimsData.claims.sub;
-    const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle();
-    if (!roleData) {
-      return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
+    const admin = await exigirAdmin(req);
+    if (admin instanceof Response) return admin;
+    const { supabase } = admin;
 
     const { profile_id_1, profile_id_2 } = await req.json();
     if (!profile_id_1 || !profile_id_2) {
-      return new Response(JSON.stringify({ error: "Two profile IDs required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return json({ error: "Two profile IDs required" }, 400);
     }
 
     // Fetch both profiles
@@ -52,7 +32,7 @@ serve(async (req) => {
       .in("id", [profile_id_1, profile_id_2]);
 
     if (fetchError || !profiles || profiles.length !== 2) {
-      return new Response(JSON.stringify({ error: "Could not fetch profiles" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return json({ error: "Could not fetch profiles" }, 404);
     }
 
     const p1 = profiles.find((p) => p.id === profile_id_1);
@@ -84,9 +64,6 @@ serve(async (req) => {
       if (!d) return "No ha completado el test DISC.";
       return `Perfil DISC: Principal=${d.primary_style} (${d.percent_d}% D, ${d.percent_i}% I, ${d.percent_s}% S, ${d.percent_c}% C), Secundario=${d.secondary_style}`;
     };
-
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const systemPrompt = `Eres un especialista en relaciones de pareja de la empresa Afín. Tu trabajo es analizar dos perfiles de personas y generar un informe de compatibilidad detallado y profesional.
 
@@ -159,61 +136,18 @@ ${p2.hobbies ? `- Hobbies: ${p2.hobbies}` : ""}
 
 Genera el informe de compatibilidad.`;
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-      }),
-    });
+    const report = await pedirJSON(systemPrompt, userPrompt);
 
-    if (!aiResponse.ok) {
-      const status = aiResponse.status;
-      if (status === 429) return new Response(JSON.stringify({ error: "Límite de peticiones excedido. Inténtalo en unos segundos." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      if (status === 402) return new Response(JSON.stringify({ error: "Créditos de IA agotados." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      const t = await aiResponse.text();
-      console.error("AI error:", status, t);
-      return new Response(JSON.stringify({ error: "Error del servicio de IA" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
-
-    const aiData = await aiResponse.json();
-    const content = aiData.choices?.[0]?.message?.content;
-
-    let report;
-    try {
-      report = JSON.parse(content);
-    } catch {
-      // Try to extract JSON from potential markdown wrapping
-      const match = content?.match(/\{[\s\S]*\}/);
-      if (match) {
-        report = JSON.parse(match[0]);
-      } else {
-        console.error("Failed to parse AI response:", content);
-        return new Response(JSON.stringify({ error: "Error procesando respuesta de IA" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      }
-    }
-
-    return new Response(JSON.stringify({
+    return json({
       report,
       profiles: {
         a: { id: p1.id, nombre: p1.nombre_completo, edad: p1.edad, ciudad: p1.ciudad, disc: disc1 ? { primary: disc1.primary_style, secondary: disc1.secondary_style, percent_d: disc1.percent_d, percent_i: disc1.percent_i, percent_s: disc1.percent_s, percent_c: disc1.percent_c } : null },
         b: { id: p2.id, nombre: p2.nombre_completo, edad: p2.edad, ciudad: p2.ciudad, disc: disc2 ? { primary: disc2.primary_style, secondary: disc2.secondary_style, percent_d: disc2.percent_d, percent_i: disc2.percent_i, percent_s: disc2.percent_s, percent_c: disc2.percent_c } : null },
       },
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
+    if (e instanceof ErrorIA) return json({ error: e.message }, e.status);
     console.error("compatibility error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);
   }
 });
