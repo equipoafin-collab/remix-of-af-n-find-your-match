@@ -8,15 +8,16 @@ import CabeceraFicha from "@/components/admin/ficha/CabeceraFicha";
 import ResumenTab from "@/components/admin/ficha/ResumenTab";
 import SugerenciasTab from "@/components/admin/ficha/SugerenciasTab";
 import NotasTab from "@/components/admin/ficha/NotasTab";
+import SesionesTab from "@/components/admin/ficha/SesionesTab";
 import CuestionarioTab from "@/components/admin/ficha/CuestionarioTab";
 import DocumentosTab from "@/components/admin/ficha/DocumentosTab";
 
 // Orden de la sección T2.1. Las pestañas sin componente salen deshabilitadas hasta su fase:
-// Sesiones (T3.1), Matches (T6.1), Tareas (T6.2).
+// Matches (T6.1), Tareas (T6.2).
 const PESTANAS: { id: string; label: string; Contenido?: ComponentType<{ perfil: Perfil }> }[] = [
   { id: "resumen", label: "Resumen", Contenido: ResumenTab },
   { id: "sugerencias", label: "Sugerencias IA", Contenido: SugerenciasTab },
-  { id: "sesiones", label: "Sesiones" },
+  { id: "sesiones", label: "Sesiones", Contenido: SesionesTab },
   { id: "matches", label: "Matches" },
   { id: "tareas", label: "Tareas" },
   { id: "notas", label: "Notas", Contenido: NotasTab },

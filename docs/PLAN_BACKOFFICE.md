@@ -354,9 +354,10 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
 
 ### FASE 3 — Sesiones y resumen automático con IA
 
-- [ ] **T3.1 · CRUD de sesiones** · Depende de T1.3, T2.1
+- [x] **T3.1 · CRUD de sesiones** · Depende de T1.3, T2.1
   - Cambios: pestaña Sesiones: listado (fecha, tipo, estado, badge del resumen), crear/programar, marcar como realizada / cancelada / no asistió. La primera sesión se marca `tipo='primera'` y puede asociar el vídeo.
   - Aceptación: los contadores de la cabecera cambian al marcar sesiones realizadas; "próxima cita" = siguiente sesión programada o cita de match, la más próxima.
+  > Nota de implementación: migración con índice único parcial `uq_sesiones_una_primera` (una primera no cancelada por cliente) y trigger `sesiones_seguimiento` que pone `ultimo_seguimiento_at` al registrar o marcar una sesión realizada (sin retroceder ni pasar de ahora), como pide 3.1. Pestaña Sesiones (`SesionesTab`): alta con fecha, duración, tipo y estado (fecha pasada → "realizada" por defecto; "primera" por defecto si aún no hay), y cambio de estado con un selector por fila, que también permite corregir. Sin borrar ni reprogramar: una sesión equivocada se cancela y se crea otra. "Asociar el vídeo": la primera sesión enlaza al vídeo de presentación de Resumen, sin duplicar la ruta en `sesiones.video_path` (queda para T3.5). La próxima cita ya la daba `v_clientes`; las citas de match se suman en T6.1.
 
 - [ ] **T3.2 · Edge Function `resumen-sesion`** · Depende de T3.1
   - Entrada: `sesion_id`. Lee `notas_brutas` de la sesión, datos clave del cliente y los 3 últimos resúmenes revisados (para medir evolución).
@@ -590,3 +591,4 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 02/10/2026 | T2.2 | Tabla `notas_privadas` (solo admin) con `notas_admin` copiada como primera nota, trigger de `ultimo_seguimiento_at`, nota automática en cada cambio de estado y pestaña Notas con historial, edición, borrado y vínculo a sesión. |
 | 02/10/2026 | T2.3 | Bloque "Vídeo de presentación" en Resumen: subir con barra de progreso, reproducir con URL firmada de 1 h, reemplazar y eliminar (`videos-sesiones/<perfil_id>/presentacion.<ext>`). |
 | 02/10/2026 | T2.4 | Diálogo "Plan" en la cabecera de la ficha (tipo, inicio, fin y sesiones contratadas) con sugerencia automática de sesiones según el plan y los meses. |
+| 03/10/2026 | T3.1 | Pestaña Sesiones (programar/registrar, cambiar estado, primera sesión con enlace al vídeo), una sola primera por cliente y la sesión realizada cuenta como seguimiento. |
