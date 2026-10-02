@@ -12,7 +12,6 @@ const SYSTEM_PROMPT = `Eres la asistente de una psicóloga de Afín, un servicio
 REGLAS:
 - Escribe en español, con frases breves, en tercera persona ("el cliente", "ella", "él").
 - Usa solo lo que aparece en las notas. No inventes ni diagnostiques. Si algo no aparece, deja la lista vacía.
-- Los datos del cliente (edad, qué busca, rango de edad, zona…) son solo contexto: no los copies al resumen ni a las preferencias si no salen en las notas.
 - Si hay resúmenes de sesiones anteriores, úsalos para señalar la evolución (en "avances" y "estado_emocional").
 - "preferencias_detectadas" son preferencias sobre la pareja o la relación que ayuden al matching (qué busca, qué evita). Vacía si no hay.
 
@@ -25,9 +24,6 @@ Responde EXCLUSIVAMENTE con un JSON válido (sin markdown, sin backticks) con es
   "proximos_pasos": ["<acción acordada o recomendada>", ...],
   "preferencias_detectadas": ["<preferencia>", ...]
 }`;
-
-const lineas = (titulo: string, valores: string[] | null | undefined) =>
-  valores?.length ? `${titulo}: ${valores.join("; ")}` : "";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -47,10 +43,10 @@ serve(async (req) => {
       return json({ error: "La sesión no tiene notas: pega tus notas o la transcripción antes de generar el resumen." }, 400);
     }
 
+    // Solo lo necesario para redactar (pronombres). Los criterios del cuestionario (qué busca, edades, zona…)
+    // no se envían: la IA los copiaba al resumen y el matching ya los lee del perfil.
     const { data: perfil } = await supabase
-      .from("perfiles")
-      .select("nombre_completo, edad, genero, busca_genero, tipo_relacion, hijos, edad_min_busca, edad_max_busca, zona, ciudad, valores_importantes")
-      .eq("id", sesion.perfil_id).single();
+      .from("perfiles").select("nombre_completo, edad, genero").eq("id", sesion.perfil_id).single();
 
     // Los 3 últimos resúmenes revisados, para medir la evolución.
     const { data: previos } = await supabase
@@ -64,9 +60,7 @@ serve(async (req) => {
       .join("\n");
 
     const userPrompt = [
-      `CLIENTE: ${perfil?.nombre_completo}, ${perfil?.edad} años, ${perfil?.genero ?? ""}, busca ${perfil?.busca_genero ?? "—"}.`,
-      `Busca: ${perfil?.tipo_relacion}. Hijos: ${perfil?.hijos}. Rango de edad: ${perfil?.edad_min_busca ?? "?"}-${perfil?.edad_max_busca ?? "?"}. Zona: ${perfil?.zona ?? perfil?.ciudad}.`,
-      lineas("Valores importantes", perfil?.valores_importantes),
+      `CLIENTE: ${perfil?.nombre_completo}, ${perfil?.edad} años${perfil?.genero ? `, ${perfil.genero}` : ""}.`,
       "",
       `SESIÓN DEL ${sesion.fecha_hora.slice(0, 10)} (${sesion.tipo === "primera" ? "primera sesión" : "seguimiento"}).`,
       historial ? `RESÚMENES REVISADOS ANTERIORES (más reciente primero):\n${historial}` : "Es la primera sesión con resumen.",

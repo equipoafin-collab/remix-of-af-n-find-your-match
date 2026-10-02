@@ -32,3 +32,28 @@ export function useGenerarResumen() {
     onError: (error) => toast({ title: "No se pudo generar el resumen", description: error.message, variant: "destructive" }),
   });
 }
+
+/**
+ * "Guardar como revisado" (T3.3): el resumen editado pasa a revisado y cuenta como seguimiento.
+ * ponytail: dos updates sin transacción; si falla el segundo solo se pierde el sello de seguimiento.
+ */
+export function useGuardarResumen() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ sesionId, perfilId, resumen, notas }: { sesionId: string; perfilId: string; resumen: ResumenSesion; notas: string }) => {
+      const ahora = new Date().toISOString();
+      const { error } = await supabase
+        .from("sesiones")
+        .update({ resumen_ia: resumen, resumen_estado: "revisado", resumen_revisado_at: ahora, notas_brutas: notas })
+        .eq("id", sesionId);
+      if (error) throw error;
+      const { error: errorPerfil } = await supabase.from("perfiles").update({ ultimo_seguimiento_at: ahora }).eq("id", perfilId);
+      if (errorPerfil) throw errorPerfil;
+    },
+    onSuccess: () => Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["sesiones"] }),
+      queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
+    ]),
+    onError: (error) => toast({ title: "No se pudo guardar el resumen", description: error.message, variant: "destructive" }),
+  });
+}
