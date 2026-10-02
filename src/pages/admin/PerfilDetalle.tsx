@@ -10,7 +10,7 @@ import { usePerfil, usePerfiles, useUpdatePerfil } from "@/hooks/admin/usePerfil
 
 import type { EstadoCliente, Perfil } from "@/types/admin";
 import FotoPerfil from "@/components/admin/FotoPerfil";
-import { EstadoBadge, SinRevisarBadge } from "@/components/admin/EstadoBadge";
+import { EstadoBadge, PlanBadge, SinRevisarBadge } from "@/components/admin/Badges";
 import { Constants } from "@/integrations/supabase/types";
 
 const Field = ({ label, value }: { label: string; value: ReactNode }) => (
@@ -164,6 +164,7 @@ const PerfilDetalle = () => {
             <span>Busca: {p.busca_genero || "—"}</span>
           </p>
           <div className="flex items-center gap-2 flex-wrap mt-2">
+            <PlanBadge plan={p.plan} />
             <EstadoBadge estado={p.estado_cliente} />
             {!p.revisado && <SinRevisarBadge />}
             {calidad && (

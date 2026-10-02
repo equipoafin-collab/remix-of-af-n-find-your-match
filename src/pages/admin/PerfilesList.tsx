@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Search, Filter, ChevronRight, MapPin } from "lucide-react";
 import { usePerfiles } from "@/hooks/admin/usePerfiles";
 import FotoPerfil from "@/components/admin/FotoPerfil";
-import { EstadoBadge, SinRevisarBadge } from "@/components/admin/EstadoBadge";
+import { EstadoBadge, PlanBadge, SinRevisarBadge } from "@/components/admin/Badges";
 import { Constants } from "@/integrations/supabase/types";
 
 const SIN_REVISAR = "sin revisar";
@@ -84,7 +84,7 @@ const PerfilesList = () => {
           <table className="w-full">
             <thead>
               <tr className="bg-muted">
-                {["Persona", "Edad", "Ciudad", "Género", "Busca", "Estado", "Alta", ""].map((h) => (
+                {["Persona", "Edad", "Ciudad", "Género", "Busca", "Plan", "Estado", "Alta", ""].map((h) => (
                   <th key={h} className="text-left px-4 py-3 font-body text-xs font-semibold text-muted-foreground uppercase">{h}</th>
                 ))}
               </tr>
@@ -107,6 +107,7 @@ const PerfilesList = () => {
                   </td>
                   <td className="px-4 py-3 font-body text-sm text-muted-foreground">{p.genero || "—"}</td>
                   <td className="px-4 py-3 font-body text-sm text-muted-foreground">{p.busca_genero || "—"}</td>
+                  <td className="px-4 py-3"><PlanBadge plan={p.plan} /></td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
                       <EstadoBadge estado={p.estado_cliente} />

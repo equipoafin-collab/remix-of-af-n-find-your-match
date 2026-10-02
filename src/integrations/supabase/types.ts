@@ -152,35 +152,52 @@ export type Database = {
         }
         Relationships: []
       }
-      paid_users: {
+      pagos: {
         Row: {
           created_at: string
           email: string
+          fecha: string
           id: string
+          importe: number | null
           nombre_completo: string
           notas: string | null
-          plan: string
+          perfil_id: string | null
+          plan: Database["public"]["Enums"]["plan_tipo"]
           telefono: string | null
         }
         Insert: {
           created_at?: string
           email: string
+          fecha?: string
           id?: string
+          importe?: number | null
           nombre_completo: string
           notas?: string | null
-          plan: string
+          perfil_id?: string | null
+          plan: Database["public"]["Enums"]["plan_tipo"]
           telefono?: string | null
         }
         Update: {
           created_at?: string
           email?: string
+          fecha?: string
           id?: string
+          importe?: number | null
           nombre_completo?: string
           notas?: string | null
-          plan?: string
+          perfil_id?: string | null
+          plan?: Database["public"]["Enums"]["plan_tipo"]
           telefono?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pagos_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       perfiles: {
         Row: {
