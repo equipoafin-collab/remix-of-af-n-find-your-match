@@ -4,13 +4,14 @@ import {
   candidatosDecididos,
   filaSugerencia,
   planificarSugerencias,
+  soloReglas,
   type SugerenciaExistente,
 } from "../../../supabase/functions/_shared/sugerencias";
 import { ana, luis } from "./fixtures";
 
 const pool = ["a", "b", "c", "d"].map((id) => ({ ...luis, id }));
-const top = (excluirIds: string[] = []) => findMatchesFor(ana, pool, 20, { excluirIds });
-const ids = (ms: { perfilB: { id: string } }[]) => ms.map((m) => m.perfilB.id).sort();
+const top = (excluirIds: string[] = []) => findMatchesFor(ana, pool, 20, { excluirIds }).map(soloReglas);
+const ids = (ss: ReturnType<typeof top>) => ss.map((s) => s.match.perfilB.id).sort();
 
 describe("planificarSugerencias", () => {
   it("la primera vez inserta todo el top", () => {
@@ -53,9 +54,10 @@ describe("planificarSugerencias", () => {
 });
 
 describe("filaSugerencia", () => {
-  it("guarda el score por reglas, el desglose, motivos y riesgos como pendiente", () => {
-    const [m] = top();
-    const fila = filaSugerencia("ana", m, VERSION_ALGORITMO, "2026-10-07T10:00:00Z");
+  it("solo reglas: score y motivos de reglas, sin score_ia, como pendiente", () => {
+    const [s] = top();
+    const m = s.match;
+    const fila = filaSugerencia("ana", s, VERSION_ALGORITMO, "2026-10-07T10:00:00Z");
     expect(fila).toMatchObject({
       perfil_id: "ana",
       candidato_id: m.perfilB.id,
@@ -66,8 +68,14 @@ describe("filaSugerencia", () => {
       version_algoritmo: "v3",
       calculado_at: "2026-10-07T10:00:00Z",
     });
-    expect(fila.desglose).toEqual(m.breakdown);
     expect(fila.motivos).toEqual(m.highlights);
     expect(fila.riesgos).toEqual(m.warnings);
+  });
+
+  it("con IA guarda su score y sus motivos, y conserva los de reglas en el desglose", () => {
+    const [s] = top();
+    const fila = filaSugerencia("ana", { ...s, score: 90, score_ia: 95, motivos: ["Los dos quieren hijos pronto"], riesgos: [] }, "v3", "2026-10-07T10:00:00Z");
+    expect(fila).toMatchObject({ score: 90, score_reglas: s.match.score, score_ia: 95, motivos: ["Los dos quieren hijos pronto"], riesgos: [] });
+    expect(fila.desglose).toEqual({ ...s.match.breakdown, motivos_reglas: s.match.highlights, riesgos_reglas: s.match.warnings });
   });
 });

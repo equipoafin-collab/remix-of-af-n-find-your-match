@@ -59,7 +59,12 @@ const TarjetaSugerencia = ({ s, perfilId }: { s: Sugerencia; perfilId: string })
             {c?.edad} años · {c?.zona ?? c?.ciudad} <PlanBadge plan={c?.plan ?? null} />
           </p>
         </div>
-        <span className={`px-2.5 py-1 rounded-full text-sm font-display font-bold border ${colorScore(s.score)}`}>{s.score}%</span>
+        <div className="text-right">
+          <span className={`px-2.5 py-1 rounded-full text-sm font-display font-bold border ${colorScore(s.score)}`}>{s.score}%</span>
+          <p className="font-body text-[10px] text-muted-foreground mt-1" title="Puntuación de la IA y del algoritmo por reglas">
+            {s.score_ia === null ? "Solo reglas" : `IA ${s.score_ia} · reglas ${s.score_reglas}`}
+          </p>
+        </div>
       </div>
 
       {(s.motivos.length > 0 || s.riesgos.length > 0) && (

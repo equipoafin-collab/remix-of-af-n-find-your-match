@@ -10,6 +10,10 @@ export interface Configuracion {
   umbral_alta_compatibilidad: number;
   dias_feedback: number;
   num_sugerencias: number;
+  /** Mejores por reglas que re-puntúa la IA (T5.2). */
+  num_candidatos_ia: number;
+  /** Peso de la IA en el score final (0-1); el de las reglas es 1 − peso_ia. */
+  peso_ia: number;
   pesos_algoritmo: typeof WEIGHTS;
 }
 
@@ -21,6 +25,8 @@ export const CONFIGURACION_POR_DEFECTO: Configuracion = {
   umbral_alta_compatibilidad: 80,
   dias_feedback: 3,
   num_sugerencias: 10,
+  num_candidatos_ia: 15,
+  peso_ia: 0.5,
   pesos_algoritmo: WEIGHTS,
 };
 

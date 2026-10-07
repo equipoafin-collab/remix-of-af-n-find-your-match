@@ -341,6 +341,45 @@ export type Database = {
           },
         ]
       }
+      perfil_aprendizaje: {
+        Row: {
+          actualizado_at: string
+          ajustes_pesos: Json
+          perfil_id: string
+          preferencias: Json
+          resumen_contexto: string | null
+        }
+        Insert: {
+          actualizado_at?: string
+          ajustes_pesos?: Json
+          perfil_id: string
+          preferencias?: Json
+          resumen_contexto?: string | null
+        }
+        Update: {
+          actualizado_at?: string
+          ajustes_pesos?: Json
+          perfil_id?: string
+          preferencias?: Json
+          resumen_contexto?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "perfil_aprendizaje_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: true
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "perfil_aprendizaje_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: true
+            referencedRelation: "v_clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       perfiles: {
         Row: {
           acepta_otras_zonas: boolean
