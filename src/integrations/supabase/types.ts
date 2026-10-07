@@ -941,6 +941,18 @@ export type Database = {
         }
         Relationships: []
       }
+      v_automatizaciones: {
+        Row: {
+          clase: string | null
+          clave: string | null
+          match_id: string | null
+          perfil_id: string | null
+          severidad: string | null
+          texto: string | null
+          tipo: string | null
+        }
+        Relationships: []
+      }
       v_clientes: {
         Row: {
           acepta_otras_zonas: boolean | null
@@ -1028,6 +1040,10 @@ export type Database = {
           _perfil_id: string
         }
         Returns: undefined
+      }
+      evaluar_automatizaciones: {
+        Args: { _perfil_id?: string }
+        Returns: Json
       }
       has_role: {
         Args: {
