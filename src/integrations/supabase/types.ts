@@ -14,6 +14,67 @@ export type Database = {
   }
   public: {
     Tables: {
+      alertas: {
+        Row: {
+          clave_unica: string | null
+          created_at: string
+          estado: Database["public"]["Enums"]["alerta_estado"]
+          id: string
+          match_id: string | null
+          mensaje: string
+          perfil_id: string | null
+          resuelta_at: string | null
+          severidad: Database["public"]["Enums"]["alerta_severidad"]
+          tipo: Database["public"]["Enums"]["alerta_tipo"]
+        }
+        Insert: {
+          clave_unica?: string | null
+          created_at?: string
+          estado?: Database["public"]["Enums"]["alerta_estado"]
+          id?: string
+          match_id?: string | null
+          mensaje: string
+          perfil_id?: string | null
+          resuelta_at?: string | null
+          severidad?: Database["public"]["Enums"]["alerta_severidad"]
+          tipo?: Database["public"]["Enums"]["alerta_tipo"]
+        }
+        Update: {
+          clave_unica?: string | null
+          created_at?: string
+          estado?: Database["public"]["Enums"]["alerta_estado"]
+          id?: string
+          match_id?: string | null
+          mensaje?: string
+          perfil_id?: string | null
+          resuelta_at?: string | null
+          severidad?: Database["public"]["Enums"]["alerta_severidad"]
+          tipo?: Database["public"]["Enums"]["alerta_tipo"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alertas_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alertas_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alertas_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "v_clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       auditoria: {
         Row: {
           accion: string
@@ -885,6 +946,7 @@ export type Database = {
           acepta_otras_zonas: boolean | null
           alcohol: string | null
           ambicion_profesional: number | null
+          alertas_abiertas: number | null
           aprendizaje_ultima_relacion: string | null
           busca_genero: string | null
           ciudad: string | null
@@ -980,6 +1042,16 @@ export type Database = {
       }
     }
     Enums: {
+      alerta_estado: "abierta" | "vista" | "resuelta"
+      alerta_severidad: "info" | "aviso" | "urgente"
+      alerta_tipo:
+        | "informe_pendiente"
+        | "feedback_pendiente"
+        | "pocas_sesiones"
+        | "plan_terminado"
+        | "nuevo_compatible"
+        | "sin_seguimiento"
+        | "otra"
       app_role: "admin" | "user"
       estado_cliente: "activo" | "pausado" | "baja" | "finalizado"
       match_estado:
@@ -1131,6 +1203,17 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      alerta_estado: ["abierta", "vista", "resuelta"],
+      alerta_severidad: ["info", "aviso", "urgente"],
+      alerta_tipo: [
+        "informe_pendiente",
+        "feedback_pendiente",
+        "pocas_sesiones",
+        "plan_terminado",
+        "nuevo_compatible",
+        "sin_seguimiento",
+        "otra",
+      ],
       app_role: ["admin", "user"],
       estado_cliente: ["activo", "pausado", "baja", "finalizado"],
       match_estado: [

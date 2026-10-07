@@ -54,7 +54,7 @@ const Revisado = ({ perfil }: { perfil: Perfil }) => {
   );
 };
 
-// Siempre visible (sticky) sobre las pestañas. AMPLIAR: alertas (T7.1).
+// Siempre visible (sticky) sobre las pestañas. Las alertas del cliente van en la banda de debajo (AlertasCliente).
 const CabeceraFicha = ({ cliente: p }: { cliente: Cliente }) => {
   const calidad = useMemo(() => calidadPerfil(p), [p]);
   const conPlan = !!p.plan || p.sesiones_contratadas > 0;

@@ -7,7 +7,8 @@ import { COLUMNAS_MATCHING, VERSION_ALGORITMO, type MatchSuggestion, type Pesos,
 import { filaSugerencia, soloReglas, type EstadoSugerencia } from "../_shared/sugerencias.ts";
 
 // T5.4 · Procesa cola_matching: cada perfil nuevo o reactivado contra todos los clientes activos con plan,
-// solo por reglas. Si es muy compatible con alguno (≥ umbral_alta_compatibilidad), le crea o actualiza la sugerencia.
+// solo por reglas. Si es muy compatible con alguno (≥ umbral_alta_compatibilidad), le crea o actualiza la sugerencia
+// y una alerta "info" (T7.1).
 
 const LOTE = 50; // ponytail: perfiles por llamada; lo que no quepa sale en la siguiente
 const COLUMNAS = COLUMNAS_MATCHING.join(", ");
@@ -68,8 +69,18 @@ serve(async (req) => {
       const errorActualizar = actualizaciones.find((r) => r.error)?.error;
       if (errorActualizar) throw errorActualizar;
 
-      // AMPLIAR EN T7.1: alerta "info" "Nuevo perfil muy compatible con <cliente>" por cada detección
-      // (clave_unica `compatible:<cliente_id>:<nuevo_id>`), para el Dashboard (T8.2).
+      // Una alerta por cliente y perfil nuevo (clave_unica): reactivar el perfil no la repite. La lee el Dashboard (T8.2).
+      const { error: alertasError } = await supabase.from("alertas").upsert(
+        detecciones.map((m) => ({
+          perfil_id: m.perfilA.id,
+          tipo: "nuevo_compatible",
+          severidad: "info",
+          mensaje: `Nuevo perfil muy compatible con ${m.perfilA.nombre_completo}: ${nuevo.nombre_completo} (${m.score} %)`,
+          clave_unica: `compatible:${m.perfilA.id}:${nuevo.id}`,
+        })),
+        { onConflict: "clave_unica", ignoreDuplicates: true },
+      );
+      if (alertasError) throw alertasError;
       detectadas.push(...detecciones.map((m) => ({ cliente_id: m.perfilA.id, candidato_id: nuevo.id, score: m.score })));
     }
 

@@ -6,6 +6,7 @@ import { useCalculoAutomatico } from "@/hooks/admin/useSugerencias";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Perfil } from "@/types/admin";
 import CabeceraFicha from "@/components/admin/ficha/CabeceraFicha";
+import AlertasCliente from "@/components/admin/ficha/AlertasCliente";
 import ResumenTab from "@/components/admin/ficha/ResumenTab";
 import SugerenciasTab from "@/components/admin/ficha/SugerenciasTab";
 import NotasTab from "@/components/admin/ficha/NotasTab";
@@ -46,6 +47,7 @@ const PerfilDetalle = () => {
       </button>
 
       <CabeceraFicha cliente={cliente} />
+      <AlertasCliente perfilId={cliente.id} />
 
       <Tabs value={pestana} onValueChange={(tab) => setParams({ tab }, { replace: true })}>
         <TabsList className="h-auto flex-wrap justify-start">
