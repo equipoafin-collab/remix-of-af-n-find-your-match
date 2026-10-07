@@ -26,8 +26,8 @@ const Tareas = () => {
         <div>
           <h1 className="font-display text-3xl font-bold text-foreground flex items-center gap-2"><ListChecks className="w-7 h-7 text-gold" /> Tareas</h1>
           <p className="font-body text-sm text-muted-foreground mt-1">
-            {estado === "pendiente" ? `${pendientes.length} pendientes` : `${tareas.length} tareas`}
-            {vencidas > 0 && <span className="text-rose-700 font-semibold"> · {vencidas} vencidas</span>}
+            {estado === "pendiente" ? `${pendientes.length} pendiente${pendientes.length === 1 ? "" : "s"}` : `${tareas.length} tarea${tareas.length === 1 ? "" : "s"}`}
+            {vencidas > 0 && <span className="text-rose-700 font-semibold"> · {vencidas} vencida{vencidas === 1 ? "" : "s"}</span>}
           </p>
         </div>
         {!creando && (
