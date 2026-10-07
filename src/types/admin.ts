@@ -24,4 +24,5 @@ export type Cliente = Perfil & {
   sugerencias_pendientes: number;
   tareas_pendientes: number;
   alertas_abiertas: number;
+  matches_abiertos: number;
 };

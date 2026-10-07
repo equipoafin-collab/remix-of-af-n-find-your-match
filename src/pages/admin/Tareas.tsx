@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Plus, ListChecks } from "lucide-react";
 import { Constants } from "@/integrations/supabase/types";
 import { useTareas, type FiltrosTareas } from "@/hooks/admin/useTareas";
 import { ListaTareas, NuevaTarea } from "@/components/admin/tareas/ListaTareas";
 import { TIPO_TAREA, vencimiento, type Vencimiento } from "@/lib/tareas";
+import { valorDeUrl } from "@/lib/dashboard";
 import type { TareaTipo } from "@/types/admin";
 
 const selector = "px-3 py-2 rounded-lg border border-border bg-background font-body text-sm";
@@ -11,7 +13,8 @@ const selector = "px-3 py-2 rounded-lg border border-border bg-background font-b
 // T6.2 · Panel global de tareas de todos los clientes.
 const Tareas = () => {
   const [estado, setEstado] = useState<FiltrosTareas["estado"]>("pendiente");
-  const [tipo, setTipo] = useState<TareaTipo | "">("");
+  const [params] = useSearchParams();
+  const [tipo, setTipo] = useState<TareaTipo | "">(() => valorDeUrl(params, "tipo", Constants.public.Enums.tarea_tipo) ?? "");  // enlaces del Dashboard
   const [venc, setVenc] = useState<Vencimiento | "">("");
   const [creando, setCreando] = useState(false);
   const { data: tareas = [], isLoading, error } = useTareas({ estado, tipo: tipo || undefined });

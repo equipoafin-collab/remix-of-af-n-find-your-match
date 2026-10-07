@@ -2,7 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Fragment, type ReactNode } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 import Perfil from "./pages/Perfil";
 import PerfilDocumentos from "./pages/PerfilDocumentos";
@@ -23,6 +24,9 @@ import QuienesSomos from "./pages/QuienesSomos";
 
 const queryClient = new QueryClient();
 
+// Estas páginas leen sus filtros de la URL al montarse (enlaces del Dashboard, T8.2): con otra URL, se vuelven a montar.
+const FiltrosDeUrl = ({ children }: { children: ReactNode }) => <Fragment key={useLocation().search}>{children}</Fragment>;
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -36,14 +40,14 @@ const App = () => (
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboardHome />} />
-            <Route path="perfiles" element={<PerfilesList />} />
+            <Route path="perfiles" element={<FiltrosDeUrl><PerfilesList /></FiltrosDeUrl>} />
             <Route path="perfiles/:id" element={<PerfilDetalle />} />
             <Route path="compatibilidades" element={<Placeholder title="Compatibilidades" description="Visión global de los matches sugeridos por el algoritmo. Para generar matches de un perfil concreto, abre su ficha y pulsa 'Buscar Pareja Compatible'." />} />
             <Route path="matches" element={<Placeholder title="Matches Aprobados" description="Aquí aparecerán los matches que apruebes desde la ficha de cada perfil, con su estado y trazabilidad." />} />
             <Route path="seguimiento" element={<Placeholder title="Seguimiento" description="Cronología de cada match aprobado: primer contacto, reunión agendada, en conversación, relación iniciada." />} />
             <Route path="notas" element={<Placeholder title="Notas Privadas" description="Las notas internas se gestionan dentro de cada ficha de perfil. Esta sección agregará una vista consolidada." />} />
-            <Route path="tareas" element={<Tareas />} />
-            <Route path="alertas" element={<Alertas />} />
+            <Route path="tareas" element={<FiltrosDeUrl><Tareas /></FiltrosDeUrl>} />
+            <Route path="alertas" element={<FiltrosDeUrl><Alertas /></FiltrosDeUrl>} />
             <Route path="pagos" element={<Pagos />} />
             <Route path="configuracion" element={<Configuracion />} />
           </Route>

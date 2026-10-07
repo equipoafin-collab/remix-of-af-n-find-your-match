@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Bell } from "lucide-react";
 import { Constants } from "@/integrations/supabase/types";
 import { useAlertas, type FiltrosAlertas } from "@/hooks/admin/useAlertas";
 import { ListaAlertas } from "@/components/admin/alertas/ListaAlertas";
 import { SEVERIDAD_ALERTA, TIPO_ALERTA } from "@/lib/alertas";
+import { valorDeUrl } from "@/lib/dashboard";
 import type { AlertaSeveridad, AlertaTipo } from "@/types/admin";
 
 const selector = "px-3 py-2 rounded-lg border border-border bg-background font-body text-sm";
@@ -11,8 +13,10 @@ const selector = "px-3 py-2 rounded-lg border border-border bg-background font-b
 // T7.1 · Todas las alertas, urgentes primero.
 const Alertas = () => {
   const [estado, setEstado] = useState<FiltrosAlertas["estado"]>("pendientes");
-  const [severidad, setSeveridad] = useState<AlertaSeveridad | "">("");
-  const [tipo, setTipo] = useState<AlertaTipo | "">("");
+  // Los enlaces del Dashboard llegan con ?severidad= o ?tipo=.
+  const [params] = useSearchParams();
+  const [severidad, setSeveridad] = useState<AlertaSeveridad | "">(() => valorDeUrl(params, "severidad", Constants.public.Enums.alerta_severidad) ?? "");
+  const [tipo, setTipo] = useState<AlertaTipo | "">(() => valorDeUrl(params, "tipo", Constants.public.Enums.alerta_tipo) ?? "");
   const { data: alertas = [], isLoading, error } = useAlertas({ estado, severidad: severidad || undefined, tipo: tipo || undefined });
   const urgentes = alertas.filter((a) => a.severidad === "urgente" && a.estado !== "resuelta").length;
 

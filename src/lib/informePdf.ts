@@ -1,6 +1,14 @@
 import jsPDF from "jspdf";
 import type { InformeCompatibilidad } from "../../supabase/functions/_shared/informe";
 
+// La Helvetica de jsPDF solo admite WinAnsi (Latin-1 + estos de cp1252): un carácter de fuera
+// (✓, →, un emoji de la IA) hace que jsPDF escriba la línea entera en UTF-16 y salga ilegible.
+const CP1252 = "€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ";
+const SUSTITUTOS: Record<string, string> = { "✓": "+", "→": "->", "≥": ">=", "≤": "<=" };
+
+export const aWinAnsi = (t: string) =>
+  [...t].map((c) => (c.charCodeAt(0) < 256 || CP1252.includes(c) ? c : SUSTITUTOS[c] ?? "")).join("");
+
 /** PDF del informe de compatibilidad (T6.3; antes en la página /compatibilidad). */
 export function exportarInformePdf(informe: InformeCompatibilidad, nombreA: string, nombreB: string) {
   const doc = new jsPDF();
@@ -12,7 +20,7 @@ export function exportarInformePdf(informe: InformeCompatibilidad, nombreA: stri
     doc.setFontSize(tam);
     doc.setFont("helvetica", negrita ? "bold" : "normal");
     doc.setTextColor(...color);
-    const lineas = doc.splitTextToSize(t, ancho);
+    const lineas = doc.splitTextToSize(aWinAnsi(t), ancho);
     if (y + lineas.length * tam * 0.5 > 280) {
       doc.addPage();
       y = 20;
@@ -35,7 +43,7 @@ export function exportarInformePdf(informe: InformeCompatibilidad, nombreA: stri
   y += 2;
   texto(informe.resumen, 11);
   y += 6;
-  lista("Fortalezas", [16, 185, 129], informe.fortalezas, () => "✓");
+  lista("Fortalezas", [16, 185, 129], informe.fortalezas, () => "+");
   lista("Posibles fricciones", [251, 146, 60], informe.fricciones, () => "•");
   lista("Preguntas para la primera cita", [180, 140, 60], informe.preguntas_sugeridas, (i) => `${i + 1}.`);
   if (informe.analisis_detallado) {

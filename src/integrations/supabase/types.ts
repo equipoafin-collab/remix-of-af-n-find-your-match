@@ -1005,6 +1005,7 @@ export type Database = {
           importa_politica: boolean | null
           importa_religion: boolean | null
           importa_vestir: boolean | null
+          matches_abiertos: number | null
           necesidad_independencia: number | null
           nivel_social: number | null
           nombre_completo: string | null
@@ -1056,6 +1057,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      dashboard_resumen: { Args: never; Returns: Json }
       estado_automatizaciones: {
         Args: never
         Returns: {
