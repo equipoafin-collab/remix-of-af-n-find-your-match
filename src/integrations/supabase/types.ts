@@ -764,6 +764,21 @@ export type Database = {
           },
         ]
       }
+      secretos_internos: {
+        Row: {
+          clave: string
+          valor: string
+        }
+        Insert: {
+          clave: string
+          valor: string
+        }
+        Update: {
+          clave?: string
+          valor?: string
+        }
+        Relationships: []
+      }
       sesiones: {
         Row: {
           created_at: string
@@ -957,8 +972,8 @@ export type Database = {
         Row: {
           acepta_otras_zonas: boolean | null
           alcohol: string | null
-          ambicion_profesional: number | null
           alertas_abiertas: number | null
+          ambicion_profesional: number | null
           aprendizaje_ultima_relacion: string | null
           busca_genero: string | null
           ciudad: string | null
@@ -1052,10 +1067,7 @@ export type Database = {
           ultima_ejecucion: string
         }[]
       }
-      evaluar_automatizaciones: {
-        Args: { _perfil_id?: string }
-        Returns: Json
-      }
+      evaluar_automatizaciones: { Args: { _perfil_id?: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
