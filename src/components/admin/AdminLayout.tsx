@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import CampanaAlertas from "./alertas/CampanaAlertas";
 import {
   LayoutDashboard, Users, Heart, CheckCircle2, ClipboardList,
   StickyNote, CreditCard, Settings, LogOut, Sparkles, ListChecks,
@@ -46,9 +47,12 @@ const AdminLayout = () => {
   return (
     <main className="min-h-screen bg-background flex">
       <aside className="w-64 shrink-0 border-r border-border bg-card flex flex-col sticky top-0 h-screen">
-        <div className="px-5 py-5 border-b border-border">
-          <p className="font-display text-lg font-bold text-foreground">Afín · CRM</p>
-          <p className="font-body text-xs text-muted-foreground mt-0.5">Matchmaking profesional</p>
+        <div className="px-5 py-5 border-b border-border flex items-start justify-between gap-2">
+          <div>
+            <p className="font-display text-lg font-bold text-foreground">Afín · CRM</p>
+            <p className="font-body text-xs text-muted-foreground mt-0.5">Matchmaking profesional</p>
+          </div>
+          <CampanaAlertas />
         </div>
         <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
           {NAV.map((n) => (

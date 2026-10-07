@@ -13,6 +13,8 @@ import PerfilesList from "./pages/admin/PerfilesList";
 import PerfilDetalle from "./pages/admin/PerfilDetalle";
 import Pagos from "./pages/admin/Pagos";
 import Tareas from "./pages/admin/Tareas";
+import Alertas from "./pages/admin/Alertas";
+import Configuracion from "./pages/admin/Configuracion";
 import Placeholder from "./pages/admin/Placeholder";
 import DiscQuiz from "./pages/DiscQuiz";
 import NotFound from "./pages/NotFound";
@@ -41,8 +43,9 @@ const App = () => (
             <Route path="seguimiento" element={<Placeholder title="Seguimiento" description="Cronología de cada match aprobado: primer contacto, reunión agendada, en conversación, relación iniciada." />} />
             <Route path="notas" element={<Placeholder title="Notas Privadas" description="Las notas internas se gestionan dentro de cada ficha de perfil. Esta sección agregará una vista consolidada." />} />
             <Route path="tareas" element={<Tareas />} />
+            <Route path="alertas" element={<Alertas />} />
             <Route path="pagos" element={<Pagos />} />
-            <Route path="configuracion" element={<Placeholder title="Configuración" description="Ajustes del CRM, pesos del algoritmo y gestión de administradoras." />} />
+            <Route path="configuracion" element={<Configuracion />} />
           </Route>
           {/* T6.3: el informe se genera ahora dentro de cada match (ficha → Matches). */}
           <Route path="/compatibilidad" element={<Navigate to="/admin" replace />} />

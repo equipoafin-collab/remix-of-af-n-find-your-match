@@ -9,6 +9,9 @@ export type Match = Tables<"matches">;
 export type MatchEstado = Enums<"match_estado">;
 export type Tarea = Tables<"tareas">;
 export type TareaTipo = Enums<"tarea_tipo">;
+export type Alerta = Tables<"alertas">;
+export type AlertaTipo = Enums<"alerta_tipo">;
+export type AlertaSeveridad = Enums<"alerta_severidad">;
 export type PlanTipo = Enums<"plan_tipo">;
 export type EstadoCliente = Enums<"estado_cliente">;
 
@@ -20,4 +23,5 @@ export type Cliente = Perfil & {
   proxima_cita: string | null;
   sugerencias_pendientes: number;
   tareas_pendientes: number;
+  alertas_abiertas: number;
 };

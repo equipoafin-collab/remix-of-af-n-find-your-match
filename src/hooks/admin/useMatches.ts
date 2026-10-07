@@ -37,6 +37,7 @@ export function useActualizarMatch() {
       queryClient.invalidateQueries({ queryKey: ["matches"] }),
       queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
       queryClient.invalidateQueries({ queryKey: ["tareas"] }),
+      queryClient.invalidateQueries({ queryKey: ["alertas"] }),
     ]),
   });
 }
@@ -87,6 +88,7 @@ export function useGuardarFeedback() {
         queryClient.invalidateQueries({ queryKey: ["matches"] }),
         queryClient.invalidateQueries({ queryKey: ["tareas"] }),
         queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
+        queryClient.invalidateQueries({ queryKey: ["alertas"] }),
       ]);
     },
     onError: (error) => toast({ title: "No se pudo guardar el feedback", description: error.message, variant: "destructive" }),

@@ -20,6 +20,8 @@ function useInvalidarNotas() {
   return () => Promise.all([
     queryClient.invalidateQueries({ queryKey: ["notas"] }),
     queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
+    queryClient.invalidateQueries({ queryKey: ["alertas"] }),
+    queryClient.invalidateQueries({ queryKey: ["tareas"] }),
   ]);
 }
 

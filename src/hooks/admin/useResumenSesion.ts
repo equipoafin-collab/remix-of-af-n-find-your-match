@@ -44,6 +44,8 @@ export function useGuardarResumen() {
       return Promise.all([
         queryClient.invalidateQueries({ queryKey: ["sesiones"] }),
         queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
+        queryClient.invalidateQueries({ queryKey: ["alertas"] }),
+        queryClient.invalidateQueries({ queryKey: ["tareas"] }),
       ]);
     },
     onError: (error) => toast({ title: "No se pudo guardar el resumen", description: error.message, variant: "destructive" }),
