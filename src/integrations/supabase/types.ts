@@ -757,6 +757,73 @@ export type Database = {
           },
         ]
       }
+      tareas: {
+        Row: {
+          clave_unica: string | null
+          completada_at: string | null
+          created_at: string
+          descripcion: string | null
+          estado: Database["public"]["Enums"]["tarea_estado"]
+          id: string
+          match_id: string | null
+          origen: Database["public"]["Enums"]["tarea_origen"]
+          perfil_id: string
+          tipo: Database["public"]["Enums"]["tarea_tipo"]
+          titulo: string
+          vence_at: string | null
+        }
+        Insert: {
+          clave_unica?: string | null
+          completada_at?: string | null
+          created_at?: string
+          descripcion?: string | null
+          estado?: Database["public"]["Enums"]["tarea_estado"]
+          id?: string
+          match_id?: string | null
+          origen?: Database["public"]["Enums"]["tarea_origen"]
+          perfil_id: string
+          tipo?: Database["public"]["Enums"]["tarea_tipo"]
+          titulo: string
+          vence_at?: string | null
+        }
+        Update: {
+          clave_unica?: string | null
+          completada_at?: string | null
+          created_at?: string
+          descripcion?: string | null
+          estado?: Database["public"]["Enums"]["tarea_estado"]
+          id?: string
+          match_id?: string | null
+          origen?: Database["public"]["Enums"]["tarea_origen"]
+          perfil_id?: string
+          tipo?: Database["public"]["Enums"]["tarea_tipo"]
+          titulo?: string
+          vence_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tareas_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tareas_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tareas_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "v_clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -863,6 +930,7 @@ export type Database = {
           sesiones_realizadas: number | null
           sugerencias_pendientes: number | null
           tabaco: string | null
+          tareas_pendientes: number | null
           tatuajes_pareja: string | null
           telefono: string | null
           tiene_tatuajes: boolean | null
@@ -921,6 +989,15 @@ export type Database = {
       sesion_estado: "programada" | "realizada" | "cancelada" | "no_asistio"
       sesion_tipo: "primera" | "seguimiento"
       sugerencia_estado: "pendiente" | "aceptada" | "rechazada" | "caducada"
+      tarea_estado: "pendiente" | "completada" | "cancelada"
+      tarea_origen: "auto" | "manual"
+      tarea_tipo:
+        | "enviar_informe"
+        | "registrar_feedback"
+        | "revisar_resumen"
+        | "seguimiento"
+        | "renovacion_plan"
+        | "manual"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1064,6 +1141,16 @@ export const Constants = {
       sesion_estado: ["programada", "realizada", "cancelada", "no_asistio"],
       sesion_tipo: ["primera", "seguimiento"],
       sugerencia_estado: ["pendiente", "aceptada", "rechazada", "caducada"],
+      tarea_estado: ["pendiente", "completada", "cancelada"],
+      tarea_origen: ["auto", "manual"],
+      tarea_tipo: [
+        "enviar_informe",
+        "registrar_feedback",
+        "revisar_resumen",
+        "seguimiento",
+        "renovacion_plan",
+        "manual",
+      ],
     },
   },
 } as const

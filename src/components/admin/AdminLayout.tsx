@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard, Users, Heart, CheckCircle2, ClipboardList,
-  StickyNote, CreditCard, Settings, LogOut, Sparkles,
+  StickyNote, CreditCard, Settings, LogOut, Sparkles, ListChecks,
 } from "lucide-react";
 
 const NAV = [
@@ -11,6 +11,7 @@ const NAV = [
   { to: "/admin/perfiles", icon: Users, label: "Perfiles" },
   { to: "/admin/compatibilidades", icon: Sparkles, label: "Compatibilidades" },
   { to: "/admin/matches", icon: Heart, label: "Matches Aprobados" },
+  { to: "/admin/tareas", icon: ListChecks, label: "Tareas" },
   { to: "/admin/seguimiento", icon: CheckCircle2, label: "Seguimiento" },
   { to: "/admin/notas", icon: StickyNote, label: "Notas Privadas" },
   { to: "/admin/pagos", icon: CreditCard, label: "Pagos" },
