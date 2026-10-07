@@ -483,9 +483,10 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
 
 ### FASE 7 — Alertas y automatizaciones
 
-- [ ] **T7.1 · Tabla `alertas` y centro de avisos** · Depende de T1.1
+- [x] **T7.1 · Tabla `alertas` y centro de avisos** · Depende de T1.1
   - Cambios: tabla `alertas` (3.1). Icono de campana en `AdminLayout` con contador de abiertas y panel desplegable; página `/admin/alertas` con filtros; en la ficha, banda superior con las alertas del cliente. Acciones: marcar vista, resolver, ir a la ficha. Ampliar `cambiar_estado_cliente` (cerrar alertas en Baja). Añadir `alertas_abiertas` a `v_clientes`.
   - Aceptación: alertas creadas a mano por SQL se ven y se resuelven.
+  > Nota de implementación: tabla según 3.1 con enums `alerta_tipo` (informe_pendiente, feedback_pendiente, pocas_sesiones, plan_terminado, nuevo_compatible, sin_seguimiento, otra), `alerta_severidad` y `alerta_estado` (abierta = sin ver, vista, resuelta); `perfil_id` y `match_id` opcionales con `CASCADE`; `resuelta_at` lo sella un trigger. `alertas_abiertas` de `v_clientes` cuenta las no resueltas; la campana cuenta las "abiertas" (sin ver) y se refresca cada minuto. Campana en la cabecera del menú (`CampanaAlertas`, `Popover`) con las pendientes (urgentes primero), página `/admin/alertas` (filtros por estado, severidad y tipo) y banda bajo la cabecera de la ficha (`AlertasCliente`, solo si hay). Lista compartida `ListaAlertas` (marcar vista, resolver, ir a la ficha). `cambiar_estado_cliente` resuelve las alertas en Baja (con esto la función queda completa). Hecho lo pendiente de T5.4: `procesar-cola-matching` crea la alerta "Nuevo perfil muy compatible" (`compatible:<cliente>:<perfil>`). Probado en Postgres 15 y en producción con dos alertas creadas desde la consola: campana, panel, banda, página, marcar vista y resolver.
 
 - [ ] **T7.2 · Función `evaluar_automatizaciones()`** · Depende de T7.1, T6.4, T3.1
   - Función SQL (o Edge Function si requiere IA) **idempotente** que crea alertas (y tareas cuando aplique) usando `clave_unica`, y **resuelve automáticamente** las que ya no aplican:
@@ -629,3 +630,4 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 07/10/2026 | T6.3 | Informe de compatibilidad dentro de cada match (generar, editar, PDF, marcar como enviado) con `compatibility-report` sobre el match y solo datos del cuestionario; `/compatibilidad` redirige a `/admin`. |
 | 07/10/2026 | T6.4 | Tareas automáticas en los matches: informe para cada lado Premium (se completa al enviarlo) y feedback tras la cita para cada lado con plan (vence a `dias_feedback`); cerrar cancela las automáticas; aviso al agendar sin informe. |
 | 07/10/2026 | T6.5 | Feedback de los dos tras la cita (texto, 1-5, volver a verse): completa las tareas, cuenta como seguimiento, pasa el match a "feedback registrado" y entra en el contexto del aprendizaje. Fase 6 completa. |
+| 07/10/2026 | T7.1 | Tabla `alertas`, campana con contador y panel, página `/admin/alertas` y banda en la ficha; la Baja las resuelve; alerta de perfil muy compatible desde `procesar-cola-matching`. |
