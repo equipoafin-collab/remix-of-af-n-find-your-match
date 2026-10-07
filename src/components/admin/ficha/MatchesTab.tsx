@@ -33,7 +33,7 @@ const aLocal = (iso: string) => {
   return new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 };
 
-const FormCita = ({ match, cerrar }: { match: MatchConPersonas; cerrar: () => void }) => {
+const FormCita = ({ match, cerrar, faltaInforme }: { match: MatchConPersonas; cerrar: () => void; faltaInforme: boolean }) => {
   const actualizar = useActualizarMatch();
   const [fecha, setFecha] = useState(match.fecha_cita ? aLocal(match.fecha_cita) : "");
   const [lugar, setLugar] = useState(match.lugar ?? "");
@@ -46,6 +46,11 @@ const FormCita = ({ match, cerrar }: { match: MatchConPersonas; cerrar: () => vo
 
   return (
     <div className="mt-3 p-4 rounded-xl border border-border bg-background/50 space-y-3">
+      {faltaInforme && (
+        <p className="font-body text-xs text-amber-700">
+          El informe de compatibilidad aún no se ha enviado y hay un cliente Premium. Puedes agendar igualmente.
+        </p>
+      )}
       <div className="grid sm:grid-cols-2 gap-3">
         <div>
           <label className={etiqueta}>Fecha y hora de la cita</label>
@@ -73,6 +78,8 @@ const FilaMatch = ({ match, perfil }: { match: MatchConPersonas; perfil: Perfil 
   const [editandoCita, setEditandoCita] = useState(false);
   const [verInforme, setVerInforme] = useState(false);
   const otro = match.perfil_a === perfil.id ? match.b : match.a;
+  // T6.4 · Bloqueo suave: con un lado Premium la tarea "Enviar informe" sigue pendiente hasta marcarlo como enviado.
+  const faltaInforme = !match.informe_enviado_at && (match.a?.plan === "premium" || match.b?.plan === "premium");
 
   const cambiarEstado = (estado: MatchEstado) => {
     // Agendar pide fecha y lugar: el estado se guarda con el formulario.
@@ -126,7 +133,7 @@ const FilaMatch = ({ match, perfil }: { match: MatchConPersonas; perfil: Perfil 
           {Constants.public.Enums.match_estado.map((e) => <option key={e} value={e}>{ESTADO[e].label}</option>)}
         </select>
       </div>
-      {editandoCita && <FormCita match={match} cerrar={() => setEditandoCita(false)} />}
+      {editandoCita && <FormCita match={match} faltaInforme={faltaInforme} cerrar={() => setEditandoCita(false)} />}
       {verInforme && <PanelInforme match={match} />}
     </li>
   );
