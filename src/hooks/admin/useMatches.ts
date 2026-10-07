@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
 import { toast } from "@/hooks/use-toast";
 import { mensajeDeFuncion } from "./mensajeDeFuncion";
+import { useActualizarAprendizaje } from "./useAprendizaje";
 
 const PERSONA = "id, nombre_completo, edad, zona, ciudad, plan, foto_url";
 
@@ -50,5 +51,44 @@ export function useGenerarInforme() {
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["matches"] }),
     onError: (error) => toast({ title: "No se pudo generar el informe", description: error.message, variant: "destructive" }),
+  });
+}
+
+export interface Feedback {
+  feedback_a: string | null;
+  feedback_b: string | null;
+  valoracion_a: number | null;
+  valoracion_b: number | null;
+  quiere_repetir_a: boolean | null;
+  quiere_repetir_b: boolean | null;
+}
+
+/**
+ * T6.5 · Feedback de los dos tras la cita. Con el de ambos, el match pasa a "feedback registrado"; cada texto
+ * completa la tarea de su lado y cuenta como seguimiento (triggers). Después aprende de los dos (T5.3).
+ */
+export function useGuardarFeedback() {
+  const queryClient = useQueryClient();
+  const aprender = useActualizarAprendizaje();
+  return useMutation({
+    mutationFn: async ({ match, feedback }: { match: MatchConPersonas; feedback: Feedback }) => {
+      const ambos = !!feedback.feedback_a?.trim() && !!feedback.feedback_b?.trim();
+      const { error } = await supabase.from("matches").update({
+        ...feedback,
+        feedback_at: new Date().toISOString(),
+        ...(ambos && match.estado === "cita_realizada" && { estado: "feedback_registrado" as const }),
+      }).eq("id", match.id);
+      if (error) throw error;
+    },
+    onSuccess: (_, { match }) => {
+      aprender.mutate(match.perfil_a);
+      aprender.mutate(match.perfil_b);
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["matches"] }),
+        queryClient.invalidateQueries({ queryKey: ["tareas"] }),
+        queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
+      ]);
+    },
+    onError: (error) => toast({ title: "No se pudo guardar el feedback", description: error.message, variant: "destructive" }),
   });
 }
