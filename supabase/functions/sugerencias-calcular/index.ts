@@ -31,9 +31,10 @@ serve(async (req) => {
     const { perfil_id, forzar = false } = await req.json();
     if (!perfil_id) return json({ error: "Falta perfil_id" }, 400);
 
-    const { data: cliente, error: clienteError } = await supabase.from("perfiles").select(COLUMNAS).eq("id", perfil_id).maybeSingle();
+    const { data: clienteData, error: clienteError } = await supabase.from("perfiles").select(COLUMNAS).eq("id", perfil_id).maybeSingle();
     if (clienteError) throw clienteError;
-    if (!cliente) return json({ error: "No existe el perfil" }, 404);
+    if (!clienteData) return json({ error: "No existe el perfil" }, 404);
+    const cliente = clienteData as unknown as PerfilForMatching;
     // Pausado, Finalizado o Baja: conserva lo que tenga, pero no recibe sugerencias nuevas.
     if (cliente.estado_cliente !== "activo") return json({ recalculado: false, motivo: "El cliente no está activo" });
 
@@ -50,9 +51,10 @@ serve(async (req) => {
     const { data: pool, error: poolError } = await supabase
       .from("perfiles").select(COLUMNAS).eq("estado_cliente", "activo").neq("id", perfil_id);
     if (poolError) throw poolError;
+    const perfiles = pool as unknown as PerfilForMatching[];
 
     // AMPLIAR EN T6.1: excluir también los candidatos con un match en curso con este cliente (en cualquier orden).
-    const top = findMatchesFor(cliente as PerfilForMatching, pool as PerfilForMatching[], config.num_sugerencias ?? 10, {
+    const top = findMatchesFor(cliente, perfiles, config.num_sugerencias ?? 10, {
       pesos: config.pesos_algoritmo,
       excluirIds: candidatosDecididos(existentes as SugerenciaExistente[]),
     });
