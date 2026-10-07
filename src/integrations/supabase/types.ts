@@ -282,6 +282,8 @@ export type Database = {
           lugar: string | null
           perfil_a: string
           perfil_b: string
+          quiere_repetir_a: boolean | null
+          quiere_repetir_b: boolean | null
           sugerencia_id: string | null
           valoracion_a: number | null
           valoracion_b: number | null
@@ -299,6 +301,8 @@ export type Database = {
           lugar?: string | null
           perfil_a: string
           perfil_b: string
+          quiere_repetir_a?: boolean | null
+          quiere_repetir_b?: boolean | null
           sugerencia_id?: string | null
           valoracion_a?: number | null
           valoracion_b?: number | null
@@ -316,6 +320,8 @@ export type Database = {
           lugar?: string | null
           perfil_a?: string
           perfil_b?: string
+          quiere_repetir_a?: boolean | null
+          quiere_repetir_b?: boolean | null
           sugerencia_id?: string | null
           valoracion_a?: number | null
           valoracion_b?: number | null

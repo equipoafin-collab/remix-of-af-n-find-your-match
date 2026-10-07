@@ -18,8 +18,8 @@ const sinDatos = Promise.resolve({ data: null, error: null });
 
 /**
  * T5.1 · Todo lo que la IA necesita saber del cliente, como texto acotado a ~maxTokens: preguntas clave,
- * cuestionario, DISC, preferencias aprendidas, 5 últimos resúmenes revisados, 10 últimas notas (no automáticas)
- * y 20 últimas decisiones. Incluye datos de salud: usar solo con el cliente service role tras exigirAdmin.
+ * cuestionario, DISC, preferencias aprendidas, 5 últimos resúmenes revisados, 10 últimas notas (no automáticas),
+ * feedback del cliente en sus 10 últimas citas (T6.5) y 20 últimas decisiones. Incluye datos de salud: usar solo con el cliente service role tras exigirAdmin.
  * Con `alcance: "cuestionario"` se queda en lo que el cliente rellenó (preguntas clave, cuestionario y DISC):
  * es lo que usa el informe de compatibilidad (T6.3), que leen los clientes.
  */
@@ -29,7 +29,7 @@ export async function construirContextoCliente(
   { maxTokens, alcance = "completo" }: { maxTokens?: number; alcance?: "completo" | "cuestionario" } = {},
 ): Promise<string> {
   const completo = alcance === "completo";
-  const [perfil, aprendizaje, sesiones, notas, decisiones] = await Promise.all([
+  const [perfil, aprendizaje, sesiones, notas, decisiones, citas] = await Promise.all([
     supabase.from("perfiles").select(COLUMNAS_CLIENTE).eq("id", perfilId).single(),
     completo ? supabase.from("perfil_aprendizaje").select("preferencias").eq("perfil_id", perfilId).maybeSingle() : sinDatos,
     completo
@@ -45,8 +45,15 @@ export async function construirContextoCliente(
         .select(`decidido_at, estado, motivo_decision, score, candidato:perfiles!match_sugerencias_candidato_id_fkey(${COLUMNAS_CANDIDATO})`)
         .eq("perfil_id", perfilId).in("estado", ["aceptada", "rechazada"]).order("decidido_at", { ascending: false }).limit(20)
       : sinDatos,
+    completo
+      ? supabase.from("matches")
+        .select(`feedback_at, perfil_a, feedback_a, feedback_b, valoracion_a, valoracion_b, quiere_repetir_a, quiere_repetir_b,
+          a:perfiles!matches_perfil_a_fkey(${COLUMNAS_CANDIDATO}), b:perfiles!matches_perfil_b_fkey(${COLUMNAS_CANDIDATO})`)
+        .or(`perfil_a.eq.${perfilId},perfil_b.eq.${perfilId}`).not("feedback_at", "is", null)
+        .order("feedback_at", { ascending: false }).limit(10)
+      : sinDatos,
   ]);
-  for (const r of [perfil, aprendizaje, sesiones, notas, decisiones]) if (r.error) throw r.error;
+  for (const r of [perfil, aprendizaje, sesiones, notas, decisiones, citas]) if (r.error) throw r.error;
 
   const cliente = perfil.data as unknown as CuestionarioContexto & { disc_result_id: string | null };
   let disc = null;
@@ -70,6 +77,25 @@ export async function construirContextoCliente(
     decidido_at: string | null; estado: string; motivo_decision: string | null; score: number; candidato: CandidatoResumido | null;
   }[];
 
+  // De cada cita, solo el feedback del propio cliente (el lado A o B que le toque).
+  const filasCita = (citas.data ?? []) as unknown as {
+    feedback_at: string; perfil_a: string; feedback_a: string | null; feedback_b: string | null; valoracion_a: number | null;
+    valoracion_b: number | null; quiere_repetir_a: boolean | null; quiere_repetir_b: boolean | null;
+    a: CandidatoResumido | null; b: CandidatoResumido | null;
+  }[];
+  const citasDelCliente = filasCita
+    .map((c) => {
+      const soyA = c.perfil_a === perfilId;
+      return {
+        fecha: c.feedback_at,
+        con: soyA ? c.b : c.a,
+        valoracion: soyA ? c.valoracion_a : c.valoracion_b,
+        repetir: soyA ? c.quiere_repetir_a : c.quiere_repetir_b,
+        feedback: (soyA ? c.feedback_a : c.feedback_b) ?? "",
+      };
+    })
+    .filter((c) => c.feedback.trim());
+
   return formatearContexto({
     perfil: cliente,
     disc,
@@ -81,5 +107,6 @@ export async function construirContextoCliente(
     decisiones: filasDecision.map((x) => ({
       fecha: x.decidido_at ?? "", estado: x.estado, motivo: x.motivo_decision, score: x.score, candidato: x.candidato,
     })),
+    citas: citasDelCliente,
   }, maxTokens);
 }

@@ -33,12 +33,16 @@ const base: DatosContexto = {
     fecha: "2026-10-03T12:00:00+00:00", estado: "rechazada", motivo: "Distancia", score: 71,
     candidato: { edad: 38, genero: "Hombre", zona: "Sevilla", ciudad: "Sevilla", tipo_relacion: "Matrimonio", hijos: "Tengo", valores_importantes: ["Familia"], disc_perfil: "D" },
   }],
+  citas: [{
+    fecha: "2026-10-04T20:00:00+00:00", valoracion: 4, repetir: true, feedback: "Se rieron mucho",
+    con: { edad: 36, genero: "Hombre", zona: "Madrid", ciudad: "Madrid", tipo_relacion: "Matrimonio", hijos: "Quiero tener", valores_importantes: [], disc_perfil: null },
+  }],
 };
 
 describe("formatearContexto", () => {
   it("incluye todas las secciones con lo más reciente primero", () => {
     const texto = formatearContexto(base);
-    for (const titulo of ["Preguntas clave", "Cuestionario", "Personalidad (DISC)", "Preferencias aprendidas", "Resúmenes de sesión", "Notas de la psicóloga", "Decisiones sobre candidatos"]) {
+    for (const titulo of ["Preguntas clave", "Cuestionario", "Personalidad (DISC)", "Preferencias aprendidas", "Resúmenes de sesión", "Notas de la psicóloga", "Feedback del cliente tras sus citas", "Decisiones sobre candidatos"]) {
       expect(texto).toContain(`## ${titulo}`);
     }
     expect(texto).toContain("- Zona: Madrid");
@@ -46,10 +50,11 @@ describe("formatearContexto", () => {
     expect(texto).toContain("- Evita: fumadores");
     expect(texto.indexOf("Tranquila")).toBeLessThan(texto.indexOf("Nerviosa"));
     expect(texto).toContain("rechazada (Distancia): Hombre de 38 años, Sevilla, busca Matrimonio, hijos: Tengo, valores: Familia, DISC D · 71 %");
+    expect(texto).toContain("- 2026-10-04 · con Hombre de 36 años, Madrid, busca Matrimonio, hijos: Quiero tener · valoración 4/5 · quiere volver a verle: sí: Se rieron mucho");
   });
 
   it("no envía datos de contacto ni secciones vacías", () => {
-    const texto = formatearContexto({ ...base, preferencias: null, resumenes: [], notas: [], decisiones: [] });
+    const texto = formatearContexto({ ...base, preferencias: null, resumenes: [], notas: [], decisiones: [], citas: [] });
     expect(texto).not.toContain("Preferencias aprendidas");
     expect(texto).not.toContain("Notas de la psicóloga");
     expect(texto).not.toMatch(/email|teléfono/i);

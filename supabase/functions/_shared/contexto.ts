@@ -50,6 +50,8 @@ export interface DatosContexto {
   resumenes: { fecha: string; resumen: ResumenSesion }[];
   notas: { fecha: string; contenido: string }[];
   decisiones: { fecha: string; estado: string; motivo: string | null; score: number; candidato: CandidatoResumido | null }[];
+  /** Lo que el propio cliente contó tras cada cita (T6.5). */
+  citas: { fecha: string; con: CandidatoResumido | null; valoracion: number | null; repetir: boolean | null; feedback: string }[];
 }
 
 const CARACTERES_POR_TOKEN = 4; // aproximación para español
@@ -116,6 +118,14 @@ function renderizar(d: DatosContexto) {
     seccion("Resúmenes de sesión revisados (más reciente primero)", r),
     seccion("Notas de la psicóloga (más reciente primero)", d.notas.map((n) => `- ${dia(n.fecha)}: ${recortar(n.contenido.trim(), MAX_NOTA)}`)),
     seccion(
+      "Feedback del cliente tras sus citas (más reciente primero)",
+      d.citas.map((c) =>
+        `- ${dia(c.fecha)} · con ${candidato(c.con)}` +
+        `${c.valoracion ? ` · valoración ${c.valoracion}/5` : ""}${c.repetir === null ? "" : ` · quiere volver a verle: ${c.repetir ? "sí" : "no"}`}` +
+        `: ${recortar(c.feedback.trim(), MAX_NOTA)}`,
+      ),
+    ),
+    seccion(
       "Decisiones sobre candidatos (más reciente primero)",
       d.decisiones.map((x) => `- ${dia(x.fecha)} · ${x.estado}${x.motivo ? ` (${x.motivo})` : ""}: ${candidato(x.candidato)} · ${x.score} %`),
     ),
@@ -126,13 +136,19 @@ const porFechaDesc = <T extends { fecha: string }>(xs: T[]) => [...xs].sort((a, 
 
 /**
  * Texto estructurado con lo que la IA necesita saber del cliente (T5.1). Si pasa de `maxTokens`, quita
- * resúmenes, notas y decisiones empezando por el más antiguo de los tres; el cuestionario se queda siempre.
+ * resúmenes, notas, feedback de citas y decisiones empezando por el más antiguo; el cuestionario se queda siempre.
  */
 export function formatearContexto(d: DatosContexto, maxTokens = 6000): string {
-  const datos = { ...d, resumenes: porFechaDesc(d.resumenes), notas: porFechaDesc(d.notas), decisiones: porFechaDesc(d.decisiones) };
+  const datos = {
+    ...d,
+    resumenes: porFechaDesc(d.resumenes),
+    notas: porFechaDesc(d.notas),
+    decisiones: porFechaDesc(d.decisiones),
+    citas: porFechaDesc(d.citas),
+  };
   let texto = renderizar(datos);
   while (texto.length / CARACTERES_POR_TOKEN > maxTokens) {
-    const listas = [datos.resumenes, datos.notas, datos.decisiones].filter((xs) => xs.length);
+    const listas = [datos.resumenes, datos.notas, datos.decisiones, datos.citas].filter((xs) => xs.length);
     if (!listas.length) break;
     // El último de cada lista es su más antiguo: se quita el más antiguo de todos.
     const masAntigua = listas.reduce((a, b) => (a[a.length - 1].fecha <= b[b.length - 1].fecha ? a : b));
