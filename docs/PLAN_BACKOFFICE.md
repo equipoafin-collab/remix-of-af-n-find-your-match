@@ -388,13 +388,14 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
   - Aceptación: RLS solo admin; función de estado caduca sugerencias.
   > Nota de implementación: `estado` es el enum `sugerencia_estado`; las tres puntuaciones son enteros 0-100 (`score_ia` null = solo reglas), `version_algoritmo` obligatorio, `CHECK (perfil_id <> candidato_id)` y `ON DELETE CASCADE` desde ambos perfiles. `cambiar_estado_cliente` caduca solo las `pendiente` (aceptadas y rechazadas se conservan para el aprendizaje): Pausado/Finalizado las que le tienen como candidato, Baja además las suyas; reactivar no resucita ninguna, las recalcula T4.4. `sugerencias_pendientes` va al final de `v_clientes` con `CREATE OR REPLACE`. Sin UI: la usa T4.5. Probado en Postgres 15 local (aplicada dos veces, RLS, caducidad por estado y cascada).
 
-- [ ] **T4.2 · Preguntas clave del cuestionario** · Depende de T1.1
+- [x] **T4.2 · Preguntas clave del cuestionario** · Depende de T1.1
   - Cambios en `Perfil.tsx` (flujo público) **sin alargarlo**:
     - `zona`: sustituir/complementar ciudad libre por selector de provincia (lista de provincias de España + "Otra"), y checkbox "Estoy abierto/a a conocer gente de otras zonas".
     - `valores_importantes`: multi-selección (máx. 3) de una lista cerrada: Familia, Honestidad, Fe/espiritualidad, Ambición, Libertad, Estabilidad, Humor, Cultura, Salud/deporte, Compromiso social.
   - Constante compartida `src/lib/preguntasClave.ts` que define las **5 preguntas clave** (tipo_relacion, hijos, rango edad, zona, valores_importantes) con etiqueta y opciones; la ficha y el matching la usan.
   - Script/SQL de relleno: `zona` a partir de `ciudad` cuando coincida con una provincia.
   - Aceptación: nuevos perfiles guardan zona y valores; ficha muestra "Preguntas clave" en Resumen.
+  > Nota de implementación: se complementa la ciudad (no se sustituye: el matching, el listado y el informe la usan): selector nativo de provincia obligatorio y la casilla de otras zonas en el paso "Datos"; valores (de 1 a 3) al principio del paso "Valores", con las opciones sobrantes deshabilitadas al llegar a 3. Sin pasos nuevos. `preguntasClave.ts` exporta además `TIPO_RELACION`, `HIJOS`, `PROVINCIAS` (50 + Ceuta, Melilla y "Otra") y `VALORES_IMPORTANTES`, que `/perfil` ya no define por su cuenta; `PREGUNTAS_CLAVE` lleva por pregunta `clave`, `etiqueta`, `opciones` y `respuesta(perfil)`, y Resumen se pinta con ella. Cuestionario muestra provincia y valores. El relleno es la migración `20261007120000_t4_2_rellenar_zona.sql`: casa la ciudad con el nombre de la provincia o sus variantes (Vizcaya, Gerona, La Coruña…) sin tildes ni mayúsculas, y solo toca perfiles sin zona. La política de INSERT anónimo de T1.1 ya admitía estas columnas. Probado en Chrome con migración aplicada: el perfil de prueba "Prueba Claude T4.2" (`prueba-t42@example.com`) se guardó con provincia y valores y sale en Resumen; el perfil existente "madrid" quedó con zona Madrid.
 
 - [ ] **T4.3 · Algoritmo v3 compartido** · Depende de T4.2, T0.4, T0.5
   - Cambios en `src/lib/profileMatching.ts` (mantener tests pasando, añadir nuevos):
@@ -602,3 +603,4 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 03/10/2026 | T3.3 | Panel de notas y resumen en cada sesión realizada: generar/regenerar con IA, editar por sección y guardar como revisado (sella revisión y seguimiento). |
 | 03/10/2026 | T3.4 | Línea temporal "Evolución" en Resumen con el estado emocional y los avances de las últimas sesiones revisadas. T3.5 (opcional) pospuesta. |
 | 07/10/2026 | T4.1 | Tabla `match_sugerencias` (solo admin, un par cliente-candidato único), `sugerencias_pendientes` en `v_clientes` y `cambiar_estado_cliente` caduca las sugerencias pendientes al pausar, finalizar o dar de baja. |
+| 07/10/2026 | T4.2 | Provincia (+ "abierto/a a otras zonas") y hasta 3 valores importantes en `/perfil` sin pasos nuevos; `src/lib/preguntasClave.ts` con las 5 preguntas clave que pinta la ficha; relleno de `zona` desde la ciudad. |

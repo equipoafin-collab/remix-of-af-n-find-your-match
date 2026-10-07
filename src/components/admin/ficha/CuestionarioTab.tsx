@@ -10,6 +10,7 @@ const CuestionarioTab = ({ perfil: p }: { perfil: Perfil }) => (
       <Field label="Teléfono" value={p.telefono} />
       <Field label="Edad" value={p.edad} />
       <Field label="Ciudad" value={p.ciudad} />
+      <Field label="Provincia" value={p.zona && `${p.zona}${p.acepta_otras_zonas ? " · abierto/a a otras zonas" : ""}`} />
       <Field label="Género" value={p.genero} />
       <Field label="Estatura" value={p.estatura ? `${p.estatura} cm` : null} />
       <Field label="Peso" value={p.peso ? `${p.peso} kg` : null} />
@@ -31,6 +32,7 @@ const CuestionarioTab = ({ perfil: p }: { perfil: Perfil }) => (
     </Section>
 
     <Section title="Valores" icon={Sparkles}>
+      <Field label="Valores importantes" value={p.valores_importantes.join(", ")} />
       <Field label="Religión" value={p.religion} />
       <Field label="Importa religión pareja" value={p.importa_religion ? `Sí (busca ${p.religion_pareja})` : "No"} />
       <Field label="Ideología" value={p.ideologia} />
