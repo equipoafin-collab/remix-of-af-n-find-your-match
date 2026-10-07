@@ -6,6 +6,8 @@ import { mensajeDeFuncion } from "./mensajeDeFuncion";
 /** Respuesta de la Edge Function sugerencias-calcular (T4.4): contadores si recalcula, motivo si no. */
 export interface ResultadoCalculo {
   recalculado: boolean;
+  /** false si la IA no respondió y se guardaron solo las de reglas (T5.2). */
+  ia?: boolean;
   pendientes?: number;
   nuevas?: number;
   caducadas?: number;
@@ -72,7 +74,10 @@ export function useRecalcularSugerencias() {
     mutationFn: (perfilId: string) => calcular(perfilId, true),
     onSuccess: (resultado, perfilId) => {
       toast(resultado.recalculado
-        ? { title: "Sugerencias recalculadas", description: `${resultado.pendientes} pendientes · ${resultado.nuevas} nuevas · ${resultado.caducadas} caducadas` }
+        ? {
+          title: resultado.ia ? "Sugerencias recalculadas con IA" : "Sugerencias recalculadas solo por reglas",
+          description: `${resultado.pendientes} pendientes · ${resultado.nuevas} nuevas · ${resultado.caducadas} caducadas${resultado.pendientes && !resultado.ia ? " · la IA no respondió" : ""}`,
+        }
         : { title: "No se han recalculado", description: resultado.motivo });
       return invalidar(perfilId);
     },
