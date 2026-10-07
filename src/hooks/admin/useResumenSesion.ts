@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { ResumenSesion } from "../../../supabase/functions/_shared/resumen";
 import { mensajeDeFuncion } from "./mensajeDeFuncion";
+import { useActualizarAprendizaje } from "./useAprendizaje";
 
 export type { ResumenSesion };
 
@@ -26,6 +27,7 @@ export function useGenerarResumen() {
  */
 export function useGuardarResumen() {
   const queryClient = useQueryClient();
+  const aprender = useActualizarAprendizaje(); // el resumen revisado alimenta el aprendizaje (T5.3)
   return useMutation({
     mutationFn: async ({ sesionId, perfilId, resumen, notas }: { sesionId: string; perfilId: string; resumen: ResumenSesion; notas: string }) => {
       const ahora = new Date().toISOString();
@@ -37,10 +39,13 @@ export function useGuardarResumen() {
       const { error: errorPerfil } = await supabase.from("perfiles").update({ ultimo_seguimiento_at: ahora }).eq("id", perfilId);
       if (errorPerfil) throw errorPerfil;
     },
-    onSuccess: () => Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["sesiones"] }),
-      queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
-    ]),
+    onSuccess: (_, { perfilId }) => {
+      aprender.mutate(perfilId);
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["sesiones"] }),
+        queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
+      ]);
+    },
     onError: (error) => toast({ title: "No se pudo guardar el resumen", description: error.message, variant: "destructive" }),
   });
 }

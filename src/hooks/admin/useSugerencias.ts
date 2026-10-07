@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { mensajeDeFuncion } from "./mensajeDeFuncion";
+import { useActualizarAprendizaje } from "./useAprendizaje";
 
 /** Respuesta de la Edge Function sugerencias-calcular (T4.4): contadores si recalcula, motivo si no. */
 export interface ResultadoCalculo {
@@ -85,9 +86,10 @@ export function useRecalcularSugerencias() {
   });
 }
 
-/** Aceptar o rechazar. Solo una pendiente: si caducó mientras tanto, avisa en vez de decidir. */
+/** Aceptar o rechazar. Solo una pendiente: si caducó mientras tanto, avisa en vez de decidir. Después, aprende (T5.3). */
 export function useDecidirSugerencia() {
   const invalidar = useInvalidarSugerencias();
+  const aprender = useActualizarAprendizaje();
   return useMutation({
     mutationFn: async ({ id, estado, motivo }: { id: string; perfilId: string; estado: "aceptada" | "rechazada"; motivo: string | null }) => {
       const { data, error } = await supabase
@@ -98,7 +100,10 @@ export function useDecidirSugerencia() {
       if (error) throw error;
       if (!data.length) throw new Error("Esta sugerencia ya no está pendiente. Recarga la lista.");
     },
-    onSuccess: (_, { perfilId }) => invalidar(perfilId),
+    onSuccess: (_, { perfilId }) => {
+      aprender.mutate(perfilId);
+      return invalidar(perfilId);
+    },
     onError: (error) => toast({ title: "No se pudo guardar la decisión", description: error.message, variant: "destructive" }),
   });
 }
