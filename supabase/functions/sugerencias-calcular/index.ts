@@ -4,7 +4,7 @@ import { exigirAdmin } from "../_shared/auth.ts";
 import { leerConfiguracion } from "../_shared/configuracion.ts";
 import { construirContextoCliente } from "../_shared/contextoCliente.ts";
 import { pedirJSON } from "../_shared/ia.ts";
-import { findMatchesFor, VERSION_ALGORITMO, type Pesos, type PerfilForMatching } from "../_shared/profileMatching.ts";
+import { COLUMNAS_MATCHING, findMatchesFor, VERSION_ALGORITMO, type Pesos, type PerfilForMatching } from "../_shared/profileMatching.ts";
 import { combinarConIA, promptReranking, SYSTEM_RERANKING, validarReranking } from "../_shared/reranking.ts";
 import {
   candidatosDecididos, filaSugerencia, planificarSugerencias, soloReglas, type SugerenciaCalculada, type SugerenciaExistente,
@@ -16,15 +16,8 @@ import {
 
 const VIGENCIA_MS = 24 * 60 * 60 * 1000;
 
-// Las columnas de PerfilForMatching y los hobbies (para que la IA personalice): el cuestionario completo no hace falta.
-const COLUMNAS = [
-  "id", "nombre_completo", "email", "edad", "ciudad", "zona", "acepta_otras_zonas", "valores_importantes", "estado_cliente",
-  "genero", "busca_genero", "edad_min_busca", "edad_max_busca", "tipo_relacion", "hijos", "tabaco", "alcohol",
-  "desea_casarse", "religion", "religion_pareja", "importa_religion", "ideologia", "deseo_familia", "ambicion_profesional",
-  "nivel_social", "estilo_vida_activo", "necesidad_independencia", "fin_de_semana", "conflicto", "sentirse_querido",
-  "disc_perfil", "importa_vestir", "estilo_vestir", "estilo_vestir_pareja", "importa_politica", "politica_pareja",
-  "tiene_tatuajes", "tatuajes_pareja", "hobbies",
-].join(", ");
+// Las columnas del algoritmo y los hobbies (para que la IA personalice): el cuestionario completo no hace falta.
+const COLUMNAS = [...COLUMNAS_MATCHING, "hobbies"].join(", ");
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });

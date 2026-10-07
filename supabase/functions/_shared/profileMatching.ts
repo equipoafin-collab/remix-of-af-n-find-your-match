@@ -67,6 +67,16 @@ export interface PerfilForMatching {
   foto_url?: string | null;
 }
 
+/** Columnas de perfiles que necesita el algoritmo, para leer solo eso desde las Edge Functions. */
+export const COLUMNAS_MATCHING = [
+  "id", "nombre_completo", "email", "edad", "ciudad", "zona", "acepta_otras_zonas", "valores_importantes", "estado_cliente",
+  "genero", "busca_genero", "edad_min_busca", "edad_max_busca", "tipo_relacion", "hijos", "tabaco", "alcohol",
+  "desea_casarse", "religion", "religion_pareja", "importa_religion", "ideologia", "deseo_familia", "ambicion_profesional",
+  "nivel_social", "estilo_vida_activo", "necesidad_independencia", "fin_de_semana", "conflicto", "sentirse_querido",
+  "disc_perfil", "importa_vestir", "estilo_vestir", "estilo_vestir_pareja", "importa_politica", "politica_pareja",
+  "tiene_tatuajes", "tatuajes_pareja",
+];
+
 export interface MatchSuggestion {
   perfilA: PerfilForMatching;
   perfilB: PerfilForMatching;
