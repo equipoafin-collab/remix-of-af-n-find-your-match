@@ -155,6 +155,86 @@ export type Database = {
         }
         Relationships: []
       }
+      match_sugerencias: {
+        Row: {
+          calculado_at: string
+          candidato_id: string
+          decidido_at: string | null
+          desglose: Json
+          estado: Database["public"]["Enums"]["sugerencia_estado"]
+          id: string
+          motivo_decision: string | null
+          motivos: string[]
+          perfil_id: string
+          riesgos: string[]
+          score: number
+          score_ia: number | null
+          score_reglas: number
+          version_algoritmo: string
+        }
+        Insert: {
+          calculado_at?: string
+          candidato_id: string
+          decidido_at?: string | null
+          desglose?: Json
+          estado?: Database["public"]["Enums"]["sugerencia_estado"]
+          id?: string
+          motivo_decision?: string | null
+          motivos?: string[]
+          perfil_id: string
+          riesgos?: string[]
+          score: number
+          score_ia?: number | null
+          score_reglas: number
+          version_algoritmo: string
+        }
+        Update: {
+          calculado_at?: string
+          candidato_id?: string
+          decidido_at?: string | null
+          desglose?: Json
+          estado?: Database["public"]["Enums"]["sugerencia_estado"]
+          id?: string
+          motivo_decision?: string | null
+          motivos?: string[]
+          perfil_id?: string
+          riesgos?: string[]
+          score?: number
+          score_ia?: number | null
+          score_reglas?: number
+          version_algoritmo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_sugerencias_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_sugerencias_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "v_clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_sugerencias_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_sugerencias_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "v_clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notas_privadas: {
         Row: {
           automatica: boolean
@@ -619,6 +699,7 @@ export type Database = {
           sesiones_contratadas: number | null
           sesiones_pendientes: number | null
           sesiones_realizadas: number | null
+          sugerencias_pendientes: number | null
           tabaco: string | null
           tatuajes_pareja: string | null
           telefono: string | null
@@ -669,6 +750,7 @@ export type Database = {
       resumen_estado: "sin_generar" | "borrador" | "revisado"
       sesion_estado: "programada" | "realizada" | "cancelada" | "no_asistio"
       sesion_tipo: "primera" | "seguimiento"
+      sugerencia_estado: "pendiente" | "aceptada" | "rechazada" | "caducada"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -802,6 +884,7 @@ export const Constants = {
       resumen_estado: ["sin_generar", "borrador", "revisado"],
       sesion_estado: ["programada", "realizada", "cancelada", "no_asistio"],
       sesion_tipo: ["primera", "seguimiento"],
+      sugerencia_estado: ["pendiente", "aceptada", "rechazada", "caducada"],
     },
   },
 } as const

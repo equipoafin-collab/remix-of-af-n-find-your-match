@@ -383,9 +383,10 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
 
 ### FASE 4 — Cuestionario clave y motor de matching v3 (servidor + persistencia)
 
-- [ ] **T4.1 · Tabla `match_sugerencias`** · Depende de T1.1
+- [x] **T4.1 · Tabla `match_sugerencias`** · Depende de T1.1
   - Cambios: tabla según 3.1 + índices `(perfil_id, estado)`, `(candidato_id)`. Ampliar `cambiar_estado_cliente` (T1.5). Añadir `sugerencias_pendientes` a `v_clientes`.
   - Aceptación: RLS solo admin; función de estado caduca sugerencias.
+  > Nota de implementación: `estado` es el enum `sugerencia_estado`; las tres puntuaciones son enteros 0-100 (`score_ia` null = solo reglas), `version_algoritmo` obligatorio, `CHECK (perfil_id <> candidato_id)` y `ON DELETE CASCADE` desde ambos perfiles. `cambiar_estado_cliente` caduca solo las `pendiente` (aceptadas y rechazadas se conservan para el aprendizaje): Pausado/Finalizado las que le tienen como candidato, Baja además las suyas; reactivar no resucita ninguna, las recalcula T4.4. `sugerencias_pendientes` va al final de `v_clientes` con `CREATE OR REPLACE`. Sin UI: la usa T4.5. Probado en Postgres 15 local (aplicada dos veces, RLS, caducidad por estado y cascada).
 
 - [ ] **T4.2 · Preguntas clave del cuestionario** · Depende de T1.1
   - Cambios en `Perfil.tsx` (flujo público) **sin alargarlo**:
@@ -600,3 +601,4 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 03/10/2026 | — | `src/integrations/supabase` fuera del lint: Lovable añadió `previewAuthStorage.ts` con un error de lint y rompió el CI de `main`. Los tipos que regeneró Lovable coinciden con los escritos a mano. |
 | 03/10/2026 | T3.3 | Panel de notas y resumen en cada sesión realizada: generar/regenerar con IA, editar por sección y guardar como revisado (sella revisión y seguimiento). |
 | 03/10/2026 | T3.4 | Línea temporal "Evolución" en Resumen con el estado emocional y los avances de las últimas sesiones revisadas. T3.5 (opcional) pospuesta. |
+| 07/10/2026 | T4.1 | Tabla `match_sugerencias` (solo admin, un par cliente-candidato único), `sugerencias_pendientes` en `v_clientes` y `cambiar_estado_cliente` caduca las sugerencias pendientes al pausar, finalizar o dar de baja. |
