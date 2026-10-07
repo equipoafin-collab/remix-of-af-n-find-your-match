@@ -1,29 +1,41 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Search, Filter, ChevronRight, ChevronLeft, MapPin } from "lucide-react";
 import {
-  POR_PAGINA, SIN_REVISAR, SOLO_CLIENTES, SOLO_LEADS, TODOS,
+  POR_PAGINA, SIN_REVISAR, SITUACIONES, SOLO_CLIENTES, SOLO_LEADS, TODOS,
   useClientes, useOpcionesFiltro, type FiltrosClientes,
 } from "@/hooks/admin/useClientes";
 import FotoPerfil from "@/components/admin/FotoPerfil";
 import { EstadoBadge, PlanBadge, SinRevisarBadge } from "@/components/admin/Badges";
+import { useConfiguracion } from "@/hooks/admin/useConfiguracion";
 import { Constants } from "@/integrations/supabase/types";
+import { valorDeUrl } from "@/lib/dashboard";
 
 const ESTADOS = [...Constants.public.Enums.estado_cliente, SIN_REVISAR];
 const PLANES = [SOLO_CLIENTES, ...Constants.public.Enums.plan_tipo, SOLO_LEADS];
 
 const FILTROS_INICIALES: FiltrosClientes = {
-  busqueda: "", genero: TODOS, ciudad: TODOS, estado: TODOS, plan: TODOS, hijos: TODOS, tabaco: TODOS, religion: TODOS,
+  busqueda: "", genero: TODOS, ciudad: TODOS, estado: TODOS, plan: TODOS, situacion: TODOS, hijos: TODOS, tabaco: TODOS, religion: TODOS,
 };
+
+// Los enlaces del Dashboard llegan con ?plan=, ?estado= y ?situacion= (App vuelve a montar la página si cambia la URL).
+const filtrosDeUrl = (params: URLSearchParams): FiltrosClientes => ({
+  ...FILTROS_INICIALES,
+  plan: valorDeUrl(params, "plan", PLANES) ?? TODOS,
+  estado: valorDeUrl(params, "estado", ESTADOS) ?? TODOS,
+  situacion: valorDeUrl(params, "situacion", Object.keys(SITUACIONES)) ?? TODOS,
+});
 
 const fechaCita = (iso: string) =>
   new Date(iso).toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 
 const PerfilesList = () => {
   const [texto, setTexto] = useState("");
-  const [filtros, setFiltros] = useState(FILTROS_INICIALES);
+  const [params] = useSearchParams();
+  const [filtros, setFiltros] = useState(() => filtrosDeUrl(params));
   const [pagina, setPagina] = useState(0);
-  const { data, isLoading: loading, isFetching, error } = useClientes(filtros, pagina);
+  const { data: config } = useConfiguracion();
+  const { data, isLoading: loading, isFetching, error } = useClientes(filtros, pagina, config?.umbral_pocas_sesiones);
   const { data: opciones } = useOpcionesFiltro();
   const clientes = data?.clientes ?? [];
   const total = data?.total ?? 0;
@@ -68,6 +80,7 @@ const PerfilesList = () => {
           <Filter className="w-4 h-4 text-muted-foreground" />
           <Select label="Plan" value={filtros.plan} onChange={filtrar("plan")} options={PLANES} />
           <Select label="Estado" value={filtros.estado} onChange={filtrar("estado")} options={ESTADOS} />
+          <Select label="Situación" value={filtros.situacion} onChange={filtrar("situacion")} options={Object.keys(SITUACIONES)} etiquetas={SITUACIONES} />
           <Select label="Género" value={filtros.genero} onChange={filtrar("genero")} options={["Hombre", "Mujer", "Otro"]} />
           <Select label="Ciudad" value={filtros.ciudad} onChange={filtrar("ciudad")} options={opciones?.ciudades ?? []} />
           <Select label="Hijos" value={filtros.hijos} onChange={filtrar("hijos")} options={["Tengo", "Quiero tener", "No quiero tener"]} />
@@ -163,14 +176,16 @@ const PerfilesList = () => {
   );
 };
 
-const Select = ({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: string[] }) => (
+const Select = ({ label, value, onChange, options, etiquetas = {} }: {
+  label: string; value: string; onChange: (v: string) => void; options: string[]; etiquetas?: Record<string, string>;
+}) => (
   <select
     value={value}
     onChange={(e) => onChange(e.target.value)}
     className="px-3 py-1.5 rounded-lg border border-border bg-background font-body text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-gold/40"
   >
     <option value={TODOS}>{label}: Todos</option>
-    {options.map((o) => <option key={o} value={o}>{label}: {o}</option>)}
+    {options.map((o) => <option key={o} value={o}>{label}: {etiquetas[o] ?? o}</option>)}
   </select>
 );
 
