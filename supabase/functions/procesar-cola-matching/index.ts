@@ -1,12 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders, json } from "../_shared/http.ts";
-import { exigirAdmin } from "../_shared/auth.ts";
+import { exigirAdminOCron } from "../_shared/auth.ts";
 import { leerConfiguracion } from "../_shared/configuracion.ts";
 import { detectarCompatibles, planificarDeteccion } from "../_shared/deteccion.ts";
 import { COLUMNAS_MATCHING, VERSION_ALGORITMO, type MatchSuggestion, type Pesos, type PerfilForMatching } from "../_shared/profileMatching.ts";
 import { filaSugerencia, soloReglas, type EstadoSugerencia } from "../_shared/sugerencias.ts";
 
-// T5.4 · Procesa cola_matching: cada perfil nuevo o reactivado contra todos los clientes activos con plan,
+// T5.4 · Procesa cola_matching (cada 15 min con pg_cron, T7.3): cada perfil nuevo o reactivado contra todos los clientes activos con plan,
 // solo por reglas. Si es muy compatible con alguno (≥ umbral_alta_compatibilidad), le crea o actualiza la sugerencia
 // y una alerta "info" (T7.1).
 
@@ -17,8 +17,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // AMPLIAR EN T7.3: aceptar también la llamada del proceso programado (pg_cron), sin sesión de admin.
-    const admin = await exigirAdmin(req);
+    // La llama pg_cron cada 15 minutos (T7.3) y la admin desde Configuración ("Ejecutar ahora").
+    const admin = await exigirAdminOCron(req, "cron_procesar_cola");
     if (admin instanceof Response) return admin;
     const { supabase } = admin;
 

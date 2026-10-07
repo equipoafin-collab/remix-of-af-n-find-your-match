@@ -22,3 +22,17 @@ export async function exigirAdmin(req: Request): Promise<{ supabase: SupabaseCli
 
   return { supabase, userId };
 }
+
+/**
+ * Como exigirAdmin, pero acepta también al proceso programado (pg_cron, T7.3): sin sesión de usuario y con la
+ * cabecera x-cron-secret igual a secretos_internos[clave]. userId es null en ese caso.
+ */
+export async function exigirAdminOCron(req: Request, clave: string): Promise<{ supabase: SupabaseClient; userId: string | null } | Response> {
+  const secreto = req.headers.get("x-cron-secret");
+  if (!secreto) return exigirAdmin(req);
+
+  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const { data } = await supabase.from("secretos_internos").select("valor").eq("clave", clave).maybeSingle();
+  if (!data || data.valor !== secreto) return json({ error: "Forbidden" }, 403);
+  return { supabase, userId: null };
+}

@@ -1041,6 +1041,17 @@ export type Database = {
         }
         Returns: undefined
       }
+      estado_automatizaciones: {
+        Args: never
+        Returns: {
+          activa: boolean
+          detalle: string
+          programacion: string
+          resultado: string
+          tarea: string
+          ultima_ejecucion: string
+        }[]
+      }
       evaluar_automatizaciones: {
         Args: { _perfil_id?: string }
         Returns: Json

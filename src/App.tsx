@@ -14,6 +14,7 @@ import PerfilDetalle from "./pages/admin/PerfilDetalle";
 import Pagos from "./pages/admin/Pagos";
 import Tareas from "./pages/admin/Tareas";
 import Alertas from "./pages/admin/Alertas";
+import Configuracion from "./pages/admin/Configuracion";
 import Placeholder from "./pages/admin/Placeholder";
 import DiscQuiz from "./pages/DiscQuiz";
 import NotFound from "./pages/NotFound";
@@ -44,7 +45,7 @@ const App = () => (
             <Route path="tareas" element={<Tareas />} />
             <Route path="alertas" element={<Alertas />} />
             <Route path="pagos" element={<Pagos />} />
-            <Route path="configuracion" element={<Placeholder title="Configuración" description="Ajustes del CRM, pesos del algoritmo y gestión de administradoras." />} />
+            <Route path="configuracion" element={<Configuracion />} />
           </Route>
           {/* T6.3: el informe se genera ahora dentro de cada match (ficha → Matches). */}
           <Route path="/compatibilidad" element={<Navigate to="/admin" replace />} />
