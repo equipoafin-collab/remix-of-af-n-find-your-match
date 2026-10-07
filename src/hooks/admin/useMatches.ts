@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesUpdate } from "@/integrations/supabase/types";
+import { toast } from "@/hooks/use-toast";
+import { mensajeDeFuncion } from "./mensajeDeFuncion";
 
 const PERSONA = "id, nombre_completo, edad, zona, ciudad, plan, foto_url";
 
@@ -33,5 +35,18 @@ export function useActualizarMatch() {
       queryClient.invalidateQueries({ queryKey: ["matches"] }),
       queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
     ]),
+  });
+}
+
+/** compatibility-report (T6.3): genera el informe del match con IA y lo guarda en matches.informe. */
+export function useGenerarInforme() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (matchId: string) => {
+      const { error } = await supabase.functions.invoke("compatibility-report", { body: { match_id: matchId } });
+      if (error) throw new Error(await mensajeDeFuncion(error, "No se pudo generar el informe"));
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["matches"] }),
+    onError: (error) => toast({ title: "No se pudo generar el informe", description: error.message, variant: "destructive" }),
   });
 }
