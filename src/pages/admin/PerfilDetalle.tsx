@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { usePerfil } from "@/hooks/admin/usePerfiles";
+import { useCalculoAutomatico } from "@/hooks/admin/useSugerencias";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Perfil } from "@/types/admin";
 import CabeceraFicha from "@/components/admin/ficha/CabeceraFicha";
@@ -30,6 +31,8 @@ const PerfilDetalle = () => {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const { data: cliente, isLoading: loading } = usePerfil(id);
+  // T4.5: las sugerencias se ponen al día en segundo plano en cuanto se abre la ficha, en cualquier pestaña.
+  useCalculoAutomatico(id);
   const pestana = params.get("tab") ?? "resumen";
 
   if (loading) return <div className="p-8 font-body text-muted-foreground">Cargando perfil…</div>;
