@@ -44,6 +44,39 @@ export type Database = {
         }
         Relationships: []
       }
+      cola_matching: {
+        Row: {
+          encolado_at: string
+          motivo: string
+          perfil_id: string
+        }
+        Insert: {
+          encolado_at?: string
+          motivo: string
+          perfil_id: string
+        }
+        Update: {
+          encolado_at?: string
+          motivo?: string
+          perfil_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cola_matching_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: true
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cola_matching_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: true
+            referencedRelation: "v_clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       configuracion: {
         Row: {
           clave: string
