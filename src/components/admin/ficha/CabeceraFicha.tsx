@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { MapPin, Cake, User, Trophy, CalendarClock } from "lucide-react";
+import { Link } from "react-router-dom";
+import { MapPin, Cake, User, Trophy, CalendarClock, ListChecks } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useUpdatePerfil } from "@/hooks/admin/usePerfiles";
 import FotoPerfil from "@/components/admin/FotoPerfil";
@@ -53,7 +54,7 @@ const Revisado = ({ perfil }: { perfil: Perfil }) => {
   );
 };
 
-// Siempre visible (sticky) sobre las pestañas. AMPLIAR: tareas pendientes (T6.2) y alertas (T7.1).
+// Siempre visible (sticky) sobre las pestañas. AMPLIAR: alertas (T7.1).
 const CabeceraFicha = ({ cliente: p }: { cliente: Cliente }) => {
   const calidad = useMemo(() => calidadPerfil(p), [p]);
   const conPlan = !!p.plan || p.sesiones_contratadas > 0;
@@ -112,6 +113,16 @@ const CabeceraFicha = ({ cliente: p }: { cliente: Cliente }) => {
                 ? new Date(p.proxima_cita).toLocaleString("es-ES", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
                 : "Sin cita programada"}
             </p>
+          </div>
+          <div>
+            <p className="font-body text-[11px] uppercase tracking-wider text-muted-foreground">Tareas</p>
+            <Link
+              to="?tab=tareas"
+              className={`font-body text-sm mt-0.5 inline-flex items-center gap-1 hover:underline ${p.tareas_pendientes ? "text-foreground" : "text-muted-foreground"}`}
+            >
+              <ListChecks className="w-3.5 h-3.5 text-muted-foreground" />
+              {p.tareas_pendientes ? `${p.tareas_pendientes} pendiente${p.tareas_pendientes === 1 ? "" : "s"}` : "Sin tareas pendientes"}
+            </Link>
           </div>
         </div>
 

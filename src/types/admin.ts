@@ -5,6 +5,10 @@ export type Pago = Tables<"pagos">;
 export type DiscResult = Tables<"disc_results">;
 export type Nota = Tables<"notas_privadas">;
 export type Sesion = Tables<"sesiones">;
+export type Match = Tables<"matches">;
+export type MatchEstado = Enums<"match_estado">;
+export type Tarea = Tables<"tareas">;
+export type TareaTipo = Enums<"tarea_tipo">;
 export type PlanTipo = Enums<"plan_tipo">;
 export type EstadoCliente = Enums<"estado_cliente">;
 
@@ -15,4 +19,5 @@ export type Cliente = Perfil & {
   sesiones_pendientes: number;
   proxima_cita: string | null;
   sugerencias_pendientes: number;
+  tareas_pendientes: number;
 };
