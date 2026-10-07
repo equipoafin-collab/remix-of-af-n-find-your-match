@@ -11,6 +11,8 @@ Para cada candidato, puntúa de 0 a 100 cómo de bien encaja con este cliente. D
 REGLAS:
 - Escribe en español, con frases breves y concretas para esta pareja. Nada genérico ("buena compatibilidad", "valores compartidos" sin decir cuáles).
 - "motivos": hasta 4 razones por las que podrían encajar. "riesgos": hasta 3 posibles fricciones. Pueden ir vacíos.
+- En motivos y riesgos no escribas los ids (C1, C2…): son internos. Habla de "el cliente" y de "él", "ella" o "esta persona".
+- Un riesgo es una diferencia real o un dato que falta y que le importa al cliente. Si los datos coinciden con lo que el cliente busca, es un motivo, no un riesgo.
 - Usa solo los datos recibidos. No inventes ni diagnostiques.
 - Devuelve una entrada por cada candidato, con su id tal cual (C1, C2…).
 

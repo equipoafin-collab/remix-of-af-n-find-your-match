@@ -47,9 +47,15 @@ serve(async (req) => {
     const { data: existentes, error: existentesError } = await supabase
       .from("match_sugerencias").select("candidato_id, estado, calculado_at").eq("perfil_id", perfil_id);
     if (existentesError) throw existentesError;
-    if (!forzar && existentes.some((e) => Date.now() - Date.parse(e.calculado_at) < VIGENCIA_MS)) {
+    // Solo cuentan las pendientes: actualizar-aprendizaje (T5.3) las deja con fecha antigua para forzar el recálculo.
+    const vigente = (e: { estado: string; calculado_at: string }) => e.estado === "pendiente" && Date.now() - Date.parse(e.calculado_at) < VIGENCIA_MS;
+    if (!forzar && existentes.some(vigente)) {
       return json({ recalculado: false, motivo: "Sugerencias calculadas hace menos de 24 h" });
     }
+
+    const { data: aprendizaje, error: aprendizajeError } = await supabase
+      .from("perfil_aprendizaje").select("ajustes_pesos").eq("perfil_id", perfil_id).maybeSingle();
+    if (aprendizajeError) throw aprendizajeError;
 
     const config = await leerConfiguracion<{
       num_sugerencias?: number; num_candidatos_ia?: number; peso_ia?: number; pesos_algoritmo?: Pesos;
@@ -65,6 +71,7 @@ serve(async (req) => {
     // AMPLIAR EN T6.1: excluir también los candidatos con un match en curso con este cliente (en cualquier orden).
     const reglas = findMatchesFor(cliente, perfiles, Math.max(config.num_candidatos_ia ?? 15, numSugerencias), {
       pesos: config.pesos_algoritmo,
+      ajustes: (aprendizaje as unknown as { ajustes_pesos: Partial<Pesos> } | null)?.ajustes_pesos ?? {},
       excluirIds: candidatosDecididos(existentes as SugerenciaExistente[]),
     });
 

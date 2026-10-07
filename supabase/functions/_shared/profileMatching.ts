@@ -95,6 +95,16 @@ export const WEIGHTS = {
 };
 
 export type Dimension = keyof typeof WEIGHTS;
+
+/** Nombre de cada dimensión para mostrarla (ficha, aprendizaje). */
+export const NOMBRES_DIMENSION: Record<Dimension, string> = {
+  objetivos: "Objetivos",
+  valores: "Valores",
+  estiloVida: "Estilo de vida",
+  personalidad: "Personalidad",
+  geografia: "Geografía",
+  preferencias: "Preferencias",
+};
 export type Pesos = Record<Dimension, number>;
 
 export interface OpcionesMatching {

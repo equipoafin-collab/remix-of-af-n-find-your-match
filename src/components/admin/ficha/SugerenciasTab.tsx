@@ -4,6 +4,9 @@ import { Sparkles, Loader2, AlertTriangle, RefreshCw, Check, X } from "lucide-re
 import FotoPerfil from "@/components/admin/FotoPerfil";
 import { PlanBadge } from "@/components/admin/Badges";
 import type { Perfil } from "@/types/admin";
+import { NOMBRES_DIMENSION } from "@/lib/profileMatching";
+import { MOTIVOS_RECHAZO as MOTIVOS } from "../../../../supabase/functions/_shared/aprendizaje";
+import AprendizajeCliente from "./AprendizajeCliente";
 import {
   useCalculoAutomatico,
   useDecidirSugerencia,
@@ -18,17 +21,8 @@ const FILTROS = [
   { estado: "rechazada", label: "Rechazadas", vacio: "Aún no has rechazado ninguna sugerencia." },
 ] as const;
 
-const DIMENSIONES = [
-  ["objetivos", "Objetivos"],
-  ["valores", "Valores"],
-  ["estiloVida", "Estilo de vida"],
-  ["personalidad", "Personalidad"],
-  ["geografia", "Geografía"],
-  ["preferencias", "Preferencias"],
-] as const;
-
-// Chips de la sección 3.2; se guardan en motivo_decision ("Distancia, Edad — texto") para el aprendizaje (T5.3).
-const MOTIVOS_RECHAZO = ["Edad", "Distancia", "Valores", "Físico", "Intuición profesional"];
+// Chips de la sección 3.2; se guardan en motivo_decision ("Distancia, Edad — texto") y el aprendizaje los lee (T5.3).
+const MOTIVOS_RECHAZO = Object.keys(MOTIVOS);
 
 const fecha = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" }) : "");
 
@@ -81,7 +75,7 @@ const TarjetaSugerencia = ({ s, perfilId }: { s: Sugerencia; perfilId: string })
       )}
 
       <div className="grid grid-cols-3 gap-x-3 gap-y-1.5">
-        {DIMENSIONES.map(([clave, etiqueta]) => (
+        {Object.entries(NOMBRES_DIMENSION).map(([clave, etiqueta]) => (
           <div key={clave}>
             <div className="flex justify-between font-body text-[10px] text-muted-foreground">
               <span>{etiqueta}</span>
@@ -194,6 +188,8 @@ const SugerenciasTab = ({ perfil }: { perfil: Perfil }) => {
           </button>
         ))}
       </div>
+
+      <AprendizajeCliente perfilId={perfil.id} />
 
       {perfil.estado_cliente !== "activo" && (
         <p className="font-body text-xs text-muted-foreground">El cliente no está activo: conserva sus sugerencias, pero no recibe nuevas.</p>
