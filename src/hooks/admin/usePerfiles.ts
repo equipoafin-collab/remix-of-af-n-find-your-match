@@ -35,7 +35,12 @@ export function useUpdatePerfil() {
       const { error } = await supabase.from("perfiles").update(cambios).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
+    // Plan, sesiones contratadas y fechas reevalúan alertas y tareas del cliente (T7.4).
+    onSuccess: () => Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
+      queryClient.invalidateQueries({ queryKey: ["alertas"] }),
+      queryClient.invalidateQueries({ queryKey: ["tareas"] }),
+    ]),
   });
 }
 
@@ -56,6 +61,8 @@ export function useCambiarEstado() {
     onSuccess: () => Promise.all([
       queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
       queryClient.invalidateQueries({ queryKey: ["notas"] }),
+      queryClient.invalidateQueries({ queryKey: ["alertas"] }),
+      queryClient.invalidateQueries({ queryKey: ["tareas"] }),
     ]),
   });
 }

@@ -19,12 +19,14 @@ export function useSesiones(perfilId: string) {
 const errorSesion = (error: PostgrestError) =>
   error.code === "23505" ? new Error("Este cliente ya tiene una primera sesión. Cancélala para programar otra.") : error;
 
-// Las sesiones mueven los contadores de v_clientes y el seguimiento del perfil.
+// Las sesiones mueven los contadores de v_clientes y el seguimiento del perfil, y reevalúan alertas y tareas (T7.4).
 function useInvalidarSesiones() {
   const queryClient = useQueryClient();
   return () => Promise.all([
     queryClient.invalidateQueries({ queryKey: ["sesiones"] }),
     queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
+    queryClient.invalidateQueries({ queryKey: ["alertas"] }),
+    queryClient.invalidateQueries({ queryKey: ["tareas"] }),
   ]);
 }
 
