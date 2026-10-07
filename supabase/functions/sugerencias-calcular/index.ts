@@ -61,11 +61,16 @@ serve(async (req) => {
     if (poolError) throw poolError;
     const perfiles = pool as unknown as PerfilForMatching[];
 
-    // AMPLIAR EN T6.1: excluir también los candidatos con un match en curso con este cliente (en cualquier orden).
+    // Con quien ya tiene un match (en cualquier orden y estado) no se vuelve a proponer.
+    const { data: matches, error: matchesError } = await supabase
+      .from("matches").select("perfil_a, perfil_b").or(`perfil_a.eq.${perfil_id},perfil_b.eq.${perfil_id}`);
+    if (matchesError) throw matchesError;
+    const conMatch = (matches ?? []).map((m) => (m.perfil_a === perfil_id ? m.perfil_b : m.perfil_a) as string);
+
     const reglas = findMatchesFor(cliente, perfiles, Math.max(config.num_candidatos_ia ?? 15, numSugerencias), {
       pesos: config.pesos_algoritmo,
       ajustes: (aprendizaje as unknown as { ajustes_pesos: Partial<Pesos> } | null)?.ajustes_pesos ?? {},
-      excluirIds: candidatosDecididos(existentes as SugerenciaExistente[]),
+      excluirIds: [...candidatosDecididos(existentes as SugerenciaExistente[]), ...conMatch],
     });
 
     let calculadas: SugerenciaCalculada[] = reglas.map(soloReglas);

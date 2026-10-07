@@ -5,6 +5,8 @@ export type Pago = Tables<"pagos">;
 export type DiscResult = Tables<"disc_results">;
 export type Nota = Tables<"notas_privadas">;
 export type Sesion = Tables<"sesiones">;
+export type Match = Tables<"matches">;
+export type MatchEstado = Enums<"match_estado">;
 export type PlanTipo = Enums<"plan_tipo">;
 export type EstadoCliente = Enums<"estado_cliente">;
 
