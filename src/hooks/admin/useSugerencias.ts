@@ -39,13 +39,15 @@ export function useSugerencias(perfilId: string) {
 }
 export type Sugerencia = NonNullable<ReturnType<typeof useSugerencias>["data"]>[number];
 
-// Las sugerencias cambian el contador de v_clientes (cuelga de ["perfiles"]) y aceptar crea un match (T6.1).
+// Las sugerencias cambian el contador de v_clientes (cuelga de ["perfiles"]); aceptar crea un match (T6.1)
+// y, con un cliente Premium, su tarea de informe (T6.4).
 function useInvalidarSugerencias() {
   const queryClient = useQueryClient();
   return (perfilId: string) => Promise.all([
     queryClient.invalidateQueries({ queryKey: ["sugerencias", perfilId] }),
     queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
     queryClient.invalidateQueries({ queryKey: ["matches"] }),
+    queryClient.invalidateQueries({ queryKey: ["tareas"] }),
   ]);
 }
 

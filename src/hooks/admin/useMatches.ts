@@ -23,7 +23,8 @@ export function useMatches(perfilId: string) {
 }
 export type MatchConPersonas = NonNullable<ReturnType<typeof useMatches>["data"]>[number];
 
-// La cita de un match cuenta como próxima cita de los dos en v_clientes (cuelga de ["perfiles"]).
+// La cita de un match cuenta como próxima cita de los dos en v_clientes (cuelga de ["perfiles"]) y los cambios
+// de estado crean o completan tareas automáticas (T6.4).
 export function useActualizarMatch() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -34,6 +35,7 @@ export function useActualizarMatch() {
     onSuccess: () => Promise.all([
       queryClient.invalidateQueries({ queryKey: ["matches"] }),
       queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
+      queryClient.invalidateQueries({ queryKey: ["tareas"] }),
     ]),
   });
 }

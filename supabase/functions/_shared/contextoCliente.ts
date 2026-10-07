@@ -14,28 +14,37 @@ const COLUMNAS_CANDIDATO = "edad, genero, zona, ciudad, tipo_relacion, hijos, va
 const COLUMNAS_DISC =
   "primary_style, secondary_style, strength_1, strength_2, strength_3, weakness_1, weakness_2, weakness_3";
 
+const sinDatos = Promise.resolve({ data: null, error: null });
+
 /**
  * T5.1 · Todo lo que la IA necesita saber del cliente, como texto acotado a ~maxTokens: preguntas clave,
  * cuestionario, DISC, preferencias aprendidas, 5 últimos resúmenes revisados, 10 últimas notas (no automáticas)
- * y 20 últimas decisiones (`decisiones: false` las omite: el informe de T6.3 no debe hablar de otros candidatos).
- * Incluye datos de salud: usar solo con el cliente service role tras exigirAdmin.
+ * y 20 últimas decisiones. Incluye datos de salud: usar solo con el cliente service role tras exigirAdmin.
+ * Con `alcance: "cuestionario"` se queda en lo que el cliente rellenó (preguntas clave, cuestionario y DISC):
+ * es lo que usa el informe de compatibilidad (T6.3), que leen los clientes.
  */
 export async function construirContextoCliente(
   supabase: SupabaseClient,
   perfilId: string,
-  { maxTokens, decisiones: conDecisiones = true }: { maxTokens?: number; decisiones?: boolean } = {},
+  { maxTokens, alcance = "completo" }: { maxTokens?: number; alcance?: "completo" | "cuestionario" } = {},
 ): Promise<string> {
+  const completo = alcance === "completo";
   const [perfil, aprendizaje, sesiones, notas, decisiones] = await Promise.all([
     supabase.from("perfiles").select(COLUMNAS_CLIENTE).eq("id", perfilId).single(),
-    supabase.from("perfil_aprendizaje").select("preferencias").eq("perfil_id", perfilId).maybeSingle(),
-    supabase.from("sesiones").select("fecha_hora, resumen_ia")
-      .eq("perfil_id", perfilId).eq("resumen_estado", "revisado").order("fecha_hora", { ascending: false }).limit(5),
-    supabase.from("notas_privadas").select("created_at, contenido")
-      .eq("perfil_id", perfilId).eq("automatica", false).order("created_at", { ascending: false }).limit(10),
-    supabase.from("match_sugerencias")
-      .select(`decidido_at, estado, motivo_decision, score, candidato:perfiles!match_sugerencias_candidato_id_fkey(${COLUMNAS_CANDIDATO})`)
-      .eq("perfil_id", perfilId).in("estado", ["aceptada", "rechazada"]).order("decidido_at", { ascending: false })
-      .limit(conDecisiones ? 20 : 0),
+    completo ? supabase.from("perfil_aprendizaje").select("preferencias").eq("perfil_id", perfilId).maybeSingle() : sinDatos,
+    completo
+      ? supabase.from("sesiones").select("fecha_hora, resumen_ia")
+        .eq("perfil_id", perfilId).eq("resumen_estado", "revisado").order("fecha_hora", { ascending: false }).limit(5)
+      : sinDatos,
+    completo
+      ? supabase.from("notas_privadas").select("created_at, contenido")
+        .eq("perfil_id", perfilId).eq("automatica", false).order("created_at", { ascending: false }).limit(10)
+      : sinDatos,
+    completo
+      ? supabase.from("match_sugerencias")
+        .select(`decidido_at, estado, motivo_decision, score, candidato:perfiles!match_sugerencias_candidato_id_fkey(${COLUMNAS_CANDIDATO})`)
+        .eq("perfil_id", perfilId).in("estado", ["aceptada", "rechazada"]).order("decidido_at", { ascending: false }).limit(20)
+      : sinDatos,
   ]);
   for (const r of [perfil, aprendizaje, sesiones, notas, decisiones]) if (r.error) throw r.error;
 
