@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findMatchesFor, generateAllMatches, matchProfiles } from "@/lib/profileMatching";
+import { VERSION_ALGORITMO, WEIGHTS, findMatchesFor, generateAllMatches, matchProfiles } from "@/lib/profileMatching";
 import { ana, crearPerfil, luis } from "./fixtures";
 
 describe("matchProfiles · filtros duros", () => {
@@ -117,5 +117,97 @@ describe("generateAllMatches", () => {
     // ana-luis y ana-otro son válidos; luis-otro no (ambos hombres buscando mujer).
     expect(todos).toHaveLength(2);
     expect(todos[0].score).toBeGreaterThanOrEqual(todos[1].score);
+  });
+});
+
+describe("v3 · estado y exclusiones", () => {
+  it("solo propone candidatos activos", () => {
+    for (const estado of ["pausado", "baja", "finalizado"]) {
+      expect(matchProfiles(ana, { ...luis, estado_cliente: estado }).excluded).toBe(`Candidato no activo (${estado})`);
+    }
+    // El estado del cliente no filtra: un pausado conserva y puede recalcular sus sugerencias.
+    expect(matchProfiles({ ...ana, estado_cliente: "pausado" }, luis).excluded).toBeUndefined();
+  });
+
+  it("excluye los ids recibidos (rechazados antes, matches en curso)", () => {
+    expect(matchProfiles(ana, luis, { excluirIds: ["luis"] }).excluded).toBe("Descartado antes o con un match en curso");
+    const pool = [luis, { ...luis, id: "otro" }];
+    expect(findMatchesFor(ana, pool, 20, { excluirIds: ["luis"] }).map((m) => m.perfilB.id)).toEqual(["otro"]);
+  });
+
+  it("expone la versión del algoritmo", () => {
+    expect(VERSION_ALGORITMO).toBe("v3");
+  });
+});
+
+describe("v3 · zona", () => {
+  const madrid = { ...ana, zona: "Madrid" };
+  const sevilla = { ...luis, ciudad: "Sevilla", zona: "Sevilla" };
+
+  it("excluye zonas distintas si ninguno acepta otras zonas", () => {
+    expect(matchProfiles(madrid, sevilla).excluded).toBe("Zonas distintas y ninguno acepta otras zonas");
+  });
+
+  it("basta con que uno acepte otras zonas", () => {
+    expect(matchProfiles({ ...madrid, acepta_otras_zonas: true }, sevilla).excluded).toBeUndefined();
+    expect(matchProfiles(madrid, { ...sevilla, acepta_otras_zonas: true }).excluded).toBeUndefined();
+  });
+
+  it("sin zona o con 'Otra' no excluye", () => {
+    expect(matchProfiles({ ...madrid, zona: null }, sevilla).excluded).toBeUndefined();
+    expect(matchProfiles(madrid, { ...sevilla, zona: "Otra" }).excluded).toBeUndefined();
+  });
+
+  it("misma provincia y distinta ciudad puntúa entre misma ciudad y lejos", () => {
+    const m = matchProfiles(madrid, { ...luis, ciudad: "Alcalá de Henares", zona: "Madrid" });
+    expect(m.breakdown.geografia).toBe(80);
+    expect(m.highlights).toContain("Misma provincia");
+    expect(matchProfiles(madrid, { ...luis, zona: "Madrid" }).breakdown.geografia).toBe(100);
+  });
+});
+
+describe("v3 · valores importantes", () => {
+  it("cuantos más valores compartidos, más puntúa la dimensión valores", () => {
+    const a = { ...ana, valores_importantes: ["Familia", "Humor", "Honestidad"] };
+    const iguales = matchProfiles(a, { ...luis, valores_importantes: ["Familia", "Humor", "Honestidad"] });
+    const uno = matchProfiles(a, { ...luis, valores_importantes: ["Familia", "Ambición", "Libertad"] });
+    const ninguno = matchProfiles(a, { ...luis, valores_importantes: ["Ambición", "Libertad", "Cultura"] });
+    expect(iguales.breakdown.valores).toBeGreaterThan(uno.breakdown.valores);
+    expect(uno.breakdown.valores).toBeGreaterThan(ninguno.breakdown.valores);
+    expect(uno.highlights).toContain("Comparten valores: Familia");
+  });
+
+  it("si alguno no los ha contestado puntúa neutro, sin premiar ni castigar", () => {
+    const a = { ...ana, valores_importantes: ["Familia"] };
+    const sinDatos = matchProfiles(a, luis).breakdown.valores;
+    expect(sinDatos).toBeLessThan(matchProfiles(a, { ...luis, valores_importantes: ["Familia"] }).breakdown.valores);
+    expect(sinDatos).toBeGreaterThan(matchProfiles(a, { ...luis, valores_importantes: ["Ambición"] }).breakdown.valores);
+  });
+});
+
+describe("v3 · pesos", () => {
+  const cerca = { ...luis, id: "cerca", tipo_relacion: "Casual", desea_casarse: "No" };
+  const lejos = { ...luis, id: "lejos", ciudad: "Sevilla" };
+
+  it("sin opciones usa WEIGHTS", () => {
+    expect(matchProfiles(ana, luis, { pesos: WEIGHTS }).score).toBe(matchProfiles(ana, luis).score);
+  });
+
+  it("los pesos inyectados cambian el ranking", () => {
+    expect(findMatchesFor(ana, [cerca, lejos]).map((m) => m.perfilB.id)).toEqual(["lejos", "cerca"]);
+    const pesos = { ...WEIGHTS, geografia: 2 };
+    expect(findMatchesFor(ana, [cerca, lejos], 20, { pesos }).map((m) => m.perfilB.id)).toEqual(["cerca", "lejos"]);
+  });
+
+  it("los ajustes multiplican el peso de una dimensión", () => {
+    const base = matchProfiles(ana, lejos).score;
+    expect(matchProfiles(ana, lejos, { ajustes: { geografia: 1.3 } }).score).toBeLessThan(base);
+    expect(matchProfiles(ana, lejos, { ajustes: { geografia: 0.7 } }).score).toBeGreaterThan(base);
+  });
+
+  it("el score sigue en 0-100 aunque los pesos no sumen 1", () => {
+    const m = matchProfiles(ana, luis, { pesos: { objetivos: 5, valores: 5, estiloVida: 5, personalidad: 5, geografia: 5, preferencias: 5 } });
+    expect(m.score).toBeGreaterThan(0);
+    expect(m.score).toBeLessThanOrEqual(100);
   });
 });

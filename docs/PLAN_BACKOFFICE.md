@@ -383,19 +383,21 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
 
 ### FASE 4 — Cuestionario clave y motor de matching v3 (servidor + persistencia)
 
-- [ ] **T4.1 · Tabla `match_sugerencias`** · Depende de T1.1
+- [x] **T4.1 · Tabla `match_sugerencias`** · Depende de T1.1
   - Cambios: tabla según 3.1 + índices `(perfil_id, estado)`, `(candidato_id)`. Ampliar `cambiar_estado_cliente` (T1.5). Añadir `sugerencias_pendientes` a `v_clientes`.
   - Aceptación: RLS solo admin; función de estado caduca sugerencias.
+  > Nota de implementación: `estado` es el enum `sugerencia_estado`; las tres puntuaciones son enteros 0-100 (`score_ia` null = solo reglas), `version_algoritmo` obligatorio, `CHECK (perfil_id <> candidato_id)` y `ON DELETE CASCADE` desde ambos perfiles. `cambiar_estado_cliente` caduca solo las `pendiente` (aceptadas y rechazadas se conservan para el aprendizaje): Pausado/Finalizado las que le tienen como candidato, Baja además las suyas; reactivar no resucita ninguna, las recalcula T4.4. `sugerencias_pendientes` va al final de `v_clientes` con `CREATE OR REPLACE`. Sin UI: la usa T4.5. Probado en Postgres 15 local (aplicada dos veces, RLS, caducidad por estado y cascada).
 
-- [ ] **T4.2 · Preguntas clave del cuestionario** · Depende de T1.1
+- [x] **T4.2 · Preguntas clave del cuestionario** · Depende de T1.1
   - Cambios en `Perfil.tsx` (flujo público) **sin alargarlo**:
     - `zona`: sustituir/complementar ciudad libre por selector de provincia (lista de provincias de España + "Otra"), y checkbox "Estoy abierto/a a conocer gente de otras zonas".
     - `valores_importantes`: multi-selección (máx. 3) de una lista cerrada: Familia, Honestidad, Fe/espiritualidad, Ambición, Libertad, Estabilidad, Humor, Cultura, Salud/deporte, Compromiso social.
   - Constante compartida `src/lib/preguntasClave.ts` que define las **5 preguntas clave** (tipo_relacion, hijos, rango edad, zona, valores_importantes) con etiqueta y opciones; la ficha y el matching la usan.
   - Script/SQL de relleno: `zona` a partir de `ciudad` cuando coincida con una provincia.
   - Aceptación: nuevos perfiles guardan zona y valores; ficha muestra "Preguntas clave" en Resumen.
+  > Nota de implementación: se complementa la ciudad (no se sustituye: el matching, el listado y el informe la usan): selector nativo de provincia obligatorio y la casilla de otras zonas en el paso "Datos"; valores (de 1 a 3) al principio del paso "Valores", con las opciones sobrantes deshabilitadas al llegar a 3. Sin pasos nuevos. `preguntasClave.ts` exporta además `TIPO_RELACION`, `HIJOS`, `PROVINCIAS` (50 + Ceuta, Melilla y "Otra") y `VALORES_IMPORTANTES`, que `/perfil` ya no define por su cuenta; `PREGUNTAS_CLAVE` lleva por pregunta `clave`, `etiqueta`, `opciones` y `respuesta(perfil)`, y Resumen se pinta con ella. Cuestionario muestra provincia y valores. El relleno es la migración `20261007120000_t4_2_rellenar_zona.sql`: casa la ciudad con el nombre de la provincia o sus variantes (Vizcaya, Gerona, La Coruña…) sin tildes ni mayúsculas, y solo toca perfiles sin zona. La política de INSERT anónimo de T1.1 ya admitía estas columnas. Probado en Chrome con migración aplicada: el perfil de prueba "Prueba Claude T4.2" (`prueba-t42@example.com`) se guardó con provincia y valores y sale en Resumen; el perfil existente "madrid" quedó con zona Madrid.
 
-- [ ] **T4.3 · Algoritmo v3 compartido** · Depende de T4.2, T0.4, T0.5
+- [x] **T4.3 · Algoritmo v3 compartido** · Depende de T4.2, T0.4, T0.5
   - Cambios en `src/lib/profileMatching.ts` (mantener tests pasando, añadir nuevos):
     - Filtros duros nuevos: candidato con `estado_cliente='activo'`; zona incompatible si ninguno acepta otras zonas y `zona` distinta; excluir ids recibidos en `excluirIds` (rechazados previos, matches en curso).
     - Nueva dimensión **valores_importantes** (Jaccard) dentro de "valores"; geografía usa `zona` además de ciudad.
@@ -403,11 +405,13 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
     - Exportar `VERSION_ALGORITMO = 'v3'`.
   - El fichero debe ser **puro** (sin imports de navegador) para poder copiarse/importarse desde la Edge Function (`supabase/functions/_shared/profileMatching.ts`; documentar cómo mantener ambos sincronizados o usar import relativo si el bundler lo permite).
   - Aceptación: tests nuevos para estado, zona, valores y pesos.
+  > Nota de implementación: una sola copia, sin sincronizar: el algoritmo vive en `supabase/functions/_shared/profileMatching.ts` (sin imports, lo cargan Deno y Vite) y `src/lib/profileMatching.ts` lo reexporta, igual que `_shared/resumen.ts`. Las Edge Functions lo importan con `../_shared/profileMatching.ts`. `PerfilForMatching` suma `zona`, `acepta_otras_zonas`, `valores_importantes` y `estado_cliente`. Filtros nuevos (a = cliente, b = candidato): candidato no `activo` (el estado del cliente no filtra), `excluirIds` y zonas distintas si ninguno acepta otras zonas; "Otra" o sin zona no excluye. Valores: Jaccard de `valores_importantes` con 30 puntos dentro de "valores" (neutro si alguno no contestó). Geografía: misma ciudad 100, misma provincia 80 (y aviso "Misma provincia"), ciudad desconocida 50, resto 30. `matchProfiles(a, b, { pesos, ajustes, excluirIds })` y `findMatchesFor(…, limit, opciones)`: peso efectivo = `pesos[d] × ajustes[d]` (multiplicadores, 1 = sin cambio) y el score se divide por la suma de pesos, así sigue en 0-100 aunque no sumen 1. Los límites de ±30 % los aplica T5.3. 13 tests nuevos (28 en total).
 
-- [ ] **T4.4 · Edge Function `sugerencias-calcular`** · Depende de T4.1, T4.3
+- [x] **T4.4 · Edge Function `sugerencias-calcular`** · Depende de T4.1, T4.3
   - Entrada: `perfil_id`, `forzar?: boolean`.
   - Pasos: cargar cliente + pool de candidatos activos (solo columnas necesarias) → excluir rechazados/en curso → puntuar por reglas → top `num_sugerencias` → **upsert** en `match_sugerencias` (no pisa las `aceptada`/`rechazada`; actualiza score de las `pendiente`; marca `caducada` las pendientes que ya no entran).
   - Aceptación: llamar dos veces no duplica; respeta decisiones previas.
+  > Nota de implementación: respuesta `{ recalculado, pendientes, nuevas, caducadas }` o `{ recalculado: false, motivo }`. Sin `forzar` no recalcula si alguna sugerencia del cliente se calculó hace menos de 24 h (la otra condición de T4.5, "perfil cambiado", la decide T4.5); tampoco recalcula si el cliente no está activo (conserva lo que tenga). Pool: perfiles activos, solo las columnas de `PerfilForMatching`, con pesos y `num_sugerencias` de `configuracion`; las aceptadas y rechazadas van en `excluirIds` (los matches en curso se suman en T6.1, marcado `AMPLIAR EN T6.1`). Qué insertar, actualizar y caducar lo decide `planificarSugerencias` (`_shared/sugerencias.ts`, con tests); las escrituras llevan su propia condición (insertar ignora pares existentes, actualizar solo toca `pendiente`/`caducada`) para no pisar una decisión tomada durante el cálculo. Las caducadas que vuelven al top pasan otra vez a `pendiente`. Tope de 1.000 perfiles por consulta de PostgREST, marcado `ponytail:`.
 
 - [ ] **T4.5 · Pestaña "Sugerencias IA" con aceptar/rechazar** · Depende de T4.4, T2.1
   - Cambios: al **abrir la ficha** se leen las sugerencias guardadas (instantáneo) y se lanza `sugerencias-calcular` en segundo plano si están obsoletas (> 24 h o `perfiles.updated_at` posterior). Tarjeta por candidato: foto, nombre, edad, zona, plan, **% compatibilidad**, **motivos**, **riesgos**, desglose por dimensión (barras) y botones **Aceptar** / **Rechazar** (este último con chips de motivo + texto opcional). Enlace a la ficha del candidato.
@@ -600,3 +604,7 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 03/10/2026 | — | `src/integrations/supabase` fuera del lint: Lovable añadió `previewAuthStorage.ts` con un error de lint y rompió el CI de `main`. Los tipos que regeneró Lovable coinciden con los escritos a mano. |
 | 03/10/2026 | T3.3 | Panel de notas y resumen en cada sesión realizada: generar/regenerar con IA, editar por sección y guardar como revisado (sella revisión y seguimiento). |
 | 03/10/2026 | T3.4 | Línea temporal "Evolución" en Resumen con el estado emocional y los avances de las últimas sesiones revisadas. T3.5 (opcional) pospuesta. |
+| 07/10/2026 | T4.1 | Tabla `match_sugerencias` (solo admin, un par cliente-candidato único), `sugerencias_pendientes` en `v_clientes` y `cambiar_estado_cliente` caduca las sugerencias pendientes al pausar, finalizar o dar de baja. |
+| 07/10/2026 | T4.2 | Provincia (+ "abierto/a a otras zonas") y hasta 3 valores importantes en `/perfil` sin pasos nuevos; `src/lib/preguntasClave.ts` con las 5 preguntas clave que pinta la ficha; relleno de `zona` desde la ciudad. |
+| 07/10/2026 | T4.3 | Matching v3 en `supabase/functions/_shared/profileMatching.ts` (reexportado en `src/lib`): solo candidatos activos, `excluirIds`, zona, valores importantes, provincia en geografía, pesos y ajustes inyectables y `VERSION_ALGORITMO`. |
+| 07/10/2026 | T4.4 | Edge Function `sugerencias-calcular`: top por reglas guardado en `match_sugerencias` sin duplicar, sin tocar decisiones y caducando las que salen; vigencia de 24 h salvo `forzar`. |

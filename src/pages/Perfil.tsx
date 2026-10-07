@@ -10,11 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PlanBookingDialog from "@/components/PlanBookingDialog";
 import { calculateDisc, type DiscResult } from "@/components/DiscSurvey";
+import { HIJOS, MAX_VALORES, PROVINCIAS, TIPO_RELACION, VALORES_IMPORTANTES } from "@/lib/preguntasClave";
 
 type DiscType = "D" | "I" | "S" | "C";
 
-const TIPO_RELACION = ["Matrimonio", "Relación estable", "Relación sin convivencia", "Casual"];
-const HIJOS = ["Tengo", "No tengo", "Quiero tener", "No quiero tener"];
 const TABACO = ["Sí", "Ocasional", "No"];
 const CONFLICTO_OPTIONS = ["Dialogar", "Necesito tiempo", "Evitar conflicto", "Enfrentar directamente"];
 const QUERIDO_OPTIONS = ["Palabras", "Tiempo de calidad", "Contacto físico", "Proyectos compartidos", "Admiración"];
@@ -113,6 +112,8 @@ interface FormData {
   telefono: string;
   edad: string;
   ciudad: string;
+  zona: string;
+  acepta_otras_zonas: boolean;
   estatura: string;
   peso: string;
   tipo_relacion: string;
@@ -127,6 +128,7 @@ interface FormData {
   nivel_social: number;
   estilo_vida_activo: number;
   necesidad_independencia: number;
+  valores_importantes: string[];
   conflicto: string[];
   sentirse_querido: string[];
   relacion_sana: string;
@@ -152,10 +154,10 @@ interface FormData {
 }
 
 const initialForm: FormData = {
-  nombre_completo: "", email: "", telefono: "", edad: "", ciudad: "", estatura: "", peso: "", tipo_relacion: "", hijos: "", tabaco: "", busca_genero: "", genero: "",
+  nombre_completo: "", email: "", telefono: "", edad: "", ciudad: "", zona: "", acepta_otras_zonas: false, estatura: "", peso: "", tipo_relacion: "", hijos: "", tabaco: "", busca_genero: "", genero: "",
   edad_min_busca: "", edad_max_busca: "",
   deseo_familia: 3, ambicion_profesional: 3, nivel_social: 3, estilo_vida_activo: 3, necesidad_independencia: 3,
-  conflicto: [], sentirse_querido: [],
+  valores_importantes: [], conflicto: [], sentirse_querido: [],
   relacion_sana: "", aprendizaje_ultima_relacion: "", vida_en_10_anios: "", fin_de_semana: "", hobbies: "",
   disc_answers: {},
   importa_vestir: "", estilo_vestir: "", estilo_vestir_pareja: "",
@@ -203,10 +205,10 @@ const Perfil = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const update = (field: keyof FormData, value: string | number) =>
+  const update = (field: keyof FormData, value: string | number | boolean) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
-  const toggleMulti = (field: "conflicto" | "sentirse_querido", value: string) => {
+  const toggleMulti = (field: "valores_importantes" | "conflicto" | "sentirse_querido", value: string) => {
     setForm((prev) => {
       const arr = prev[field];
       return { ...prev, [field]: arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value] };
@@ -226,6 +228,7 @@ const Perfil = () => {
         const edad = parseInt(form.edad);
         if (!form.edad || isNaN(edad) || edad < 18 || edad > 99) return "La edad debe ser entre 18 y 99";
         if (!form.ciudad.trim()) return "La ciudad es obligatoria";
+        if (!form.zona) return "Selecciona tu provincia";
         if (!form.genero) return "Selecciona tu género";
         return null;
       }
@@ -248,6 +251,9 @@ const Perfil = () => {
         if (form.importa_politica === "si" && !form.politica_pareja) return "Selecciona la ideología que prefieres";
         if (!form.tiene_tatuajes) return "Indica si tienes tatuajes";
         if (form.tiene_tatuajes === "no" && !form.tatuajes_pareja) return "Indica tu preferencia sobre tatuajes en tu pareja";
+        return null;
+      case 4:
+        if (form.valores_importantes.length === 0) return "Elige al menos un valor importante";
         return null;
       case 5:
         if (form.conflicto.length === 0) return "Selecciona al menos una opción en conflictos";
@@ -298,6 +304,9 @@ const Perfil = () => {
       telefono: form.telefono.trim(),
       edad: parseInt(form.edad),
       ciudad: form.ciudad.trim(),
+      zona: form.zona,
+      acepta_otras_zonas: form.acepta_otras_zonas,
+      valores_importantes: form.valores_importantes,
       tipo_relacion: form.tipo_relacion,
       busca_genero: form.busca_genero,
       genero: form.genero,
@@ -461,6 +470,20 @@ const Perfil = () => {
                       <Input value={form.ciudad} onChange={(e) => update("ciudad", e.target.value)} maxLength={100} placeholder="Ej: Madrid" className="rounded-xl h-12 bg-card" />
                     </FieldGroup>
                   </div>
+                  <FieldGroup label="Provincia *">
+                    <select
+                      value={form.zona}
+                      onChange={(e) => update("zona", e.target.value)}
+                      className={`w-full rounded-xl h-12 bg-card border border-input px-3 font-body text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${form.zona ? "text-foreground" : "text-muted-foreground"}`}
+                    >
+                      <option value="" disabled>Selecciona tu provincia</option>
+                      {PROVINCIAS.map((p) => <option key={p} value={p} className="text-foreground">{p}</option>)}
+                    </select>
+                    <label className="flex items-center gap-2 pt-1 cursor-pointer font-body text-sm text-muted-foreground">
+                      <input type="checkbox" checked={form.acepta_otras_zonas} onChange={(e) => update("acepta_otras_zonas", e.target.checked)} className="w-4 h-4 accent-[hsl(var(--ring))]" />
+                      Estoy abierto/a a conocer gente de otras zonas
+                    </label>
+                  </FieldGroup>
                   <div className="grid grid-cols-2 gap-4">
                     <FieldGroup label="Estatura (cm)">
                       <Input type="number" value={form.estatura} onChange={(e) => update("estatura", e.target.value)} min={100} max={250} placeholder="Ej: 175" className="rounded-xl h-12 bg-card" />
@@ -597,6 +620,9 @@ const Perfil = () => {
               <StepWrapper key="escala" direction={direction}>
                 <StepHeader icon={<Sliders className="w-6 h-6" />} title="Escala de valores" subtitle="¿Qué importancia le das a cada aspecto?" />
                 <div className="space-y-6 mt-8">
+                  <div className="bg-card rounded-2xl p-5 border border-border shadow-sm">
+                    <MultiPillSelector label={`¿Qué valores son más importantes para ti? (hasta ${MAX_VALORES}) *`} options={VALORES_IMPORTANTES} selected={form.valores_importantes} onToggle={(v) => toggleMulti("valores_importantes", v)} max={MAX_VALORES} />
+                  </div>
                   {ESCALA_LABELS.map(({ key, label, emoji }) => (
                     <div key={key} className="bg-card rounded-2xl p-5 border border-border shadow-sm">
                       <div className="flex items-center justify-between mb-3">
@@ -1049,14 +1075,14 @@ const PillSelector = ({ label, options, value, onChange }: { label: string; opti
   </div>
 );
 
-const MultiPillSelector = ({ label, options, selected, onToggle }: { label: string; options: string[]; selected: string[]; onToggle: (v: string) => void }) => (
+const MultiPillSelector = ({ label, options, selected, onToggle, max }: { label: string; options: string[]; selected: string[]; onToggle: (v: string) => void; max?: number }) => (
   <div>
     <label className="block font-body text-sm font-medium text-foreground mb-3">{label}</label>
     <div className="flex flex-wrap gap-2">
       {options.map((opt) => {
         const isActive = selected.includes(opt);
         return (
-          <button key={opt} type="button" onClick={() => onToggle(opt)} className={`px-4 py-2.5 rounded-full border text-sm font-body transition-all duration-200 ${isActive ? "bg-gold-vivid text-white border-gold-vivid shadow-sm" : "bg-card text-foreground border-border hover:border-gold-vivid/50 hover:shadow-sm"}`}>
+          <button key={opt} type="button" onClick={() => onToggle(opt)} disabled={!isActive && max !== undefined && selected.length >= max} className={`px-4 py-2.5 rounded-full border text-sm font-body transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed ${isActive ? "bg-gold-vivid text-white border-gold-vivid shadow-sm" : "bg-card text-foreground border-border hover:border-gold-vivid/50 hover:shadow-sm"}`}>
             {isActive && <Check className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />}
             {opt}
           </button>

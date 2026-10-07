@@ -7,6 +7,10 @@ export const crearPerfil = (overrides: Partial<PerfilForMatching> = {}): PerfilF
   email: null,
   edad: 33,
   ciudad: "Madrid",
+  zona: null, // sin provincia, como los perfiles anteriores a T4.2; los tests de zona la fijan
+  acepta_otras_zonas: false,
+  valores_importantes: [],
+  estado_cliente: "activo",
   genero: "Mujer",
   busca_genero: "Hombre",
   edad_min_busca: 28,

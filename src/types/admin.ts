@@ -14,4 +14,5 @@ export type Cliente = Perfil & {
   sesiones_realizadas: number;
   sesiones_pendientes: number;
   proxima_cita: string | null;
+  sugerencias_pendientes: number;
 };

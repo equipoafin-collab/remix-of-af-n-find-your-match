@@ -38,7 +38,7 @@ const SugerenciasTab = ({ perfil }: { perfil: Perfil }) => {
       {!calculado ? null : calculating ? (
         <p className="font-body text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Calculando compatibilidad…</p>
       ) : matches.length === 0 ? (
-        <p className="font-body text-sm text-muted-foreground">No hay candidatos compatibles. Todos los demás perfiles entran en conflicto con los filtros excluyentes (género, edad, hijos, religión o política).</p>
+        <p className="font-body text-sm text-muted-foreground">No hay candidatos compatibles. Todos los demás perfiles entran en conflicto con los filtros excluyentes (estado, zona, género, edad, hijos, religión o política).</p>
       ) : (
         <div className="grid md:grid-cols-2 gap-3">
           {matches.map((m) => {
