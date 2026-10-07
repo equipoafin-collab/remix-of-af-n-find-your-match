@@ -54,7 +54,7 @@ serve(async (req) => {
     const perfiles = pool as unknown as PerfilForMatching[];
 
     // AMPLIAR EN T6.1: excluir también los candidatos con un match en curso con este cliente (en cualquier orden).
-    const top = findMatchesFor(cliente as PerfilForMatching, pool as PerfilForMatching[], config.num_sugerencias ?? 10, {
+    const top = findMatchesFor(cliente, perfiles, config.num_sugerencias ?? 10, {
       pesos: config.pesos_algoritmo,
       excluirIds: candidatosDecididos(existentes as SugerenciaExistente[]),
     });
