@@ -31,15 +31,16 @@ serve(async (req) => {
       id: string; perfil_a: string; perfil_b: string; a: { nombre_completo: string } | null; b: { nombre_completo: string } | null;
     };
 
-    // Cuestionario, preguntas clave, DISC y lo que se sabe de cada uno (sin sus decisiones sobre otros candidatos).
+    // Solo lo que cada uno rellenó (preguntas clave, cuestionario y DISC): el informe lo leen los clientes, y con
+    // sesiones o notas en el prompt la IA las acababa citando aunque se le prohibiera (visto en producción).
     const [contextoA, contextoB] = await Promise.all([
-      construirContextoCliente(supabase, m.perfil_a, { maxTokens: TOKENS_POR_PERSONA, decisiones: false }),
-      construirContextoCliente(supabase, m.perfil_b, { maxTokens: TOKENS_POR_PERSONA, decisiones: false }),
+      construirContextoCliente(supabase, m.perfil_a, { maxTokens: TOKENS_POR_PERSONA, alcance: "cuestionario" }),
+      construirContextoCliente(supabase, m.perfil_b, { maxTokens: TOKENS_POR_PERSONA, alcance: "cuestionario" }),
     ]);
     const userPrompt =
       `PERSONA A · ${m.a?.nombre_completo}\n${contextoA}\n\nPERSONA B · ${m.b?.nombre_completo}\n${contextoB}\n\nGenera el informe de compatibilidad.`;
 
-    // Puede llevar resúmenes y notas (datos de salud) camino del proveedor de IA: queda constancia (RGPD).
+    // Datos personales del cuestionario camino del proveedor de IA: queda constancia (RGPD).
     await supabase.from("auditoria").insert({ user_id: userId, accion: "generar_informe_ia", entidad: "matches", entidad_id: m.id });
     const informe = validarInforme(await pedirJSON(SYSTEM_INFORME, userPrompt));
     if (!informe) return json({ error: "La IA devolvió un informe incompleto. Prueba a regenerarlo." }, 502);
