@@ -14,13 +14,17 @@ const content = {
   },
   "/privacidad": {
     title: "Política de Privacidad",
+    // T9.3 · Versión VERSION_CONSENTIMIENTO (src/lib/rgpd.ts). Pendiente de validar con asesoría legal.
     body: [
-      "Nos tomamos muy en serio la protección de tus datos personales. Esta web cumple con la LOPDGDD y el Reglamento General de Protección de Datos (RGPD).",
-      "Datos que recogemos:\nNombre, edad, ciudad, preferencias de relación, hijos, tabaco, hobbies. Escalas de personalidad y respuestas abiertas para generar informes de compatibilidad.",
-      "Finalidad:\nLos datos se usan únicamente para crear perfiles, generar informes de compatibilidad y mejorar la experiencia del usuario.",
-      "Conservación de datos:\nSe almacenan de forma segura en nuestra base de datos y no se cederán a terceros sin tu consentimiento.",
-      "Derechos:\nPuedes acceder, rectificar o eliminar tus datos en cualquier momento enviando un correo a equipo.afin@gmail.com.",
-      "Consentimiento:\nAntes de enviar tu perfil, debes aceptar el tratamiento de tus datos marcando la casilla correspondiente.",
+      "Nos tomamos muy en serio la protección de tus datos personales. Esta política cumple con el Reglamento General de Protección de Datos (RGPD) y la LOPDGDD. Última actualización: 8 de octubre de 2026.",
+      "Responsable:\nAfín. Para cualquier cuestión sobre tus datos, escríbenos a equipo.afin@gmail.com.",
+      "Datos que tratamos:\n- Los del cuestionario: nombre, email, teléfono, edad, ciudad y zona, foto, preferencias de pareja y de relación, hijos, tabaco, valores, hobbies, escalas de personalidad, test DISC y respuestas abiertas.\n- Si contratas un plan: tus pagos, las notas y resúmenes de tus sesiones con la psicóloga (incluyen información sobre tu bienestar emocional, que es un dato de salud), el vídeo de la primera sesión y, en el plan Premium, el certificado de antecedentes que subas.\n- Tu opinión después de cada cita.",
+      "Finalidad:\nBuscarte pareja compatible: proponerte perfiles, preparar los informes de compatibilidad y acompañar tu proceso con la psicóloga. No usamos tus datos para nada más.",
+      "Base legal:\nTu consentimiento, que das al enviar el cuestionario y que es explícito para los datos sobre tu bienestar emocional, y el contrato del plan si lo contratas. Puedes retirar tu consentimiento cuando quieras.",
+      "Uso de inteligencia artificial:\nUsamos IA para ordenar los perfiles más compatibles contigo, redactar un borrador del resumen de cada sesión y preparar el informe de compatibilidad. Lo hacemos a través de la pasarela de IA de Lovable, que procesa los datos con modelos Gemini de Google. Solo enviamos lo necesario y nunca tu email ni tu teléfono. La IA no decide: la psicóloga revisa cada propuesta y cada resumen, y no te presentamos a nadie sin su aprobación.",
+      "Quién puede ver tus datos:\nSolo el equipo de Afín, con acceso protegido y registrado. Cuando te presentamos a alguien, esa persona recibe el informe de compatibilidad, con tu nombre y lo que hace que encajéis, pero nunca tus notas de sesión. Nuestros proveedores técnicos (alojamiento e IA) tratan los datos por cuenta nuestra.",
+      "Conservación:\nMientras uses el servicio. Si pides que borremos tus datos, los borramos todos, salvo los de facturación, que la ley nos obliga a conservar durante los plazos legales.",
+      "Tus derechos:\nPuedes acceder a tus datos, rectificarlos, pedir que los borremos, oponerte o limitar su tratamiento, recibirlos en un formato portable y retirar tu consentimiento escribiendo a equipo.afin@gmail.com. Si crees que no los tratamos bien, puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es).",
     ],
   },
   "/aviso-legal": {

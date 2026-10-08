@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { PostgrestError } from "@supabase/supabase-js";
 import type { TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
+import { registrarLectura } from "./useRgpd";
 
 export function useSesiones(perfilId: string) {
   return useQuery({
@@ -10,6 +11,7 @@ export function useSesiones(perfilId: string) {
       const { data, error } = await supabase
         .from("sesiones").select("*").eq("perfil_id", perfilId).order("fecha_hora", { ascending: false });
       if (error) throw error;
+      registrarLectura("leer_sesiones", [perfilId]); // notas de sesión y resúmenes: datos de salud (T9.3)
       return data;
     },
   });

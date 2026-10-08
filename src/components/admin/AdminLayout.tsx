@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import CampanaAlertas from "./alertas/CampanaAlertas";
+import ElegirContrasena from "./ElegirContrasena";
 import {
   LayoutDashboard, Users, Heart, CheckCircle2, ClipboardList,
   StickyNote, CreditCard, Settings, LogOut, Sparkles, ListChecks,
@@ -22,6 +23,7 @@ const NAV = [
 const AdminLayout = () => {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
+  const [elegirContrasena, setElegirContrasena] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -31,6 +33,7 @@ const AdminLayout = () => {
         .from("user_roles").select("role")
         .eq("user_id", session.user.id).eq("role", "admin").maybeSingle();
       if (!role) { await supabase.auth.signOut(); navigate("/admin/login", { replace: true }); return; }
+      setElegirContrasena(session.user.user_metadata?.debe_elegir_contrasena === true); // invitada por T9.2
       setChecking(false);
     })();
   }, [navigate]);
@@ -43,6 +46,8 @@ const AdminLayout = () => {
   if (checking) {
     return <main className="min-h-screen bg-background flex items-center justify-center"><p className="font-body text-muted-foreground">Cargando CRM…</p></main>;
   }
+
+  if (elegirContrasena) return <ElegirContrasena alTerminar={() => setElegirContrasena(false)} />;
 
   return (
     <main className="min-h-screen bg-background flex">

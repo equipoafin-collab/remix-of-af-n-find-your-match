@@ -7,16 +7,17 @@ import { useActualizarAprendizaje } from "./useAprendizaje";
 
 const PERSONA = "id, nombre_completo, edad, zona, ciudad, plan, foto_url";
 
-// Los del cliente en cualquier lado de la pareja (A aceptó la sugerencia, B era el candidato).
-export function useMatches(perfilId: string) {
+// Los del cliente en cualquier lado de la pareja (A aceptó la sugerencia, B era el candidato); sin cliente, todos (T9.1).
+export function useMatches(perfilId?: string) {
   return useQuery({
-    queryKey: ["matches", perfilId],
+    queryKey: ["matches", perfilId ?? "todos"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("matches")
-        .select(`*, a:perfiles!matches_perfil_a_fkey(${PERSONA}), b:perfiles!matches_perfil_b_fkey(${PERSONA})`)
-        .or(`perfil_a.eq.${perfilId},perfil_b.eq.${perfilId}`)
-        .order("created_at", { ascending: false });
+        .select(`*, a:perfiles!matches_perfil_a_fkey(${PERSONA}), b:perfiles!matches_perfil_b_fkey(${PERSONA})`);
+      if (perfilId) q = q.or(`perfil_a.eq.${perfilId},perfil_b.eq.${perfilId}`);
+      // ponytail: tope de 1.000 filas de PostgREST en la vista global; paginar cuando haya tantos matches.
+      const { data, error } = await q.order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },

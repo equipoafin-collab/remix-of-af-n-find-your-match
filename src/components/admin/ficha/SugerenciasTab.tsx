@@ -29,7 +29,7 @@ const fecha = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("e
 const colorScore = (score: number) =>
   score >= 80 ? "text-emerald-600 border-emerald-200 bg-emerald-50" : score >= 60 ? "text-amber-700 border-amber-200 bg-amber-50" : "text-rose-700 border-rose-200 bg-rose-50";
 
-const TarjetaSugerencia = ({ s, perfilId }: { s: Sugerencia; perfilId: string }) => {
+export const TarjetaSugerencia = ({ s, perfilId }: { s: Sugerencia; perfilId: string }) => {
   const decidir = useDecidirSugerencia();
   const [rechazando, setRechazando] = useState(false);
   const [motivos, setMotivos] = useState<string[]>([]);

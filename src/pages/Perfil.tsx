@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PlanBookingDialog from "@/components/PlanBookingDialog";
 import { calculateDisc, type DiscResult } from "@/components/DiscSurvey";
 import { HIJOS, MAX_VALORES, PROVINCIAS, TIPO_RELACION, VALORES_IMPORTANTES } from "@/lib/preguntasClave";
+import { VERSION_CONSENTIMIENTO } from "@/lib/rgpd";
 
 type DiscType = "D" | "I" | "S" | "C";
 
@@ -344,6 +345,7 @@ const Perfil = () => {
       foto_url: form.foto_url || null,
       disc_respuestas: disc.respuestas,
       disc_perfil: disc.perfil,
+      consentimiento_version: VERSION_CONSENTIMIENTO, // T9.3: qué texto aceptó (la fecha la pone la BD)
     });
     setSubmitting(false);
     if (dbError) {
@@ -721,6 +723,9 @@ const Perfil = () => {
                       <a href="/privacidad" target="_blank" className="text-gold underline hover:opacity-80">política de privacidad</a>
                       {" "}y los{" "}
                       <a href="/terminos" target="_blank" className="text-gold underline hover:opacity-80">términos y condiciones</a>.
+                      {" "}Consiento expresamente que Afín trate mis datos, incluidos los que comparta sobre mi bienestar emocional en las
+                      sesiones con su psicóloga, para buscarme pareja, y que use inteligencia artificial (modelos Gemini de Google, a través
+                      de Lovable) para proponerme perfiles compatibles y resumir las sesiones. Una persona revisa siempre cada propuesta.
                     </span>
                   </label>
 

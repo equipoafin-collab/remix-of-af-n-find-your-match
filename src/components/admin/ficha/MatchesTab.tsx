@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { CalendarDays, Heart, MapPin, FileText, CheckCircle2, MessageSquare } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -7,19 +7,9 @@ import FotoPerfil from "@/components/admin/FotoPerfil";
 import { PlanBadge } from "@/components/admin/Badges";
 import { useActualizarMatch, useMatches, type MatchConPersonas } from "@/hooks/admin/useMatches";
 import type { MatchEstado, Perfil } from "@/types/admin";
+import { ESTADO_MATCH as ESTADO } from "@/lib/matches";
 import PanelInforme from "./PanelInforme";
 import PanelFeedback from "./PanelFeedback";
-
-// En el orden del flujo (sección 3.1). El informe es opcional: con plan Esencial se pasa de propuesto a la cita.
-const ESTADO: Record<MatchEstado, { label: string; color: string }> = {
-  propuesto: { label: "Propuesto", color: "bg-slate-50 text-slate-700 border-slate-200" },
-  informe_enviado: { label: "Informe enviado", color: "bg-blue-50 text-blue-700 border-blue-200" },
-  cita_agendada: { label: "Cita agendada", color: "bg-amber-50 text-amber-700 border-amber-200" },
-  cita_realizada: { label: "Cita realizada", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
-  feedback_registrado: { label: "Feedback registrado", color: "bg-violet-50 text-violet-700 border-violet-200" },
-  continuan: { label: "Continúan", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  cerrado: { label: "Cerrado", color: "bg-muted text-muted-foreground border-border" },
-};
 
 const badge = "px-2 py-0.5 rounded-full text-xs font-body font-medium border";
 const campo = "mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm";
@@ -74,14 +64,29 @@ const FormCita = ({ match, cerrar, faltaInforme }: { match: MatchConPersonas; ce
   );
 };
 
-const FilaMatch = ({ match, perfil }: { match: MatchConPersonas; perfil: Perfil }) => {
+const Persona = ({ p, children }: { p: MatchConPersonas["a"]; children?: ReactNode }) => (
+  <div className="flex items-center gap-3 min-w-0">
+    <FotoPerfil path={p?.foto_url} nombre={p?.nombre_completo ?? "?"} className="w-10 h-10 rounded-full text-xs" />
+    <div className="min-w-0">
+      <Link to={`/admin/perfiles/${p?.id}?tab=matches`} className="block font-body text-sm font-semibold text-foreground truncate hover:text-gold">
+        {p?.nombre_completo}
+      </Link>
+      <p className="font-body text-xs text-muted-foreground flex items-center gap-1.5 flex-wrap">
+        {p?.edad} años · {p?.zona ?? p?.ciudad} <PlanBadge plan={p?.plan ?? null} />
+        {children}
+      </p>
+    </div>
+  </div>
+);
+
+/** En la ficha (perfilId) se ve el otro de la pareja; en Matches Aprobados (T9.1), los dos. */
+export const FilaMatch = ({ match, perfilId }: { match: MatchConPersonas; perfilId?: string }) => {
   const actualizar = useActualizarMatch();
   const [editandoCita, setEditandoCita] = useState(false);
   const [verInforme, setVerInforme] = useState(false);
   const [verFeedback, setVerFeedback] = useState(false);
   // Feedback en cuanto la cita se ha hecho (o si ya hay alguno guardado).
   const conFeedback = !!match.feedback_at || ["cita_realizada", "feedback_registrado", "continuan", "cerrado"].includes(match.estado);
-  const otro = match.perfil_a === perfil.id ? match.b : match.a;
   // T6.4 · Bloqueo suave: con un lado Premium la tarea "Enviar informe" sigue pendiente hasta marcarlo como enviado.
   const faltaInforme = !match.informe_enviado_at && (match.a?.plan === "premium" || match.b?.plan === "premium");
 
@@ -100,17 +105,22 @@ const FilaMatch = ({ match, perfil }: { match: MatchConPersonas; perfil: Perfil 
   return (
     <li className="px-5 py-4 border-t border-border">
       <div className="flex items-center gap-3 flex-wrap">
-        <FotoPerfil path={otro?.foto_url} nombre={otro?.nombre_completo ?? "?"} className="w-10 h-10 rounded-full text-xs" />
         <div className="flex-1 min-w-0">
-          <Link to={`/admin/perfiles/${otro?.id}?tab=matches`} className="block font-body text-sm font-semibold text-foreground truncate hover:text-gold">
-            {otro?.nombre_completo}
-          </Link>
-          <p className="font-body text-xs text-muted-foreground flex items-center gap-1.5 flex-wrap">
-            {otro?.edad} años · {otro?.zona ?? otro?.ciudad} <PlanBadge plan={otro?.plan ?? null} />
-            <span>· {match.perfil_a === perfil.id ? "lo propuso este cliente" : "lo propuso el otro cliente"}</span>
-          </p>
+          <div className="flex items-center gap-3 flex-wrap">
+            {perfilId ? (
+              <Persona p={match.perfil_a === perfilId ? match.b : match.a}>
+                <span>· {match.perfil_a === perfilId ? "lo propuso este cliente" : "lo propuso el otro cliente"}</span>
+              </Persona>
+            ) : (
+              <>
+                <Persona p={match.a} />
+                <Heart className="w-4 h-4 text-gold shrink-0" />
+                <Persona p={match.b} />
+              </>
+            )}
+          </div>
           {match.fecha_cita && (
-            <p className="font-body text-xs text-foreground mt-1 flex items-center gap-3 flex-wrap">
+            <p className="font-body text-xs text-foreground mt-2 flex items-center gap-3 flex-wrap">
               <span className="inline-flex items-center gap-1"><CalendarDays className="w-3.5 h-3.5 text-gold" /> {fechaCita(match.fecha_cita)}</span>
               {match.lugar && <span className="inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-gold" /> {match.lugar}</span>}
               {match.estado === "cita_agendada" && !editandoCita && (
@@ -176,7 +186,7 @@ const MatchesTab = ({ perfil }: { perfil: Perfil }) => {
           Aún no hay matches. Se crean al aceptar una sugerencia en Sugerencias IA.
         </p>
       ) : (
-        <ul>{matches.map((m) => <FilaMatch key={m.id} match={m} perfil={perfil} />)}</ul>
+        <ul>{matches.map((m) => <FilaMatch key={m.id} match={m} perfilId={perfil.id} />)}</ul>
       )}
     </section>
   );
