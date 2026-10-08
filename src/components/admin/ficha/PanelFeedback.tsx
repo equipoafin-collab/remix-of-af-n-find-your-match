@@ -18,19 +18,19 @@ const Lado = ({ nombre, texto, valoracion, repetir, onTexto, onValoracion, onRep
     <p className="font-body text-sm font-semibold text-foreground">{nombre}</p>
     <div>
       <label className={etiqueta}>Qué le ha parecido</label>
-      <textarea value={texto} onChange={(e) => onTexto(e.target.value)} rows={3} maxLength={2000} className={`${campo} resize-y`} />
+      <textarea aria-label="Qué le ha parecido" value={texto} onChange={(e) => onTexto(e.target.value)} rows={3} maxLength={2000} className={`${campo} resize-y`} />
     </div>
     <div className="grid grid-cols-2 gap-2">
       <div>
         <label className={etiqueta}>Valoración</label>
-        <select value={valoracion} onChange={(e) => onValoracion(e.target.value)} className={campo}>
+        <select aria-label="Valoración" value={valoracion} onChange={(e) => onValoracion(e.target.value)} className={campo}>
           <option value="">—</option>
           {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n} / 5</option>)}
         </select>
       </div>
       <div>
         <label className={etiqueta}>¿Volver a verse?</label>
-        <select value={repetir} onChange={(e) => onRepetir(e.target.value)} className={campo}>
+        <select aria-label="¿Volver a verse?" value={repetir} onChange={(e) => onRepetir(e.target.value)} className={campo}>
           <option value="">Sin respuesta</option>
           <option value="si">Sí</option>
           <option value="no">No</option>

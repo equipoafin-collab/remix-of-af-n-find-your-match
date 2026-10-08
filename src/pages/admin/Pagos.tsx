@@ -70,7 +70,7 @@ const Pagos = () => {
   const filtered = paid.filter((p) => filter === "all" || p.plan === filter);
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 md:p-8 space-y-6">
       <header className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
@@ -112,19 +112,19 @@ const Pagos = () => {
             <BuscadorPerfil onSelect={(perfil) => setForm({ ...form, perfil, plan: perfil.plan ?? form.plan })} />
           )}
           <div className="grid sm:grid-cols-3 gap-3">
-            <select value={form.plan} onChange={(e) => setForm({ ...form, plan: e.target.value as PlanTipo })} className="px-3 py-2 rounded-lg border border-border bg-background font-body text-sm">
+            <select aria-label="Plan" value={form.plan} onChange={(e) => setForm({ ...form, plan: e.target.value as PlanTipo })} className="px-3 py-2 rounded-lg border border-border bg-background font-body text-sm">
               <option value="esencial">Esencial</option>
               <option value="premium">Premium</option>
             </select>
-            <input type="number" min="0" step="0.01" placeholder="Importe (€)" value={form.importe} onChange={(e) => setForm({ ...form, importe: e.target.value })} className="px-3 py-2 rounded-lg border border-border bg-background font-body text-sm" />
-            <input type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} className="px-3 py-2 rounded-lg border border-border bg-background font-body text-sm" />
+            <input aria-label="Importe (€)" type="number" min="0" step="0.01" placeholder="Importe (€)" value={form.importe} onChange={(e) => setForm({ ...form, importe: e.target.value })} className="px-3 py-2 rounded-lg border border-border bg-background font-body text-sm" />
+            <input aria-label="Fecha del pago" type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} className="px-3 py-2 rounded-lg border border-border bg-background font-body text-sm" />
           </div>
-          <textarea placeholder="Notas" value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} rows={2} className="w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm resize-y" />
+          <textarea aria-label="Notas" placeholder="Notas" value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} rows={2} className="w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm resize-y" />
           <button onClick={add} disabled={crearPago.isPending} className="px-4 py-2 rounded-xl bg-foreground text-background font-body text-sm font-semibold disabled:opacity-50">Guardar</button>
         </div>
       )}
 
-      <div className="border border-border rounded-2xl overflow-hidden bg-card">
+      <div className="border border-border rounded-2xl overflow-x-auto bg-card">
         {loading ? (
           <p className="p-8 text-center font-body text-sm text-muted-foreground">Cargando…</p>
         ) : (
@@ -141,7 +141,7 @@ const Pagos = () => {
                 <tr key={c.id} className="border-t border-border">
                   <td className="px-4 py-3 font-body text-sm text-foreground">
                     {c.perfil_id ? (
-                      <Link to={`/admin/perfiles/${c.perfil_id}`} className="text-gold hover:underline font-medium">{c.nombre_completo}</Link>
+                      <Link to={`/admin/perfiles/${c.perfil_id}`} className="text-gold-texto hover:underline font-medium">{c.nombre_completo}</Link>
                     ) : vinculando === c.id ? (
                       <BuscadorPerfil onSelect={(perfil) => vincular(c.id, perfil)} />
                     ) : (

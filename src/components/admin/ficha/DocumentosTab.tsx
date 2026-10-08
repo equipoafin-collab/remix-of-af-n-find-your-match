@@ -14,7 +14,7 @@ const EnlaceDocumento = ({ doc }: { doc: Documento }) => {
         {doc.subidoAt && <span className="text-xs text-muted-foreground">· subido el {new Date(doc.subidoAt).toLocaleDateString("es-ES")}</span>}
       </span>
       {url ? (
-        <a href={url} target="_blank" rel="noopener noreferrer" className="text-gold hover:underline text-sm font-body inline-flex items-center gap-1">
+        <a href={url} target="_blank" rel="noopener noreferrer" className="text-gold-texto hover:underline text-sm font-body inline-flex items-center gap-1">
           Abrir <ExternalLink className="w-3 h-3" />
         </a>
       ) : (

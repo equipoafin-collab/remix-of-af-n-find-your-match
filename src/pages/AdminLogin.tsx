@@ -78,7 +78,7 @@ const AdminLogin = () => {
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block font-body text-sm text-foreground mb-1">Email</label>
-            <input
+            <input aria-label="Email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -88,7 +88,7 @@ const AdminLogin = () => {
           </div>
           <div>
             <label className="block font-body text-sm text-foreground mb-1">Contraseña</label>
-            <input
+            <input aria-label="Contraseña"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

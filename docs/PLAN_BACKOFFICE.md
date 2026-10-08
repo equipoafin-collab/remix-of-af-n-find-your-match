@@ -559,24 +559,27 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
 - [ ] **T9.4 · (Opcional) Integración Calendly**
   - Webhook `invitee.created` / `invitee.canceled` → Edge Function que crea/cancela `sesiones` enlazando por email al perfil (requiere plan de Calendly con webhooks).
 
-- [ ] **T9.5 · Limpieza final**
+- [x] **T9.5 · Limpieza final**
   - Eliminar `estado_perfil` y `notas_admin` (ya migrados), código muerto (`CompatibilityDashboard.tsx`, `Placeholder.tsx` si no se usa), revisar accesibilidad y responsive del admin, datos de prueba (`supabase/seed.sql`) con 30 perfiles variados para QA.
   - Aceptación: build, lint y tests en verde; checklist de QA de la sección 5 completo.
+  > Nota de implementación: migración `20261008120000_t9_5_limpieza.sql`: borra la vista `paid_users` y las columnas `estado_perfil` y `notas_admin` (nada las leía), y vuelve a crear `v_clientes` igual que en T8.1 (con `p.*` hay que quitarla para borrar columnas; ahora trae también el consentimiento de T9.3). `CompatibilityDashboard.tsx` y `Placeholder.tsx` ya se habían borrado en T6.3 y T9.1; además, fuera `NavLink.tsx`, `DiscResultCard.tsx` y `src/lib/matching.ts` (el matching DISC antiguo), que nadie importaba desde el proyecto original. Los componentes de `src/components/ui` sin usar se dejan (no se tocan salvo necesidad). **Responsive**: en móvil la barra lateral pasa a una cabecera con botón de menú (`Sheet`) que se cierra al navegar; márgenes `p-4 md:p-8`; la cabecera de la ficha deja de ser fija en móvil y ya no se sale de la pantalla; la tabla de Pagos se desplaza en horizontal en vez de cortarse. Comprobado cargando las 17 pantallas del admin en un iframe de 375 px: ninguna se sale por la derecha. **Accesibilidad** (axe-core, WCAG 2 A/AA, en las mismas pantallas): nombre accesible en todos los desplegables, campos y textareas (`aria-label` con el texto de su etiqueta visible, o el filtro que son), gris secundario del tema de 45 % a 40 % de luminosidad (no llegaba a 4,5:1 sobre las tarjetas; afecta también a la web pública), tono `gold-texto` para enlaces (el dorado de marca es para iconos y botones), insignias de calidad y botón de borrar vídeo en tonos `-700` y el enlace dentro de una frase, subrayado. Al terminar, 0 incidencias en las pantallas revisadas. **`supabase/seed.sql`**: 30 perfiles de prueba (`@afin.test`): 12 clientes (Esencial y Premium, en los cuatro estados, uno con plan a punto de terminar y otro con pocas sesiones) y 18 leads, con pagos, sesiones (resumen revisado, sin resumen, hoy y mañana), notas, 15 sugerencias pendientes y un match en cada estado que avanza como en la app para que los triggers creen y cierren sus tareas; termina con `evaluar_automatizaciones()`. Se para si hay perfiles que no son de prueba, así que no se puede cargar en la base de datos real. Probado en Postgres 15 (imagen de Supabase) con las 40 migraciones: el Dashboard sale con datos en todos los indicadores y la protección funciona.
 
 ---
 
 ## 5. Checklist de QA final (mapeo 1:1 con el PDF)
 
-- [ ] Al abrir el backoffice veo en el Dashboard los 11 indicadores pedidos.
-- [ ] Cada cliente tiene una única ficha con datos, estado, plan, sesiones (contratadas/realizadas/pendientes), vídeo, historial, resúmenes IA, notas y próxima cita.
-- [ ] El cuestionario recoge las 5 preguntas clave y el matching las usa como filtro.
-- [ ] Al abrir una ficha aparecen automáticamente los perfiles más compatibles con %, motivos, riesgos y botones Aceptar/Rechazar.
-- [ ] Las decisiones de la psicóloga cambian las siguientes recomendaciones.
-- [ ] El plan es visible siempre (listado, cabecera de ficha, sugerencias).
-- [ ] Un match con cliente Premium crea la tarea de informe; tras la cita, la de feedback; ambas visibles hasta completarse.
-- [ ] Tras cada sesión, la IA genera un resumen con las 5 secciones y la psicóloga solo revisa y guarda.
-- [ ] Baja: sale del matching, tareas canceladas, historial intacto. Pausado: fuera de nuevos matches y reactivable.
-- [ ] Se generan los 6 avisos automáticos del PDF sin intervención manual.
+- [x] Al abrir el backoffice veo en el Dashboard los 11 indicadores pedidos.
+- [x] Cada cliente tiene una única ficha con datos, estado, plan, sesiones (contratadas/realizadas/pendientes), vídeo, historial, resúmenes IA, notas y próxima cita.
+- [x] El cuestionario recoge las 5 preguntas clave y el matching las usa como filtro.
+- [x] Al abrir una ficha aparecen automáticamente los perfiles más compatibles con %, motivos, riesgos y botones Aceptar/Rechazar.
+- [x] Las decisiones de la psicóloga cambian las siguientes recomendaciones.
+- [x] El plan es visible siempre (listado, cabecera de ficha, sugerencias).
+- [x] Un match con cliente Premium crea la tarea de informe; tras la cita, la de feedback; ambas visibles hasta completarse.
+- [x] Tras cada sesión, la IA genera un resumen con las 5 secciones y la psicóloga solo revisa y guarda.
+- [x] Baja: sale del matching, tareas canceladas, historial intacto. Pausado: fuera de nuevos matches y reactivable.
+- [x] Se generan los 6 avisos automáticos del PDF sin intervención manual.
+
+> Verificado el 08/10/2026 (T9.5) contra lo probado en cada tarea, casi todo en producción: Dashboard con los indicadores y sus cuatro bloques (T8.2, revisado de nuevo); ficha única con cabecera de plan, estado, sesiones y próxima cita, y pestañas de sesiones con resúmenes, vídeo, notas e historial (T2.1-T3.4); preguntas clave en `/perfil` y filtros del matching v3 (T4.2-T4.3); sugerencias calculadas al abrir la ficha con %, motivos, riesgos y Aceptar/Rechazar (T4.5, T5.2), también en Compatibilidades (T9.1); aprendizaje de las decisiones (T5.3, probado con un rechazo por distancia); plan en el listado, la cabecera, las sugerencias, Compatibilidades y Matches Aprobados; tareas de informe Premium y de feedback tras la cita que se completan o cancelan solas (T6.4-T6.5, y de nuevo con `seed.sql`); resumen de sesión con IA en borrador que la psicóloga revisa y guarda (T3.2-T3.3); Baja y Pausado con sus efectos y reactivación (T1.5, T4.1, T6.2, T7.1); las 7 reglas de avisos y tareas cada hora con `pg_cron`, con la última ejecución correcta en Configuración (T7.2-T7.4).
 
 ---
 
@@ -649,3 +652,4 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 08/10/2026 | T9.2 | Configuración: parámetros editables (sesiones por plan, umbrales de avisos, matching y pesos) con validación, y administradoras (listar, invitar por email y quitar acceso) con la Edge Function `administradoras`. |
 | 08/10/2026 | T9.3 | RGPD: registro de lecturas de notas, resúmenes y vídeo, exportación JSON sin datos de terceros, supresión definitiva (pagos conservados sin vínculo) y consentimiento guardado con textos nuevos, pendientes de validar con asesoría legal. |
 | 08/10/2026 | T9.2 | Invitaciones sin email: Hotmail gastaba el enlace de Supabase. El CRM da un enlace a `/admin/acceso` (botón "Entrar") para enviarlo por cualquier canal, también para quien olvide la contraseña. |
+| 08/10/2026 | T9.5 | Limpieza: fuera `estado_perfil`, `notas_admin`, `paid_users` y tres ficheros sin uso; admin adaptado a móvil, accesibilidad revisada con axe (0 incidencias) y `seed.sql` con 30 perfiles de prueba. Checklist de QA completo. Fase 9 completa. |

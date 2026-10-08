@@ -596,7 +596,6 @@ export type Database = {
           email: string | null
           estado_cambiado_at: string
           estado_cliente: Database["public"]["Enums"]["estado_cliente"]
-          estado_perfil: string
           estatura: number | null
           estilo_vestir: string | null
           estilo_vestir_pareja: string | null
@@ -614,7 +613,6 @@ export type Database = {
           necesidad_independencia: number
           nivel_social: number
           nombre_completo: string
-          notas_admin: string | null
           peso: number | null
           plan: Database["public"]["Enums"]["plan_tipo"] | null
           plan_fin: string | null
@@ -659,7 +657,6 @@ export type Database = {
           email?: string | null
           estado_cambiado_at?: string
           estado_cliente?: Database["public"]["Enums"]["estado_cliente"]
-          estado_perfil?: string
           estatura?: number | null
           estilo_vestir?: string | null
           estilo_vestir_pareja?: string | null
@@ -677,7 +674,6 @@ export type Database = {
           necesidad_independencia: number
           nivel_social: number
           nombre_completo: string
-          notas_admin?: string | null
           peso?: number | null
           plan?: Database["public"]["Enums"]["plan_tipo"] | null
           plan_fin?: string | null
@@ -722,7 +718,6 @@ export type Database = {
           email?: string | null
           estado_cambiado_at?: string
           estado_cliente?: Database["public"]["Enums"]["estado_cliente"]
-          estado_perfil?: string
           estatura?: number | null
           estilo_vestir?: string | null
           estilo_vestir_pareja?: string | null
@@ -740,7 +735,6 @@ export type Database = {
           necesidad_independencia?: number
           nivel_social?: number
           nombre_completo?: string
-          notas_admin?: string | null
           peso?: number | null
           plan?: Database["public"]["Enums"]["plan_tipo"] | null
           plan_fin?: string | null
@@ -935,36 +929,6 @@ export type Database = {
       }
     }
     Views: {
-      paid_users: {
-        Row: {
-          created_at: string | null
-          email: string | null
-          id: string | null
-          nombre_completo: string | null
-          notas: string | null
-          plan: Database["public"]["Enums"]["plan_tipo"] | null
-          telefono: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          email?: string | null
-          id?: string | null
-          nombre_completo?: string | null
-          notas?: string | null
-          plan?: Database["public"]["Enums"]["plan_tipo"] | null
-          telefono?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          email?: string | null
-          id?: string | null
-          nombre_completo?: string | null
-          notas?: string | null
-          plan?: Database["public"]["Enums"]["plan_tipo"] | null
-          telefono?: string | null
-        }
-        Relationships: []
-      }
       v_automatizaciones: {
         Row: {
           clase: string | null
@@ -987,6 +951,8 @@ export type Database = {
           busca_genero: string | null
           ciudad: string | null
           conflicto: string[] | null
+          consentimiento_at: string | null
+          consentimiento_version: string | null
           created_at: string | null
           desea_casarse: string | null
           deseo_familia: number | null
@@ -999,7 +965,6 @@ export type Database = {
           email: string | null
           estado_cambiado_at: string | null
           estado_cliente: Database["public"]["Enums"]["estado_cliente"] | null
-          estado_perfil: string | null
           estatura: number | null
           estilo_vestir: string | null
           estilo_vestir_pareja: string | null
@@ -1018,7 +983,6 @@ export type Database = {
           necesidad_independencia: number | null
           nivel_social: number | null
           nombre_completo: string | null
-          notas_admin: string | null
           peso: number | null
           plan: Database["public"]["Enums"]["plan_tipo"] | null
           plan_fin: string | null

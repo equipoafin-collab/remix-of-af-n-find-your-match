@@ -29,7 +29,7 @@ const MatchesAprobados = () => {
   );
 
   return (
-    <div className="p-8 space-y-6 max-w-5xl">
+    <div className="p-4 md:p-8 space-y-6 max-w-5xl">
       <div>
         <h1 className="font-display text-3xl font-bold text-foreground flex items-center gap-2"><Heart className="w-7 h-7 text-gold" /> Matches Aprobados</h1>
         <p className="font-body text-sm text-muted-foreground mt-1">
@@ -49,8 +49,8 @@ const MatchesAprobados = () => {
 
       <section className="bg-card border border-border rounded-2xl overflow-hidden">
         <div className="p-5 flex gap-3 flex-wrap">
-          <input value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Buscar por nombre…" className={`${selector} flex-1 min-w-48`} />
-          <select value={estado} onChange={(e) => setEstado(e.target.value as MatchEstado | "abiertos" | "")} className={selector}>
+          <input aria-label="Buscar por nombre" value={texto} onChange={(e) => setTexto(e.target.value)} placeholder="Buscar por nombre…" className={`${selector} flex-1 min-w-48`} />
+          <select aria-label="Estado del match" value={estado} onChange={(e) => setEstado(e.target.value as MatchEstado | "abiertos" | "")} className={selector}>
             <option value="abiertos">Abiertos</option>
             {Constants.public.Enums.match_estado.map((e) => <option key={e} value={e}>{ESTADO_MATCH[e].label}</option>)}
             <option value="">Todos</option>

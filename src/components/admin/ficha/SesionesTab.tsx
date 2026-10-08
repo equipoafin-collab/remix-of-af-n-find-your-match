@@ -51,7 +51,7 @@ const NuevaSesion = ({ perfil, hayPrimera, cerrar }: { perfil: Perfil; hayPrimer
       <div className="grid sm:grid-cols-4 gap-3">
         <div className="sm:col-span-2">
           <label className={etiqueta}>Fecha y hora</label>
-          <input
+          <input aria-label="Fecha y hora"
             type="datetime-local"
             value={fecha}
             onChange={(e) => {
@@ -64,11 +64,11 @@ const NuevaSesion = ({ perfil, hayPrimera, cerrar }: { perfil: Perfil; hayPrimer
         </div>
         <div>
           <label className={etiqueta}>Duración (min)</label>
-          <input type="number" min="1" step="5" value={duracion} onChange={(e) => setDuracion(e.target.value)} className={campo} />
+          <input aria-label="Duración (min)" type="number" min="1" step="5" value={duracion} onChange={(e) => setDuracion(e.target.value)} className={campo} />
         </div>
         <div>
           <label className={etiqueta}>Tipo</label>
-          <select value={tipo} onChange={(e) => setTipo(e.target.value as Sesion["tipo"])} className={campo}>
+          <select aria-label="Tipo" value={tipo} onChange={(e) => setTipo(e.target.value as Sesion["tipo"])} className={campo}>
             <option value="primera" disabled={hayPrimera}>Primera sesión</option>
             <option value="seguimiento">Seguimiento</option>
           </select>
@@ -77,7 +77,7 @@ const NuevaSesion = ({ perfil, hayPrimera, cerrar }: { perfil: Perfil; hayPrimer
       <div className="flex items-end gap-3 flex-wrap">
         <div className="w-48">
           <label className={etiqueta}>Estado</label>
-          <select value={estado} onChange={(e) => setEstado(e.target.value as Estado)} className={campo}>
+          <select aria-label="Estado" value={estado} onChange={(e) => setEstado(e.target.value as Estado)} className={campo}>
             {Constants.public.Enums.sesion_estado.map((e) => <option key={e} value={e}>{ESTADO[e].label}</option>)}
           </select>
         </div>
@@ -119,7 +119,7 @@ const FilaSesion = ({ sesion, perfil }: { sesion: Sesion; perfil: Perfil }) => {
             {sesion.duracion_min} min
             {sesion.tipo === "primera" && <span className={`${badge} bg-gold/15 text-foreground border-gold/40`}>Primera sesión</span>}
             {sesion.tipo === "primera" && perfil.video_presentacion_path && (
-              <Link to="?tab=resumen" className="inline-flex items-center gap-1 text-gold hover:underline">
+              <Link to="?tab=resumen" className="inline-flex items-center gap-1 text-gold-texto hover:underline">
                 <Video className="w-3 h-3" /> Vídeo
               </Link>
             )}

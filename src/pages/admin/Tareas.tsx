@@ -24,7 +24,7 @@ const Tareas = () => {
   const visibles = venc ? tareas.filter((t) => t.estado === "pendiente" && vencimiento(t.vence_at) === venc) : tareas;
 
   return (
-    <div className="p-8 space-y-6 max-w-5xl">
+    <div className="p-4 md:p-8 space-y-6 max-w-5xl">
       <div className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <h1 className="font-display text-3xl font-bold text-foreground flex items-center gap-2"><ListChecks className="w-7 h-7 text-gold" /> Tareas</h1>
@@ -42,17 +42,17 @@ const Tareas = () => {
 
       <section className="bg-card border border-border rounded-2xl overflow-hidden">
         <div className="p-5 flex gap-3 flex-wrap">
-          <select value={estado ?? ""} onChange={(e) => setEstado((e.target.value || undefined) as FiltrosTareas["estado"])} className={selector}>
+          <select aria-label="Estado de las tareas" value={estado ?? ""} onChange={(e) => setEstado((e.target.value || undefined) as FiltrosTareas["estado"])} className={selector}>
             <option value="pendiente">Pendientes</option>
             <option value="completada">Completadas</option>
             <option value="cancelada">Canceladas</option>
             <option value="">Todas</option>
           </select>
-          <select value={tipo} onChange={(e) => setTipo(e.target.value as TareaTipo | "")} className={selector}>
+          <select aria-label="Tipo de tarea" value={tipo} onChange={(e) => setTipo(e.target.value as TareaTipo | "")} className={selector}>
             <option value="">Todos los tipos</option>
             {Constants.public.Enums.tarea_tipo.map((t) => <option key={t} value={t}>{TIPO_TAREA[t]}</option>)}
           </select>
-          <select value={venc} onChange={(e) => setVenc(e.target.value as Vencimiento | "")} className={selector}>
+          <select aria-label="Vencimiento" value={venc} onChange={(e) => setVenc(e.target.value as Vencimiento | "")} className={selector}>
             <option value="">Cualquier vencimiento</option>
             <option value="vencida">Vencidas</option>
             <option value="hoy">Vencen hoy</option>

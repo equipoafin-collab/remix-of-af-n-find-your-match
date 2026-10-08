@@ -55,7 +55,7 @@ const TarjetaKpi = ({ kpi }: { kpi: Kpi }) => {
     <>
       <div className="flex items-start justify-between gap-2 mb-2">
         <p className="font-body text-xs text-muted-foreground uppercase tracking-wider">{kpi.label}</p>
-        <kpi.icon className="w-4 h-4 shrink-0 text-muted-foreground group-hover:text-gold transition-colors" />
+        <kpi.icon className="w-4 h-4 shrink-0 text-muted-foreground group-hover:text-gold-texto transition-colors" />
       </div>
       <p className={`font-display text-3xl font-bold tabular-nums ${color}`}>{kpi.valor}</p>
       {kpi.hint && <p className="font-body text-xs text-muted-foreground mt-1">{kpi.hint}</p>}
@@ -73,7 +73,7 @@ const Panel = ({ id, titulo, icon: Icon, enlace, children }: {
     <div className="px-5 py-4 flex items-center justify-between gap-3 border-b border-border">
       <h2 className="font-display font-semibold text-foreground flex items-center gap-2"><Icon className="w-4 h-4 text-gold" /> {titulo}</h2>
       {enlace && (
-        <Link to={enlace.to} className="font-body text-xs text-gold hover:underline inline-flex items-center gap-1">
+        <Link to={enlace.to} className="font-body text-xs text-gold-texto hover:underline inline-flex items-center gap-1">
           {enlace.texto} <ArrowRight className="w-3 h-3" />
         </Link>
       )}
@@ -106,7 +106,7 @@ const AgendaHoy = () => {
                 {e.personas.map((p, i) => (
                   <Fragment key={p.id}>
                     {i > 0 && " y "}
-                    <Link to={`/admin/perfiles/${p.id}?tab=${e.cita ? "matches" : "sesiones"}`} className="hover:text-gold hover:underline">
+                    <Link to={`/admin/perfiles/${p.id}?tab=${e.cita ? "matches" : "sesiones"}`} className="hover:text-gold-texto hover:underline">
                       {p.nombre_completo}
                     </Link>
                   </Fragment>
@@ -168,7 +168,7 @@ const NuevosCompatibles = () => {
               </p>
             </div>
             {a.perfil_id && (
-              <Link to={`/admin/perfiles/${a.perfil_id}?tab=sugerencias`} className="shrink-0 font-body text-xs text-gold hover:underline inline-flex items-center gap-1">
+              <Link to={`/admin/perfiles/${a.perfil_id}?tab=sugerencias`} className="shrink-0 font-body text-xs text-gold-texto hover:underline inline-flex items-center gap-1">
                 Ver sugerencia <ArrowRight className="w-3 h-3" />
               </Link>
             )}
@@ -201,7 +201,7 @@ const AdminDashboardHome = () => {
   const hoy = new Date().toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
 
   return (
-    <div className="p-8 space-y-6 max-w-7xl">
+    <div className="p-4 md:p-8 space-y-6 max-w-7xl">
       <header className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground">Dashboard</h1>

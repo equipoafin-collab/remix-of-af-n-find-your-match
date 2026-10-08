@@ -18,7 +18,7 @@ const campo = "w-full px-3 py-2 rounded-lg border border-border bg-background fo
 // Solo aparece si el cliente tiene sesiones.
 const SelectorSesion = ({ sesiones, value, onChange }: { sesiones: Sesion[]; value: string | null; onChange: (id: string | null) => void }) =>
   sesiones.length === 0 ? null : (
-    <select value={value ?? ""} onChange={(e) => onChange(e.target.value || null)} className={`${campo} sm:w-64`}>
+    <select aria-label="Sesión vinculada" value={value ?? ""} onChange={(e) => onChange(e.target.value || null)} className={`${campo} sm:w-64`}>
       <option value="">Sin vincular a una sesión</option>
       {sesiones.map((s) => <option key={s.id} value={s.id}>{nombreSesion(s)}</option>)}
     </select>
@@ -72,7 +72,7 @@ const NotaItem = ({ nota, sesiones }: { nota: Nota; sesiones: Sesion[] }) => {
       </div>
       {editando ? (
         <div className="mt-2 space-y-2">
-          <textarea value={texto} onChange={(e) => setTexto(e.target.value)} rows={4} className={`${campo} resize-y`} />
+          <textarea aria-label="Texto de la nota" value={texto} onChange={(e) => setTexto(e.target.value)} rows={4} className={`${campo} resize-y`} />
           <SelectorSesion sesiones={sesiones} value={sesionId} onChange={setSesionId} />
           <div className="flex gap-2">
             <button onClick={guardar} disabled={actualizar.isPending || !texto.trim()} className="px-3 py-1.5 rounded-lg bg-foreground text-background font-body text-sm font-semibold disabled:opacity-50">
@@ -121,6 +121,7 @@ const NotasTab = ({ perfil }: { perfil: Perfil }) => {
           </p>
         </div>
         <textarea
+          aria-label="Nueva nota"
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
           rows={3}

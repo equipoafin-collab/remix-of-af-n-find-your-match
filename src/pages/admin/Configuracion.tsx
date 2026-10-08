@@ -298,7 +298,7 @@ const Configuracion = () => {
     });
 
   return (
-    <div className="p-8 space-y-6 max-w-5xl">
+    <div className="p-4 md:p-8 space-y-6 max-w-5xl">
       <h1 className="font-display text-3xl font-bold text-foreground flex items-center gap-2"><Settings className="w-7 h-7 text-gold" /> Configuración</h1>
 
       {config.error ? (
