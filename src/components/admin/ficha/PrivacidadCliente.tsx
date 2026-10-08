@@ -9,7 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import { useArchivosParaBorrar, useExportarCliente, useSuprimirCliente } from "@/hooks/admin/useRgpd";
 import type { Perfil } from "@/types/admin";
 
-const plural = (n: number, palabra: string) => `${n} ${palabra}${n === 1 ? "" : "s"}`;
+const plural = (n: number, una: string, varias: string) => `${n} ${n === 1 ? una : varias}`;
 
 /**
  * T9.3 · Derechos de acceso y portabilidad (exportar) y de supresión (borrar definitivamente). La supresión es
@@ -35,17 +35,19 @@ const PrivacidadCliente = ({ perfil }: { perfil: Perfil }) => {
       onError: (e) => toast({ title: "No se pudieron exportar", description: e.message, variant: "destructive" }),
     });
 
-  const confirmar = () =>
-    suprimir.mutate(perfil, {
-      onSuccess: (r) => {
-        toast({
-          title: `${perfil.nombre_completo}: datos borrados`,
-          description: `${plural(r.sesiones, "sesión")} · ${plural(r.notas, "nota")} · ${plural(r.matches, "match")} · ${plural(r.archivos, "fichero")}${r.pagos_conservados ? ` · ${plural(r.pagos_conservados, "pago")} conservado${r.pagos_conservados === 1 ? "" : "s"} por obligación contable` : ""}`,
-        });
-        navigate("/admin/perfiles", { replace: true });
-      },
-      onError: (e) => toast({ title: "No se pudo borrar", description: e.message, variant: "destructive" }),
-    });
+  // mutateAsync y no mutate: al borrarse el perfil la ficha se desmonta y los callbacks de mutate no llegarían.
+  const confirmar = async () => {
+    try {
+      const r = await suprimir.mutateAsync(perfil);
+      navigate("/admin/perfiles", { replace: true });
+      toast({
+        title: `${perfil.nombre_completo}: datos borrados`,
+        description: `${plural(r.sesiones, "sesión", "sesiones")} · ${plural(r.notas, "nota", "notas")} · ${plural(r.matches, "match", "matches")} · ${plural(r.archivos, "fichero", "ficheros")}${r.pagos_conservados ? ` · ${plural(r.pagos_conservados, "pago conservado", "pagos conservados")} por obligación contable` : ""}`,
+      });
+    } catch (e) {
+      toast({ title: "No se pudo borrar", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
+    }
+  };
 
   return (
     <section className="bg-card border border-border rounded-2xl p-5 space-y-3">
@@ -80,7 +82,7 @@ const PrivacidadCliente = ({ perfil }: { perfil: Perfil }) => {
                 <p>
                   Se borran su perfil y cuestionario, sesiones y resúmenes, notas, sugerencias, matches (también para la otra persona),
                   tareas, alertas, test DISC, foto, vídeo y documentos
-                  {archivos.data ? ` (${plural(archivos.data.length, "fichero")})` : archivos.isLoading ? " (contando ficheros…)" : ""}.
+                  {archivos.data ? ` (${plural(archivos.data.length, "fichero", "ficheros")})` : archivos.isLoading ? " (contando ficheros…)" : ""}.
                 </p>
                 <p>
                   Se conservan sus pagos para la contabilidad (sin teléfono ni notas) y el registro de auditoría, sin los motivos escritos.

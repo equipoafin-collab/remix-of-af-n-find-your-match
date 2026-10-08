@@ -133,6 +133,7 @@ export function useSuprimirCliente() {
       if (error) throw error;
       return { ...(data as unknown as Omit<ResultadoSupresion, "archivos">), archivos: archivos.length };
     },
-    onSuccess: () => queryClient.invalidateQueries(),
+    // Sin esperar: al recargarse, la ficha del perfil borrado se desmonta (por eso la pantalla usa mutateAsync).
+    onSuccess: () => void queryClient.invalidateQueries(),
   });
 }
