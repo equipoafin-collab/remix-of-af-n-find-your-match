@@ -21,6 +21,8 @@ async function calcular(perfilId: string, forzar: boolean): Promise<ResultadoCal
   return data;
 }
 
+const PERSONA = "id, nombre_completo, edad, zona, ciudad, plan, foto_url";
+
 // Las guardadas se leen al instante; las caducadas no se muestran.
 export function useSugerencias(perfilId: string) {
   return useQuery({
@@ -28,7 +30,7 @@ export function useSugerencias(perfilId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("match_sugerencias")
-        .select("*, candidato:perfiles!match_sugerencias_candidato_id_fkey(id, nombre_completo, edad, zona, ciudad, plan, foto_url)")
+        .select(`*, candidato:perfiles!match_sugerencias_candidato_id_fkey(${PERSONA})`)
         .eq("perfil_id", perfilId)
         .neq("estado", "caducada")
         .order("score", { ascending: false });
@@ -39,12 +41,34 @@ export function useSugerencias(perfilId: string) {
 }
 export type Sugerencia = NonNullable<ReturnType<typeof useSugerencias>["data"]>[number];
 
+const MAX_PENDIENTES = 200;
+
+/** T9.1 · Compatibilidades: las pendientes de todos los clientes, las mejores primero (hasta 200, con el total). */
+export function useSugerenciasPendientes() {
+  return useQuery({
+    queryKey: ["sugerencias", "pendientes"],
+    queryFn: async () => {
+      const { data, error, count } = await supabase
+        .from("match_sugerencias")
+        .select(
+          `*, candidato:perfiles!match_sugerencias_candidato_id_fkey(${PERSONA}), cliente:perfiles!match_sugerencias_perfil_id_fkey(${PERSONA})`,
+          { count: "exact" },
+        )
+        .eq("estado", "pendiente")
+        .order("score", { ascending: false })
+        .limit(MAX_PENDIENTES);
+      if (error) throw error;
+      return { sugerencias: data, total: count ?? data.length };
+    },
+  });
+}
+
 // Las sugerencias cambian el contador de v_clientes (cuelga de ["perfiles"]); aceptar crea un match (T6.1)
-// y, con un cliente Premium, su tarea de informe (T6.4).
+// y, con un cliente Premium, su tarea de informe (T6.4). Todas las de ["sugerencias"]: también la vista global (T9.1).
 function useInvalidarSugerencias() {
   const queryClient = useQueryClient();
-  return (perfilId: string) => Promise.all([
-    queryClient.invalidateQueries({ queryKey: ["sugerencias", perfilId] }),
+  return () => Promise.all([
+    queryClient.invalidateQueries({ queryKey: ["sugerencias"] }),
     queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
     queryClient.invalidateQueries({ queryKey: ["matches"] }),
     queryClient.invalidateQueries({ queryKey: ["tareas"] }),
@@ -61,7 +85,7 @@ export function useCalculoAutomatico(perfilId: string | undefined) {
     queryKey: ["sugerencias-calculo", perfilId],
     queryFn: async () => {
       const resultado = await calcular(perfilId as string, false);
-      if (resultado.recalculado) await invalidar(perfilId as string);
+      if (resultado.recalculado) await invalidar();
       return resultado;
     },
     enabled: !!perfilId,
@@ -76,14 +100,14 @@ export function useRecalcularSugerencias() {
   const invalidar = useInvalidarSugerencias();
   return useMutation({
     mutationFn: (perfilId: string) => calcular(perfilId, true),
-    onSuccess: (resultado, perfilId) => {
+    onSuccess: (resultado) => {
       toast(resultado.recalculado
         ? {
           title: resultado.ia ? "Sugerencias recalculadas con IA" : "Sugerencias recalculadas solo por reglas",
           description: `${resultado.pendientes} pendientes · ${resultado.nuevas} nuevas · ${resultado.caducadas} caducadas${resultado.pendientes && !resultado.ia ? " · la IA no respondió" : ""}`,
         }
         : { title: "No se han recalculado", description: resultado.motivo });
-      return invalidar(perfilId);
+      return invalidar();
     },
     onError: (error) => toast({ title: "No se pudieron recalcular", description: error.message, variant: "destructive" }),
   });
@@ -105,7 +129,7 @@ export function useDecidirSugerencia() {
     },
     onSuccess: (_, { perfilId }) => {
       aprender.mutate(perfilId);
-      return invalidar(perfilId);
+      return invalidar();
     },
     onError: (error) => toast({ title: "No se pudo guardar la decisión", description: error.message, variant: "destructive" }),
   });

@@ -3,16 +3,8 @@ import { Sparkles, Loader2, CheckCircle2, RefreshCw } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useActualizarSesion } from "@/hooks/admin/useSesiones";
 import { useGenerarResumen, useGuardarResumen, type ResumenSesion } from "@/hooks/admin/useResumenSesion";
-import { validarResumen } from "../../../../supabase/functions/_shared/resumen";
+import { SECCIONES_RESUMEN as LISTAS, validarResumen } from "../../../../supabase/functions/_shared/resumen";
 import type { Sesion } from "@/types/admin";
-
-const LISTAS: { clave: Exclude<keyof ResumenSesion, "estado_emocional">; label: string }[] = [
-  { clave: "temas_tratados", label: "Temas tratados" },
-  { clave: "avances", label: "Avances" },
-  { clave: "objetivos", label: "Objetivos" },
-  { clave: "proximos_pasos", label: "Próximos pasos" },
-  { clave: "preferencias_detectadas", label: "Preferencias detectadas (para el matching)" },
-];
 
 const campo = "mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm resize-y";
 const etiqueta = "font-body text-xs text-muted-foreground uppercase tracking-wider";

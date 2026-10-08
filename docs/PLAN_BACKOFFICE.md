@@ -538,12 +538,13 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
 
 ### FASE 9 — Vistas agregadas, configuración y cierre
 
-- [ ] **T9.1 · Sustituir placeholders**
+- [x] **T9.1 · Sustituir placeholders**
   - `Compatibilidades` → vista global de sugerencias pendientes de todos los clientes (ordenadas por score) con aceptar/rechazar.
   - `Matches Aprobados` → todos los matches con estado, filtros y embudo (propuestos → cita → continúan).
   - `Seguimiento` → tablero kanban de matches por estado (o redirigir a `/admin/tareas`).
   - `Notas Privadas` → buscador global de notas y resúmenes.
   - Aceptación: no queda ningún `Placeholder` en rutas.
+  > Nota de implementación: sin migración. **Compatibilidades** (`useSugerenciasPendientes`): las 200 pendientes con más score de todos los clientes (y el total), con la tarjeta de la ficha (`TarjetaSugerencia`) y "Para <cliente> <plan>" encima; las sugerencias invalidan ahora todo `["sugerencias"]` para que la vista global se refresque. **Matches Aprobados**: `useMatches()` sin cliente trae todos y `FilaMatch` (exportada, `perfilId` opcional) muestra los dos de la pareja con el mismo control de la ficha (estado, cita, informe, feedback); embudo propuestos → con cita (fecha guardada o estado tras la cita, también cerrados) → continúan en `src/lib/matches.ts` (con test), filtro por estado (por defecto, abiertos) y búsqueda por nombre. **Seguimiento**: tablero de solo lectura con una columna por estado abierto (los cerrados, en Matches Aprobados); cada tarjeta abre la pestaña Matches de la ficha. **Notas Privadas** (`useBuscarNotas`): busca al enviar en `notas_privadas.contenido`, `sesiones.notas_brutas` y cada sección de `resumen_ia` (`resumen_ia->>clave`), hasta 50 de cada tipo; sin texto, las últimas notas y resúmenes. `ESTADO_MATCH` pasa a `src/lib/matches.ts` y las secciones del resumen a `_shared/resumen.ts` (`SECCIONES_RESUMEN`). `Placeholder.tsx` borrado al quedarse sin uso. Probado en local contra producción (solo lectura): las cuatro pantallas cuadran con la BD (0 pendientes, 1 match en "cita realizada", 4 notas, 1 resumen), la búsqueda encuentra texto de las preferencias del resumen, la pestaña Matches de la ficha sigue igual y no hay errores en consola.
 
 - [ ] **T9.2 · Pantalla de Configuración**
   - Editar valores de `configuracion` (umbrales, pesos del algoritmo, peso reglas/IA, sesiones por plan), ver estado de los jobs, gestionar administradoras (invitar por email vía Edge Function protegida).
@@ -642,3 +643,4 @@ Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2
 | 07/10/2026 | T6.3 | PDF del informe probado: las fortalezas salían ilegibles por la marca ✓ (fuera de WinAnsi); todo el texto pasa por `aWinAnsi` antes de escribirse (test con jsPDF). |
 | 07/10/2026 | T8.1 | `dashboard_resumen()`: los 11 indicadores del PDF en una llamada, contados sobre `v_clientes` (nueva columna `matches_abiertos`) para que coincidan con el listado; 18-48 ms con 1.000 perfiles. |
 | 07/10/2026 | T8.2 | Nuevo Dashboard: 12 indicadores enlazados a su listado filtrado (filtros por URL y "Situación" en Perfiles), agenda de hoy, alertas importantes, tareas pendientes y nuevos perfiles compatibles. Fase 8 completa. |
+| 08/10/2026 | T9.1 | Fuera los placeholders: Compatibilidades (pendientes de todos por score con aceptar/rechazar), Matches Aprobados (todos, con embudo y filtros), Seguimiento (tablero por estado) y Notas Privadas (buscador de notas y resúmenes). |

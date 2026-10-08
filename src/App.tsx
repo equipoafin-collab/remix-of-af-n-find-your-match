@@ -16,7 +16,10 @@ import Pagos from "./pages/admin/Pagos";
 import Tareas from "./pages/admin/Tareas";
 import Alertas from "./pages/admin/Alertas";
 import Configuracion from "./pages/admin/Configuracion";
-import Placeholder from "./pages/admin/Placeholder";
+import Compatibilidades from "./pages/admin/Compatibilidades";
+import MatchesAprobados from "./pages/admin/MatchesAprobados";
+import Seguimiento from "./pages/admin/Seguimiento";
+import NotasPrivadas from "./pages/admin/NotasPrivadas";
 import DiscQuiz from "./pages/DiscQuiz";
 import NotFound from "./pages/NotFound";
 import Legal from "./pages/Legal";
@@ -42,10 +45,10 @@ const App = () => (
             <Route index element={<AdminDashboardHome />} />
             <Route path="perfiles" element={<FiltrosDeUrl><PerfilesList /></FiltrosDeUrl>} />
             <Route path="perfiles/:id" element={<PerfilDetalle />} />
-            <Route path="compatibilidades" element={<Placeholder title="Compatibilidades" description="Visión global de los matches sugeridos por el algoritmo. Para generar matches de un perfil concreto, abre su ficha y pulsa 'Buscar Pareja Compatible'." />} />
-            <Route path="matches" element={<Placeholder title="Matches Aprobados" description="Aquí aparecerán los matches que apruebes desde la ficha de cada perfil, con su estado y trazabilidad." />} />
-            <Route path="seguimiento" element={<Placeholder title="Seguimiento" description="Cronología de cada match aprobado: primer contacto, reunión agendada, en conversación, relación iniciada." />} />
-            <Route path="notas" element={<Placeholder title="Notas Privadas" description="Las notas internas se gestionan dentro de cada ficha de perfil. Esta sección agregará una vista consolidada." />} />
+            <Route path="compatibilidades" element={<Compatibilidades />} />
+            <Route path="matches" element={<MatchesAprobados />} />
+            <Route path="seguimiento" element={<Seguimiento />} />
+            <Route path="notas" element={<NotasPrivadas />} />
             <Route path="tareas" element={<FiltrosDeUrl><Tareas /></FiltrosDeUrl>} />
             <Route path="alertas" element={<FiltrosDeUrl><Alertas /></FiltrosDeUrl>} />
             <Route path="pagos" element={<Pagos />} />

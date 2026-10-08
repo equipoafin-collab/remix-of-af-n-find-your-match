@@ -10,6 +10,15 @@ export type ResumenSesion = {
   preferencias_detectadas: string[];
 };
 
+/** Secciones de lista del resumen, en el orden en que se muestran (panel de la sesión y buscador de notas, T9.1). */
+export const SECCIONES_RESUMEN: { clave: Exclude<keyof ResumenSesion, "estado_emocional">; label: string }[] = [
+  { clave: "temas_tratados", label: "Temas tratados" },
+  { clave: "avances", label: "Avances" },
+  { clave: "objetivos", label: "Objetivos" },
+  { clave: "proximos_pasos", label: "Próximos pasos" },
+  { clave: "preferencias_detectadas", label: "Preferencias detectadas (para el matching)" },
+];
+
 const LISTAS_OBLIGATORIAS = ["temas_tratados", "avances", "objetivos", "proximos_pasos"] as const;
 
 const lista = (v: unknown) =>
