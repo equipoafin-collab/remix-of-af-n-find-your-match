@@ -46,7 +46,7 @@ export const TarjetaSugerencia = ({ s, perfilId }: { s: Sugerencia; perfilId: st
       <div className="flex items-center gap-3">
         <FotoPerfil path={c?.foto_url} nombre={c?.nombre_completo ?? "?"} className="w-12 h-12 rounded-full text-sm" />
         <div className="flex-1 min-w-0">
-          <Link to={`/admin/perfiles/${s.candidato_id}`} className="block font-body text-sm font-semibold text-foreground truncate hover:text-gold">
+          <Link to={`/admin/perfiles/${s.candidato_id}`} className="block font-body text-sm font-semibold text-foreground truncate hover:text-gold-texto">
             {c?.nombre_completo}
           </Link>
           <p className="font-body text-xs text-muted-foreground flex items-center gap-1.5 flex-wrap">
@@ -109,6 +109,7 @@ export const TarjetaSugerencia = ({ s, perfilId }: { s: Sugerencia; perfilId: st
             ))}
           </div>
           <input
+            aria-label="Otro motivo de rechazo"
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
             maxLength={300}

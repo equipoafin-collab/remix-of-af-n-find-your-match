@@ -16,6 +16,7 @@ const BuscadorPerfil = ({ onSelect }: { onSelect: (perfil: Perfil) => void }) =>
     <div className="relative">
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
       <input
+        aria-label="Buscar perfil por nombre o email"
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="Buscar perfil por nombre o email…"

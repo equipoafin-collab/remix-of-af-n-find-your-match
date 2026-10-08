@@ -109,7 +109,8 @@ export default {
   			},
   			gold: {
   				DEFAULT: 'hsl(var(--gold))',
-  				vivid: 'hsl(var(--gold-vivid))'
+  				vivid: 'hsl(var(--gold-vivid))',
+  				texto: 'hsl(var(--gold-texto))'
   			},
   			wine: {
   				DEFAULT: 'hsl(var(--wine))',

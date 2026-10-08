@@ -52,7 +52,7 @@ const VideoPresentacion = ({ perfil }: { perfil: Perfil }) => {
             <button
               onClick={borrar}
               disabled={ocupado}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-background font-body text-sm text-rose-600 hover:border-rose-300 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-background font-body text-sm text-rose-700 hover:border-rose-300 disabled:opacity-50"
             >
               {eliminar.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />} Eliminar
             </button>

@@ -5,7 +5,7 @@ import { useBuscarNotas } from "@/hooks/admin/useNotas";
 import { SECCIONES_RESUMEN, validarResumen } from "../../../supabase/functions/_shared/resumen";
 
 const fecha = (iso: string) => new Date(iso).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" });
-const enlace = "font-semibold text-foreground hover:text-gold";
+const enlace = "font-semibold text-foreground hover:text-gold-texto";
 
 // T9.1 · Buscador global de notas privadas y resúmenes de sesión. Busca al enviar, no en cada tecla.
 const NotasPrivadas = () => {
@@ -18,7 +18,7 @@ const NotasPrivadas = () => {
   };
 
   return (
-    <div className="p-8 space-y-6 max-w-6xl">
+    <div className="p-4 md:p-8 space-y-6 max-w-6xl">
       <div>
         <h1 className="font-display text-3xl font-bold text-foreground flex items-center gap-2"><StickyNote className="w-7 h-7 text-gold" /> Notas Privadas</h1>
         <p className="font-body text-sm text-muted-foreground mt-1">
@@ -28,6 +28,7 @@ const NotasPrivadas = () => {
 
       <form onSubmit={buscar} className="flex gap-2">
         <input
+          aria-label="Buscar en notas, notas de sesión y resúmenes"
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
           placeholder="Buscar en notas, notas de sesión y resúmenes…"

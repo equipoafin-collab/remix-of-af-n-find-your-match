@@ -27,7 +27,7 @@ const FilaAlerta = ({ alerta, mostrarCliente, compacta }: { alerta: AlertaConPer
           {!compacta && <span>{TIPO_ALERTA[alerta.tipo]}</span>}
           <span>{fecha(alerta.created_at)}</span>
           {mostrarCliente && alerta.perfil && (
-            <Link to={`/admin/perfiles/${alerta.perfil.id}`} className="text-gold hover:underline">{alerta.perfil.nombre_completo}</Link>
+            <Link to={`/admin/perfiles/${alerta.perfil.id}`} className="text-gold-texto hover:underline">{alerta.perfil.nombre_completo}</Link>
           )}
           {resuelta && alerta.resuelta_at && <span>Resuelta el {fecha(alerta.resuelta_at)}</span>}
         </p>

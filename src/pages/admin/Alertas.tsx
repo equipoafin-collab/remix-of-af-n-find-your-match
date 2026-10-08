@@ -21,7 +21,7 @@ const Alertas = () => {
   const urgentes = alertas.filter((a) => a.severidad === "urgente" && a.estado !== "resuelta").length;
 
   return (
-    <div className="p-8 space-y-6 max-w-5xl">
+    <div className="p-4 md:p-8 space-y-6 max-w-5xl">
       <div>
         <h1 className="font-display text-3xl font-bold text-foreground flex items-center gap-2"><Bell className="w-7 h-7 text-gold" /> Alertas</h1>
         <p className="font-body text-sm text-muted-foreground mt-1">
@@ -32,16 +32,16 @@ const Alertas = () => {
 
       <section className="bg-card border border-border rounded-2xl overflow-hidden">
         <div className="p-5 flex gap-3 flex-wrap border-b border-border">
-          <select value={estado ?? ""} onChange={(e) => setEstado((e.target.value || undefined) as FiltrosAlertas["estado"])} className={selector}>
+          <select aria-label="Estado de las alertas" value={estado ?? ""} onChange={(e) => setEstado((e.target.value || undefined) as FiltrosAlertas["estado"])} className={selector}>
             <option value="pendientes">Pendientes</option>
             <option value="resuelta">Resueltas</option>
             <option value="">Todas</option>
           </select>
-          <select value={severidad} onChange={(e) => setSeveridad(e.target.value as AlertaSeveridad | "")} className={selector}>
+          <select aria-label="Severidad" value={severidad} onChange={(e) => setSeveridad(e.target.value as AlertaSeveridad | "")} className={selector}>
             <option value="">Cualquier severidad</option>
             {Constants.public.Enums.alerta_severidad.map((s) => <option key={s} value={s}>{SEVERIDAD_ALERTA[s].label}</option>)}
           </select>
-          <select value={tipo} onChange={(e) => setTipo(e.target.value as AlertaTipo | "")} className={selector}>
+          <select aria-label="Tipo de alerta" value={tipo} onChange={(e) => setTipo(e.target.value as AlertaTipo | "")} className={selector}>
             <option value="">Todos los tipos</option>
             {Constants.public.Enums.alerta_tipo.map((t) => <option key={t} value={t}>{TIPO_ALERTA[t]}</option>)}
           </select>

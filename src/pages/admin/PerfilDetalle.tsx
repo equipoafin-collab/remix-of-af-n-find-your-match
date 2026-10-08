@@ -41,7 +41,7 @@ const PerfilDetalle = () => {
   if (!cliente) return <div className="p-8 font-body text-muted-foreground">Perfil no encontrado.</div>;
 
   return (
-    <div className="p-8 pt-4 space-y-4 max-w-6xl">
+    <div className="p-4 md:p-8 pt-4 space-y-4 max-w-6xl">
       <button onClick={() => navigate("/admin/perfiles")} className="inline-flex items-center gap-1 text-sm font-body text-muted-foreground hover:text-foreground">
         <ArrowLeft className="w-4 h-4" /> Volver a perfiles
       </button>

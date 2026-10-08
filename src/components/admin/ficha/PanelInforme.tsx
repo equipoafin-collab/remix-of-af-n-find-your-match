@@ -65,30 +65,30 @@ const EditorInforme = ({ match, inicial, nombres }: { match: MatchConPersonas; i
       <div className="grid sm:grid-cols-4 gap-3">
         <div>
           <label className={etiqueta}>Compatibilidad (%)</label>
-          <input type="number" min={0} max={100} value={b.score} onChange={set("score")} className={campo} />
+          <input aria-label="Compatibilidad (%)" type="number" min={0} max={100} value={b.score} onChange={set("score")} className={campo} />
         </div>
         <div>
           <label className={etiqueta}>Nivel</label>
-          <select value={b.nivel} onChange={set("nivel")} className={campo}>
+          <select aria-label="Nivel" value={b.nivel} onChange={set("nivel")} className={campo}>
             {NIVELES.map((n) => <option key={n}>{n}</option>)}
           </select>
         </div>
         <div className="sm:col-span-2">
           <label className={etiqueta}>Resumen</label>
-          <textarea value={b.resumen} onChange={set("resumen")} rows={2} className={campo} />
+          <textarea aria-label="Resumen" value={b.resumen} onChange={set("resumen")} rows={2} className={campo} />
         </div>
       </div>
       <div className="grid md:grid-cols-3 gap-3">
         {LISTAS.map(({ clave, label }) => (
           <div key={clave}>
             <label className={etiqueta}>{label}</label>
-            <textarea value={b[clave]} onChange={set(clave)} rows={Math.max(3, b[clave].split("\n").length)} placeholder="Una línea por punto" className={campo} />
+            <textarea aria-label={label} value={b[clave]} onChange={set(clave)} rows={Math.max(3, b[clave].split("\n").length)} placeholder="Una línea por punto" className={campo} />
           </div>
         ))}
       </div>
       <div>
         <label className={etiqueta}>Análisis</label>
-        <textarea value={b.analisis_detallado} onChange={set("analisis_detallado")} rows={4} className={campo} />
+        <textarea aria-label="Análisis" value={b.analisis_detallado} onChange={set("analisis_detallado")} rows={4} className={campo} />
       </div>
       <div className="flex flex-wrap gap-2 items-center">
         <button onClick={guardar} disabled={actualizar.isPending} className={`${boton} bg-foreground text-background`}>

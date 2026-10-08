@@ -11,7 +11,7 @@ const Compatibilidades = () => {
   const total = data?.total ?? 0;
 
   return (
-    <div className="p-8 space-y-6 max-w-6xl">
+    <div className="p-4 md:p-8 space-y-6 max-w-6xl">
       <div>
         <h1 className="font-display text-3xl font-bold text-foreground flex items-center gap-2"><Sparkles className="w-7 h-7 text-gold" /> Compatibilidades</h1>
         <p className="font-body text-sm text-muted-foreground mt-1">
@@ -35,7 +35,7 @@ const Compatibilidades = () => {
               <div key={s.id} className="space-y-1.5">
                 <p className="font-body text-xs text-muted-foreground flex items-center gap-1.5 flex-wrap px-1">
                   Para
-                  <Link to={`/admin/perfiles/${s.perfil_id}?tab=sugerencias`} className="font-semibold text-foreground hover:text-gold">
+                  <Link to={`/admin/perfiles/${s.perfil_id}?tab=sugerencias`} className="font-semibold text-foreground hover:text-gold-texto">
                     {s.cliente?.nombre_completo}
                   </Link>
                   <PlanBadge plan={s.cliente?.plan ?? null} />

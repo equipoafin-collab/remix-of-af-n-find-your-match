@@ -55,7 +55,7 @@ const FormularioPlan = ({ cliente, cerrar }: { cliente: Cliente; cerrar: () => v
       <div className="space-y-4">
         <div>
           <label className={etiqueta}>Plan</label>
-          <select
+          <select aria-label="Plan"
             value={plan ?? ""}
             onChange={(e) => {
               const p = (e.target.value || null) as PlanTipo | null;
@@ -72,17 +72,17 @@ const FormularioPlan = ({ cliente, cerrar }: { cliente: Cliente; cerrar: () => v
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className={etiqueta}>Inicio</label>
-            <input type="date" value={inicio} onChange={(e) => cambiar(plan, e.target.value, fin)} className={campo} />
+            <input aria-label="Inicio" type="date" value={inicio} onChange={(e) => cambiar(plan, e.target.value, fin)} className={campo} />
           </div>
           <div>
             <label className={etiqueta}>Fin</label>
-            <input type="date" value={fin} min={inicio || undefined} onChange={(e) => cambiar(plan, inicio, e.target.value)} className={campo} />
+            <input aria-label="Fin" type="date" value={fin} min={inicio || undefined} onChange={(e) => cambiar(plan, inicio, e.target.value)} className={campo} />
           </div>
         </div>
         {fechasAlReves && <p className="font-body text-xs text-rose-700">La fecha de fin es anterior a la de inicio.</p>}
         <div>
           <label className={etiqueta}>Sesiones contratadas</label>
-          <input type="number" min="0" step="1" value={sesiones} onChange={(e) => setSesiones(e.target.value)} className={campo} />
+          <input aria-label="Sesiones contratadas" type="number" min="0" step="1" value={sesiones} onChange={(e) => setSesiones(e.target.value)} className={campo} />
           <p className="mt-1 font-body text-xs text-muted-foreground">
             {plan && meses !== null
               ? `Sugerido: ${config.sesiones_por_plan[plan]}/mes × ${meses} ${meses === 1 ? "mes" : "meses"} = ${config.sesiones_por_plan[plan] * meses}. `

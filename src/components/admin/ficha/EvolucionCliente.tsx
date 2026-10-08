@@ -22,7 +22,7 @@ const EvolucionCliente = ({ perfil }: { perfil: Perfil }) => {
           <TrendingUp className="w-4 h-4 text-gold" /> Evolución
         </h3>
         {revisadas.length > 0 && (
-          <Link to="?tab=sesiones" className="font-body text-xs text-gold hover:underline">Ver todas las sesiones</Link>
+          <Link to="?tab=sesiones" className="font-body text-xs text-gold-texto hover:underline">Ver todas las sesiones</Link>
         )}
       </div>
       {isLoading ? (

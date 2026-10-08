@@ -45,11 +45,11 @@ const FormCita = ({ match, cerrar, faltaInforme }: { match: MatchConPersonas; ce
       <div className="grid sm:grid-cols-2 gap-3">
         <div>
           <label className={etiqueta}>Fecha y hora de la cita</label>
-          <input type="datetime-local" value={fecha} onChange={(e) => setFecha(e.target.value)} className={campo} />
+          <input aria-label="Fecha y hora de la cita" type="datetime-local" value={fecha} onChange={(e) => setFecha(e.target.value)} className={campo} />
         </div>
         <div>
           <label className={etiqueta}>Lugar</label>
-          <input value={lugar} onChange={(e) => setLugar(e.target.value)} maxLength={200} placeholder="Opcional" className={campo} />
+          <input aria-label="Lugar" value={lugar} onChange={(e) => setLugar(e.target.value)} maxLength={200} placeholder="Opcional" className={campo} />
         </div>
       </div>
       <div className="flex justify-end gap-2">
@@ -68,7 +68,7 @@ const Persona = ({ p, children }: { p: MatchConPersonas["a"]; children?: ReactNo
   <div className="flex items-center gap-3 min-w-0">
     <FotoPerfil path={p?.foto_url} nombre={p?.nombre_completo ?? "?"} className="w-10 h-10 rounded-full text-xs" />
     <div className="min-w-0">
-      <Link to={`/admin/perfiles/${p?.id}?tab=matches`} className="block font-body text-sm font-semibold text-foreground truncate hover:text-gold">
+      <Link to={`/admin/perfiles/${p?.id}?tab=matches`} className="block font-body text-sm font-semibold text-foreground truncate hover:text-gold-texto">
         {p?.nombre_completo}
       </Link>
       <p className="font-body text-xs text-muted-foreground flex items-center gap-1.5 flex-wrap">

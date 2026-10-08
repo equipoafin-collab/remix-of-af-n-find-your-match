@@ -47,7 +47,7 @@ const CambiarEstado = ({ perfil }: { perfil: Perfil }) => {
     <div>
       <label className="font-body text-xs text-muted-foreground uppercase tracking-wider">Estado del cliente</label>
       {/* El valor sigue al guardado: elegir otro abre la confirmación y, si se cancela, vuelve solo. */}
-      <select
+      <select aria-label="Estado del cliente"
         value={perfil.estado_cliente}
         onChange={(e) => setDestino(e.target.value as EstadoCliente)}
         className="mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm capitalize"
@@ -66,6 +66,7 @@ const CambiarEstado = ({ perfil }: { perfil: Perfil }) => {
             <AlertDialogDescription className="font-body">{destino && CONSECUENCIAS[destino]}</AlertDialogDescription>
           </AlertDialogHeader>
           <textarea
+            aria-label="Motivo del cambio de estado"
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
             rows={3}

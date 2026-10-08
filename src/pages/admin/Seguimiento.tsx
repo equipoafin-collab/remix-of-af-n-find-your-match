@@ -18,12 +18,12 @@ const Seguimiento = () => {
   const abiertos = matches.length - cerrados;
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 md:p-8 space-y-6">
       <div>
         <h1 className="font-display text-3xl font-bold text-foreground flex items-center gap-2"><CheckCircle2 className="w-7 h-7 text-gold" /> Seguimiento</h1>
         <p className="font-body text-sm text-muted-foreground mt-1">
           {abiertos} match{abiertos === 1 ? "" : "es"} abierto{abiertos === 1 ? "" : "s"} · {cerrados} cerrado{cerrados === 1 ? "" : "s"} en{" "}
-          <Link to="/admin/matches" className="text-gold hover:underline">Matches Aprobados</Link>
+          <Link to="/admin/matches" className="text-gold-texto underline">Matches Aprobados</Link>
         </p>
       </div>
 

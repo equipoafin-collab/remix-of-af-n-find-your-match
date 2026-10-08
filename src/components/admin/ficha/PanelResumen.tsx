@@ -36,7 +36,7 @@ const EditorResumen = ({ sesion, resumen, notas }: { sesion: Sesion; resumen: Re
     <div className="space-y-3">
       <div>
         <label className={etiqueta}>Estado emocional</label>
-        <textarea
+        <textarea aria-label="Estado emocional"
           value={borrador.estado_emocional}
           onChange={(e) => setBorrador({ ...borrador, estado_emocional: e.target.value })}
           rows={2}
@@ -48,6 +48,7 @@ const EditorResumen = ({ sesion, resumen, notas }: { sesion: Sesion; resumen: Re
           <div key={clave}>
             <label className={etiqueta}>{label}</label>
             <textarea
+              aria-label={label}
               value={borrador[clave]}
               onChange={(e) => setBorrador({ ...borrador, [clave]: e.target.value })}
               rows={Math.max(2, borrador[clave].split("\n").length)}
@@ -94,7 +95,7 @@ const PanelResumen = ({ sesion }: { sesion: Sesion }) => {
     <div className="mt-3 p-4 rounded-xl border border-border bg-background/60 space-y-4">
       <div>
         <label className={etiqueta}>Notas de la sesión</label>
-        <textarea
+        <textarea aria-label="Notas de la sesión"
           value={notas}
           onChange={(e) => setNotas(e.target.value)}
           rows={5}

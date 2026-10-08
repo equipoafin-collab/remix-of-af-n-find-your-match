@@ -28,7 +28,7 @@ const CampanaAlertas = () => {
       <PopoverContent align="start" side="right" className="w-96 p-0">
         <div className="px-3 py-2.5 border-b border-border flex items-center justify-between">
           <p className="font-display text-sm font-semibold text-foreground">Alertas</p>
-          <Link to="/admin/alertas" className="font-body text-xs text-gold hover:underline">Ver todas</Link>
+          <Link to="/admin/alertas" className="font-body text-xs text-gold-texto hover:underline">Ver todas</Link>
         </div>
         <div className="max-h-[60vh] overflow-y-auto">
           <ListaAlertas alertas={pendientes.slice(0, MAX_EN_PANEL)} mostrarCliente compacta vacio="No hay alertas pendientes." />

@@ -19,7 +19,7 @@ const ProximasTareas = ({ perfil }: { perfil: Perfil }) => {
           <ListChecks className="w-4 h-4 text-gold" /> Próximas tareas
         </h3>
         {tareas.length > MAX_PROXIMAS && (
-          <Link to="?tab=tareas" className="font-body text-xs text-gold hover:underline">Ver las {tareas.length}</Link>
+          <Link to="?tab=tareas" className="font-body text-xs text-gold-texto hover:underline">Ver las {tareas.length}</Link>
         )}
       </div>
       <ListaTareas tareas={tareas.slice(0, MAX_PROXIMAS)} vacio="No hay tareas pendientes." />

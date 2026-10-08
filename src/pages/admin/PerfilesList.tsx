@@ -57,7 +57,7 @@ const PerfilesList = () => {
   }, [texto, filtros.busqueda]);
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 md:p-8 space-y-6">
       <header className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground">Perfiles</h1>
@@ -70,6 +70,7 @@ const PerfilesList = () => {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
+            aria-label="Buscar por nombre, email o ciudad"
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
             placeholder="Buscar por nombre, email o ciudad…"
@@ -141,7 +142,7 @@ const PerfilesList = () => {
                     {new Date(p.created_at).toLocaleDateString("es-ES")}
                   </td>
                   <td className="px-4 py-3">
-                    <Link to={`/admin/perfiles/${p.id}`} className="inline-flex items-center gap-1 text-gold hover:underline text-sm font-body font-medium">
+                    <Link to={`/admin/perfiles/${p.id}`} className="inline-flex items-center gap-1 text-gold-texto hover:underline text-sm font-body font-medium">
                       Abrir <ChevronRight className="w-4 h-4" />
                     </Link>
                   </td>
@@ -180,6 +181,7 @@ const Select = ({ label, value, onChange, options, etiquetas = {} }: {
   label: string; value: string; onChange: (v: string) => void; options: string[]; etiquetas?: Record<string, string>;
 }) => (
   <select
+    aria-label={label}
     value={value}
     onChange={(e) => onChange(e.target.value)}
     className="px-3 py-1.5 rounded-lg border border-border bg-background font-body text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-gold/40"

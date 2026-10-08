@@ -55,7 +55,7 @@ const FilaTarea = ({ tarea, mostrarCliente }: { tarea: TareaConPerfil; mostrarCl
           )}
           <Vence tarea={tarea} />
           {mostrarCliente && tarea.perfil && (
-            <Link to={`/admin/perfiles/${tarea.perfil.id}?tab=tareas`} className="text-gold hover:underline">{tarea.perfil.nombre_completo}</Link>
+            <Link to={`/admin/perfiles/${tarea.perfil.id}?tab=tareas`} className="text-gold-texto hover:underline">{tarea.perfil.nombre_completo}</Link>
           )}
           {tarea.estado === "cancelada" && <span className="text-muted-foreground">Cancelada</span>}
           {tarea.estado === "completada" && tarea.completada_at && <span className="text-muted-foreground">Completada el {fecha(tarea.completada_at)}</span>}
@@ -121,16 +121,16 @@ export const NuevaTarea = ({ perfilId, cerrar }: { perfilId?: string; cerrar: ()
       <div className="grid sm:grid-cols-3 gap-3">
         <div className="sm:col-span-2">
           <label className={etiqueta}>Tarea</label>
-          <input value={titulo} onChange={(e) => setTitulo(e.target.value)} maxLength={200} placeholder="Qué hay que hacer" className={campo} />
+          <input aria-label="Tarea" value={titulo} onChange={(e) => setTitulo(e.target.value)} maxLength={200} placeholder="Qué hay que hacer" className={campo} />
         </div>
         <div>
           <label className={etiqueta}>Vence (opcional)</label>
-          <input type="date" value={vence} onChange={(e) => setVence(e.target.value)} className={campo} />
+          <input aria-label="Vence (opcional)" type="date" value={vence} onChange={(e) => setVence(e.target.value)} className={campo} />
         </div>
       </div>
       <div>
         <label className={etiqueta}>Detalle (opcional)</label>
-        <textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} rows={2} maxLength={1000} className={campo} />
+        <textarea aria-label="Detalle (opcional)" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} rows={2} maxLength={1000} className={campo} />
       </div>
       <div className="flex justify-end gap-2">
         <button onClick={cerrar} className="px-3 py-1.5 rounded-lg border border-border font-body text-sm text-muted-foreground hover:text-foreground">

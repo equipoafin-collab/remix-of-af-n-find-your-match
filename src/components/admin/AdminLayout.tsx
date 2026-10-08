@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import CampanaAlertas from "./alertas/CampanaAlertas";
 import ElegirContrasena from "./ElegirContrasena";
 import {
   LayoutDashboard, Users, Heart, CheckCircle2, ClipboardList,
-  StickyNote, CreditCard, Settings, LogOut, Sparkles, ListChecks,
+  StickyNote, CreditCard, Settings, LogOut, Sparkles, ListChecks, Menu,
 } from "lucide-react";
 
 const NAV = [
@@ -20,9 +21,48 @@ const NAV = [
   { to: "/admin/configuracion", icon: Settings, label: "Configuración" },
 ];
 
+const Marca = () => (
+  <div>
+    <p className="font-display text-lg font-bold text-foreground">Afín · CRM</p>
+    <p className="font-body text-xs text-muted-foreground mt-0.5">Matchmaking profesional</p>
+  </div>
+);
+
+/** Menú y "Salir": en la barra lateral (escritorio) y en el panel del botón de menú (móvil, T9.5). */
+const Navegacion = ({ alNavegar, salir }: { alNavegar?: () => void; salir: () => void }) => (
+  <>
+    <nav aria-label="Secciones del CRM" className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
+      {NAV.map((n) => (
+        <NavLink
+          key={n.to}
+          to={n.to}
+          end={n.end}
+          onClick={alNavegar}
+          className={({ isActive }) =>
+            `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-body transition-colors ${
+              isActive
+                ? "bg-gold/15 text-foreground font-semibold"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`
+          }
+        >
+          <n.icon className="w-4 h-4" aria-hidden="true" /> {n.label}
+        </NavLink>
+      ))}
+    </nav>
+    <button
+      onClick={salir}
+      className="m-3 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-border text-sm font-body text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+    >
+      <LogOut className="w-4 h-4" aria-hidden="true" /> Salir
+    </button>
+  </>
+);
+
 const AdminLayout = () => {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
+  const [menuAbierto, setMenuAbierto] = useState(false);
   const [elegirContrasena, setElegirContrasena] = useState(false);
 
   useEffect(() => {
@@ -50,39 +90,29 @@ const AdminLayout = () => {
   if (elegirContrasena) return <ElegirContrasena alTerminar={() => setElegirContrasena(false)} />;
 
   return (
-    <main className="min-h-screen bg-background flex">
-      <aside className="w-64 shrink-0 border-r border-border bg-card flex flex-col sticky top-0 h-screen">
+    <main className="min-h-screen bg-background flex flex-col md:flex-row">
+      <header className="md:hidden sticky top-0 z-30 flex items-center gap-3 px-4 py-3 border-b border-border bg-card">
+        <Sheet open={menuAbierto} onOpenChange={setMenuAbierto}>
+          <SheetTrigger asChild>
+            <button aria-label="Abrir el menú" className="p-2 -ml-2 rounded-lg text-foreground hover:bg-muted">
+              <Menu className="w-5 h-5" />
+            </button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64 p-0 flex flex-col">
+            <SheetTitle className="sr-only">Menú del CRM</SheetTitle>
+            <div className="px-5 py-5 border-b border-border"><Marca /></div>
+            <Navegacion alNavegar={() => setMenuAbierto(false)} salir={logout} />
+          </SheetContent>
+        </Sheet>
+        <div className="flex-1"><Marca /></div>
+        <CampanaAlertas />
+      </header>
+      <aside className="hidden md:flex w-64 shrink-0 border-r border-border bg-card flex-col sticky top-0 h-screen">
         <div className="px-5 py-5 border-b border-border flex items-start justify-between gap-2">
-          <div>
-            <p className="font-display text-lg font-bold text-foreground">Afín · CRM</p>
-            <p className="font-body text-xs text-muted-foreground mt-0.5">Matchmaking profesional</p>
-          </div>
+          <Marca />
           <CampanaAlertas />
         </div>
-        <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
-          {NAV.map((n) => (
-            <NavLink
-              key={n.to}
-              to={n.to}
-              end={n.end}
-              className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-body transition-colors ${
-                  isActive
-                    ? "bg-gold/15 text-foreground font-semibold"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`
-              }
-            >
-              <n.icon className="w-4 h-4" /> {n.label}
-            </NavLink>
-          ))}
-        </nav>
-        <button
-          onClick={logout}
-          className="m-3 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-border text-sm font-body text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-        >
-          <LogOut className="w-4 h-4" /> Salir
-        </button>
+        <Navegacion salir={logout} />
       </aside>
       <section className="flex-1 min-w-0">
         <Outlet />

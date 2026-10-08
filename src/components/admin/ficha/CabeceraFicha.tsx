@@ -22,10 +22,10 @@ const calidadPerfil = (p: Perfil) => {
   if (p.desea_casarse) score += 10;
   if (p.disc_perfil) score += 10;
   if (p.telefono) score += 10;
-  if (score >= 80) return { label: "Excelente", color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200" };
-  if (score >= 60) return { label: "Alto potencial", color: "text-blue-600", bg: "bg-blue-50 border-blue-200" };
-  if (score >= 40) return { label: "Medio", color: "text-amber-600", bg: "bg-amber-50 border-amber-200" };
-  return { label: "Bajo", color: "text-rose-600", bg: "bg-rose-50 border-rose-200" };
+  if (score >= 80) return { label: "Excelente", color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-200" };
+  if (score >= 60) return { label: "Alto potencial", color: "text-blue-700", bg: "bg-blue-50 border-blue-200" };
+  if (score >= 40) return { label: "Medio", color: "text-amber-700", bg: "bg-amber-50 border-amber-200" };
+  return { label: "Bajo", color: "text-rose-700", bg: "bg-rose-50 border-rose-200" };
 };
 
 // Fechas YYYY-MM-DD: se formatean como fecha local para que no cambie de día por la zona horaria.
@@ -61,7 +61,7 @@ const CabeceraFicha = ({ cliente: p }: { cliente: Cliente }) => {
   const progreso = p.sesiones_contratadas > 0 ? Math.min(100, (p.sesiones_realizadas / p.sesiones_contratadas) * 100) : 0;
 
   return (
-    <div className="sticky top-0 z-20 -mx-8 px-8 py-3 bg-background/95 backdrop-blur">
+    <div className="md:sticky md:top-0 z-20 -mx-4 px-4 md:-mx-8 md:px-8 py-3 bg-background/95 backdrop-blur">
       <div className="bg-card border border-border rounded-2xl p-5 flex items-start gap-5 flex-wrap">
         <FotoPerfil path={p.foto_url} nombre={p.nombre_completo} className="w-16 h-16 rounded-2xl text-xl" />
 
