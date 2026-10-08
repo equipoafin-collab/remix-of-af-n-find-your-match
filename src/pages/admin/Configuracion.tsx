@@ -1,9 +1,9 @@
 import { useState, type FormEvent, type ReactNode } from "react";
-import { Settings, Play, Loader2, CheckCircle2, XCircle, UserPlus, Save } from "lucide-react";
+import { Settings, Play, Loader2, CheckCircle2, XCircle, UserPlus, Save, Copy, Mail, Link2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useEjecutarAutomatizaciones, useEstadoAutomatizaciones } from "@/hooks/admin/useAutomatizaciones";
 import { useConfiguracion, useGuardarConfiguracion } from "@/hooks/admin/useConfiguracion";
-import { useAdministradoras, useInvitarAdministradora, useQuitarAdministradora, type Administradora } from "@/hooks/admin/useAdministradoras";
+import { useAdministradoras, useEnlaceAdministradora, useInvitarAdministradora, useQuitarAdministradora, type Administradora } from "@/hooks/admin/useAdministradoras";
 import { CAMPOS_ENTEROS, validarConfiguracion, type Configuracion as Config } from "@/lib/configuracion";
 import { NOMBRES_DIMENSION, type Dimension } from "@/lib/profileMatching";
 import type { PlanTipo } from "@/types/admin";
@@ -144,27 +144,70 @@ const FormConfiguracion = ({ guardada }: { guardada: Config }) => {
   );
 };
 
-// T9.2 · Quién entra en el CRM. Invitar envía un email para elegir contraseña; quitar el acceso no borra la cuenta.
+/** Enlace de acceso recién creado: de un solo uso; la administradora lo envía por email o mensaje. */
+const PanelEnlace = ({ email, enlace, cerrar }: { email: string; enlace: string; cerrar: () => void }) => {
+  const copiar = () =>
+    navigator.clipboard.writeText(enlace).then(
+      () => toast({ title: "Enlace copiado" }),
+      () => toast({ title: "No se pudo copiar", description: "Selecciónalo y cópialo a mano.", variant: "destructive" }),
+    );
+  const correo = `mailto:${email}?${new URLSearchParams({
+    subject: "Tu acceso al CRM de Afín",
+    body: `Hola:\n\nEntra en el CRM de Afín con este enlace y elige tu contraseña:\n${enlace}\n\nEs de un solo uso y caduca pronto.`,
+  }).toString().replace(/\+/g, "%20")}`;
+
+  return (
+    <div className="px-5 py-4 border-t border-border bg-gold/5 space-y-2">
+      <p className="font-body text-sm text-foreground">
+        Enlace de acceso para <span className="font-semibold">{email}</span>. Envíaselo por email o mensaje: al abrirlo pulsará
+        "Entrar" y elegirá su contraseña. Es de un solo uso y caduca pronto (por defecto, en 1 hora).
+      </p>
+      {location.hostname === "localhost" && (
+        <p className="font-body text-xs text-amber-700">Lo has creado en local: el enlace solo funciona en este ordenador. Créalo desde la app publicada.</p>
+      )}
+      <input readOnly value={enlace} onFocus={(e) => e.target.select()} aria-label="Enlace de acceso" className="w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-xs" />
+      <div className="flex gap-2 flex-wrap">
+        <button onClick={copiar} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-foreground text-background font-body text-sm font-semibold">
+          <Copy className="w-4 h-4" /> Copiar
+        </button>
+        <a href={correo} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border font-body text-sm text-foreground hover:bg-muted">
+          <Mail className="w-4 h-4" /> Abrir en el correo
+        </a>
+        <button onClick={cerrar} className="px-3 py-1.5 rounded-lg font-body text-sm text-muted-foreground hover:text-foreground">Cerrar</button>
+      </div>
+    </div>
+  );
+};
+
+// T9.2 · Quién entra en el CRM. Sin emails automáticos: se da un enlace de acceso (ver la Edge Function).
+// Quitar el acceso no borra la cuenta.
 const Administradoras = () => {
   // isPending y no isLoading: con la pestaña en segundo plano los reintentos se pausan y no habría ni datos ni aviso.
   const { data: administradoras = [], isPending, error } = useAdministradoras();
   const invitar = useInvitarAdministradora();
+  const nuevoEnlace = useEnlaceAdministradora();
   const quitar = useQuitarAdministradora();
   const [email, setEmail] = useState("");
+  const [enlace, setEnlace] = useState<{ email: string; enlace: string } | null>(null);
 
   const enviar = (e: FormEvent) => {
     e.preventDefault();
     const destino = email.trim();
     invitar.mutate(destino, {
-      onSuccess: ({ invitada }) => {
-        toast(invitada
-          ? { title: "Invitación enviada", description: `${destino} recibirá un email para elegir su contraseña.` }
-          : { title: "Acceso recuperado", description: `${destino} ya tenía cuenta: entra con su contraseña de siempre.` });
+      onSuccess: (r) => {
+        setEnlace({ email: destino, enlace: r.enlace });
         setEmail("");
+        if (!r.nueva) toast({ title: "Ya tenía cuenta", description: "Recupera el acceso; con el enlace elegirá una contraseña nueva." });
       },
       onError: onError("No se pudo invitar"),
     });
   };
+
+  const pedirEnlace = (a: Administradora) =>
+    nuevoEnlace.mutate(a.user_id, {
+      onSuccess: (url) => setEnlace({ email: a.email ?? "", enlace: url }),
+      onError: onError("No se pudo crear el enlace"),
+    });
 
   const quitarAcceso = (a: Administradora) => {
     if (!confirm(`¿Quitar el acceso al CRM a ${a.email}?`)) return;
@@ -175,7 +218,7 @@ const Administradoras = () => {
     <section className={tarjeta}>
       <div className={cabecera}>
         <h2 className="font-display text-lg font-semibold text-foreground">Administradoras</h2>
-        <p className="font-body text-sm text-muted-foreground">Personas con acceso al CRM.</p>
+        <p className="font-body text-sm text-muted-foreground">Personas con acceso al CRM. Si alguien olvida su contraseña, dale un enlace nuevo.</p>
       </div>
       {error ? (
         <p className="px-5 py-4 font-body text-sm text-rose-700">No se pudieron cargar: {error.message}</p>
@@ -184,26 +227,36 @@ const Administradoras = () => {
       ) : (
         <ul>
           {administradoras.map((a) => (
-            <li key={a.user_id} className="px-5 py-3 border-t border-border first:border-t-0 flex items-center gap-4 flex-wrap">
+            <li key={a.user_id} className="px-5 py-3 border-t border-border first:border-t-0 flex items-center gap-2 flex-wrap">
               <div className="flex-1 min-w-[220px]">
                 <p className="font-body text-sm font-semibold text-foreground">{a.email ?? "(sin email)"}{a.yo && <span className="font-normal text-muted-foreground"> · tú</span>}</p>
                 <p className="font-body text-xs text-muted-foreground">
-                  {a.ultimo_acceso ? `Último acceso: ${fecha(a.ultimo_acceso)}` : a.invitada_at ? `Invitada el ${fecha(a.invitada_at)}, aún no ha entrado` : "Aún no ha entrado"}
+                  {a.pendiente ? "Aún no ha elegido contraseña" : a.ultimo_acceso ? `Último acceso: ${fecha(a.ultimo_acceso)}` : "Aún no ha entrado"}
                 </p>
               </div>
               {!a.yo && (
-                <button
-                  onClick={() => quitarAcceso(a)}
-                  disabled={quitar.isPending}
-                  className="px-3 py-1.5 rounded-lg border border-rose-200 text-rose-700 font-body text-sm hover:bg-rose-50 disabled:opacity-50"
-                >
-                  Quitar acceso
-                </button>
+                <>
+                  <button
+                    onClick={() => pedirEnlace(a)}
+                    disabled={nuevoEnlace.isPending}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground font-body text-sm hover:bg-muted disabled:opacity-50"
+                  >
+                    <Link2 className="w-4 h-4" /> Nuevo enlace
+                  </button>
+                  <button
+                    onClick={() => quitarAcceso(a)}
+                    disabled={quitar.isPending}
+                    className="px-3 py-1.5 rounded-lg border border-rose-200 text-rose-700 font-body text-sm hover:bg-rose-50 disabled:opacity-50"
+                  >
+                    Quitar acceso
+                  </button>
+                </>
               )}
             </li>
           ))}
         </ul>
       )}
+      {enlace && <PanelEnlace {...enlace} cerrar={() => setEnlace(null)} />}
       <form onSubmit={enviar} className="px-5 py-4 border-t border-border flex gap-2 flex-wrap">
         <input
           type="email"

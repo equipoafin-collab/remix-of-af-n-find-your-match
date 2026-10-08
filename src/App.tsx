@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Perfil from "./pages/Perfil";
 import PerfilDocumentos from "./pages/PerfilDocumentos";
 import AdminLogin from "./pages/AdminLogin";
+import AccesoAdmin from "./pages/AccesoAdmin";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboardHome from "./pages/admin/Dashboard";
 import PerfilesList from "./pages/admin/PerfilesList";
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/perfil/documentos" element={<PerfilDocumentos />} />
           <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/acceso" element={<AccesoAdmin />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboardHome />} />
             <Route path="perfiles" element={<FiltrosDeUrl><PerfilesList /></FiltrosDeUrl>} />
