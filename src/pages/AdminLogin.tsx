@@ -103,6 +103,9 @@ const AdminLogin = () => {
             {loading ? "Accediendo..." : "Entrar"}
           </button>
         </form>
+        <p className="font-body text-xs text-muted-foreground text-center mt-6">
+          ¿Primera vez o has olvidado la contraseña? Pide un enlace de acceso a otra administradora (Configuración → Administradoras).
+        </p>
       </div>
     </main>
   );
