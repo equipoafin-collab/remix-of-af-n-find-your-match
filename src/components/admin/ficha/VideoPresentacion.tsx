@@ -3,6 +3,7 @@ import { Video, Upload, Trash2, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useSignedUrl } from "@/hooks/admin/useSignedUrl";
 import { useEliminarVideo, useSubirVideo } from "@/hooks/admin/useVideoPresentacion";
+import { registrarLectura } from "@/hooks/admin/useRgpd";
 import { VIDEO_MAX_MB, validarVideo } from "@/lib/video";
 import type { Perfil } from "@/types/admin";
 
@@ -73,7 +74,7 @@ const VideoPresentacion = ({ perfil }: { perfil: Perfil }) => {
 
       {perfil.video_presentacion_path ? (
         url ? (
-          <video key={url} src={url} controls preload="metadata" className="w-full max-h-[420px] rounded-xl bg-black" />
+          <video key={url} src={url} controls preload="metadata" onPlay={() => registrarLectura("ver_video", [perfil.id])} className="w-full max-h-[420px] rounded-xl bg-black" />
         ) : (
           <p className="font-body text-sm text-muted-foreground">{firmando ? "Cargando vídeo…" : "No se pudo cargar el vídeo."}</p>
         )

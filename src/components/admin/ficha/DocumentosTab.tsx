@@ -2,6 +2,7 @@ import { FileText, ExternalLink, Loader2 } from "lucide-react";
 import { useDocumentos, type Documento } from "@/hooks/admin/useDocumentos";
 import { useSignedUrl } from "@/hooks/admin/useSignedUrl";
 import type { Perfil } from "@/types/admin";
+import PrivacidadCliente from "./PrivacidadCliente";
 
 const EnlaceDocumento = ({ doc }: { doc: Documento }) => {
   const { data: url } = useSignedUrl("antecedentes", doc.path);
@@ -27,20 +28,23 @@ const DocumentosTab = ({ perfil }: { perfil: Perfil }) => {
   const { data: docs = [], isLoading, error } = useDocumentos(perfil);
 
   return (
-    <section className="bg-card border border-border rounded-2xl overflow-hidden">
-      <h3 className="font-display text-sm font-semibold text-foreground px-5 pt-5 pb-3">Documentos</h3>
-      {error ? (
-        <p className="px-5 pb-5 font-body text-sm text-rose-700">No se pudieron cargar los documentos: {error.message}</p>
-      ) : isLoading ? (
-        <p className="px-5 pb-5 font-body text-sm text-muted-foreground">Cargando…</p>
-      ) : docs.length === 0 ? (
-        <p className="px-5 pb-5 font-body text-sm text-muted-foreground">
-          No ha subido documentos. Se suben desde /perfil/documentos indicando su email o nombre completo.
-        </p>
-      ) : (
-        <ul className="border-t border-border">{docs.map((d) => <EnlaceDocumento key={d.path} doc={d} />)}</ul>
-      )}
-    </section>
+    <div className="space-y-4">
+      <section className="bg-card border border-border rounded-2xl overflow-hidden">
+        <h3 className="font-display text-sm font-semibold text-foreground px-5 pt-5 pb-3">Documentos</h3>
+        {error ? (
+          <p className="px-5 pb-5 font-body text-sm text-rose-700">No se pudieron cargar los documentos: {error.message}</p>
+        ) : isLoading ? (
+          <p className="px-5 pb-5 font-body text-sm text-muted-foreground">Cargando…</p>
+        ) : docs.length === 0 ? (
+          <p className="px-5 pb-5 font-body text-sm text-muted-foreground">
+            No ha subido documentos. Se suben desde /perfil/documentos indicando su email o nombre completo.
+          </p>
+        ) : (
+          <ul className="border-t border-border">{docs.map((d) => <EnlaceDocumento key={d.path} doc={d} />)}</ul>
+        )}
+      </section>
+      <PrivacidadCliente perfil={perfil} />
+    </div>
   );
 };
 

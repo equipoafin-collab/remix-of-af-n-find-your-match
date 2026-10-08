@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 import { filtroBusqueda } from "@/lib/busqueda";
 import { SECCIONES_RESUMEN } from "../../../supabase/functions/_shared/resumen";
+import { registrarLectura } from "./useRgpd";
 
 export function useNotas(perfilId: string) {
   return useQuery({
@@ -11,6 +12,7 @@ export function useNotas(perfilId: string) {
       const { data, error } = await supabase
         .from("notas_privadas").select("*").eq("perfil_id", perfilId).order("created_at", { ascending: false });
       if (error) throw error;
+      registrarLectura("leer_notas", [perfilId]); // T9.3
       return data;
     },
   });
@@ -37,6 +39,9 @@ export function useBuscarNotas(texto: string) {
       ]);
       if (n.error) throw n.error;
       if (s.error) throw s.error;
+      // T9.3: queda constancia de cada cliente cuyas notas o resúmenes aparecen en el resultado.
+      registrarLectura("leer_notas", n.data.map((x) => x.perfil_id));
+      registrarLectura("leer_sesiones", s.data.map((x) => x.perfil_id));
       return { notas: n.data, sesiones: s.data };
     },
   });

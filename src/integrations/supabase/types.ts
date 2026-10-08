@@ -487,6 +487,7 @@ export type Database = {
           nombre_completo: string
           notas: string | null
           perfil_id: string | null
+          perfil_suprimido_at: string | null
           plan: Database["public"]["Enums"]["plan_tipo"]
           telefono: string | null
         }
@@ -499,6 +500,7 @@ export type Database = {
           nombre_completo: string
           notas?: string | null
           perfil_id?: string | null
+          perfil_suprimido_at?: string | null
           plan: Database["public"]["Enums"]["plan_tipo"]
           telefono?: string | null
         }
@@ -511,6 +513,7 @@ export type Database = {
           nombre_completo?: string
           notas?: string | null
           perfil_id?: string | null
+          perfil_suprimido_at?: string | null
           plan?: Database["public"]["Enums"]["plan_tipo"]
           telefono?: string | null
         }
@@ -579,6 +582,8 @@ export type Database = {
           busca_genero: string | null
           ciudad: string
           conflicto: string[] | null
+          consentimiento_at: string | null
+          consentimiento_version: string | null
           created_at: string
           desea_casarse: string | null
           deseo_familia: number
@@ -640,6 +645,8 @@ export type Database = {
           busca_genero?: string | null
           ciudad: string
           conflicto?: string[] | null
+          consentimiento_at?: string | null
+          consentimiento_version?: string | null
           created_at?: string
           desea_casarse?: string | null
           deseo_familia: number
@@ -701,6 +708,8 @@ export type Database = {
           busca_genero?: string | null
           ciudad?: string
           conflicto?: string[] | null
+          consentimiento_at?: string | null
+          consentimiento_version?: string | null
           created_at?: string
           desea_casarse?: string | null
           deseo_familia?: number
@@ -1081,6 +1090,11 @@ export type Database = {
         Args: { _accion: string; _entidad: string; _entidad_id?: string }
         Returns: undefined
       }
+      registrar_lecturas: {
+        Args: { _accion: string; _perfil_ids: string[] }
+        Returns: undefined
+      }
+      suprimir_cliente: { Args: { _perfil_id: string }; Returns: Json }
     }
     Enums: {
       alerta_estado: "abierta" | "vista" | "resuelta"
