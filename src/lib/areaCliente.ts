@@ -18,6 +18,9 @@ export interface MiAreaAbierta {
   sesiones_realizadas: number;
   sesiones_pendientes: number;
   proxima_sesion: { fecha_hora: string; duracion_min: number; tipo: "primera" | "seguimiento" } | null;
+  en_pausa: boolean;
+  /** Solicitudes pendientes a la psicóloga (T16.3). */
+  solicitudes: TipoSolicitud[];
 }
 
 export type MiArea = MiAreaCerrada | MiAreaAbierta;
@@ -27,6 +30,19 @@ export interface ContextoArea {
   area: MiAreaAbierta;
   userId: string;
 }
+
+/** T16.3 · Lo que el cliente puede pedir a su psicóloga (los mismos tipos que pedir_a_psicologa; lo comprueba un test). */
+export const SOLICITUDES = {
+  pausa: { boton: "Pausar mi búsqueda", enviada: "Has pedido pausar tu búsqueda" },
+  reanudar: { boton: "Reanudar mi búsqueda", enviada: "Has pedido reanudar tu búsqueda" },
+  datos: { boton: "Copia de mis datos", enviada: "Has pedido una copia de tus datos" },
+  baja: { boton: "Darme de baja", enviada: "Has pedido la baja" },
+} as const;
+
+export type TipoSolicitud = keyof typeof SOLICITUDES;
+
+/** Pausar o reanudar según esté, la copia de datos y la baja. */
+export const solicitudesDisponibles = (enPausa: boolean): TipoSolicitud[] => [enPausa ? "reanudar" : "pausa", "datos", "baja"];
 
 /** El aviso "tu plan termina" sale estos días antes de plan_fin. */
 export const DIAS_AVISO_FIN_PLAN = 15;

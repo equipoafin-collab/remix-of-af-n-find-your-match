@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import type { MiArea } from "@/lib/areaCliente";
+import type { MiArea, TipoSolicitud } from "@/lib/areaCliente";
 import type { MiPerfil, Preferencias } from "@/lib/cuestionario";
 import { extensionFoto } from "../../../supabase/functions/_shared/acceso";
 import { llamarFuncion } from "./accesoCliente";
@@ -37,6 +37,19 @@ export function usePedirRenovacion() {
   return useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.rpc("pedir_renovacion");
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["mi-area"] }),
+  });
+}
+
+/** T16.3 · Pedir a la psicóloga pausar o reanudar, la baja o una copia de sus datos. Devuelve false si ya estaba pedido. */
+export function usePedirAPsicologa() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (tipo: TipoSolicitud) => {
+      const { data, error } = await supabase.rpc("pedir_a_psicologa", { _tipo: tipo });
       if (error) throw error;
       return data;
     },

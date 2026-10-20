@@ -5,6 +5,7 @@ import { calculateDisc } from "@/components/DiscSurvey";
 import FotoPerfil from "@/components/admin/FotoPerfil";
 import { rotuloClaro } from "@/components/cliente/estilos";
 import EditarPreferencias from "@/components/cliente/EditarPreferencias";
+import Solicitudes from "@/components/cliente/Solicitudes";
 import { toast } from "@/hooks/use-toast";
 import { useCambiarFoto, useMiPerfil } from "@/hooks/cliente/useMiArea";
 import { fechaLarga, type ContextoArea, type MiAreaAbierta } from "@/lib/areaCliente";
@@ -176,6 +177,7 @@ const PerfilCliente = () => {
         );
       })}
 
+      <Solicitudes area={area} />
       <p className="font-body text-xs text-muted-foreground text-center">¿Quieres cambiar algo más? Díselo a tu psicóloga y lo cambiará.</p>
     </div>
   );
