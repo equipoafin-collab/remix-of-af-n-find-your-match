@@ -1,11 +1,13 @@
-import { useState, type FormEvent, type ReactNode } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useState, type FormEvent } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { mensajeDeFuncion } from "@/hooks/admin/mensajeDeFuncion";
 import { errorContrasena } from "../../supabase/functions/_shared/acceso";
+import Pantalla from "@/components/cliente/Pantalla";
+import { botonDorado, campo, etiqueta, rotulo } from "@/components/cliente/estilos";
 
 // T15.1 · El cliente crea la contraseña de su área con el enlace personal que le envía la psicóloga (?t=…).
 // acceso-cliente valida el enlace y crea la cuenta; después entra con su email y esa contraseña.
@@ -17,24 +19,6 @@ async function accesoCliente<T>(body: Record<string, string>): Promise<T> {
   }
   return data as T;
 }
-
-const campo =
-  "w-full px-5 py-3.5 rounded-full bg-primary-foreground/10 border border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 font-body text-sm focus:outline-none focus:ring-2 focus:ring-gold/50";
-const etiqueta = "block text-left font-body text-xs text-primary-foreground/70 mb-1.5 ml-4";
-
-// Mismo bloque azul marino que el final de la portada (CTASection).
-const Pantalla = ({ children }: { children: ReactNode }) => (
-  <div className="min-h-screen bg-primary relative overflow-hidden flex flex-col">
-    <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-gold/10 -translate-y-1/2 translate-x-1/2" />
-    <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-gold/5 translate-y-1/2 -translate-x-1/2" />
-    <header className="relative z-10 pt-8 text-center">
-      <Link to="/" className="font-display text-2xl font-bold text-primary-foreground">Afín</Link>
-    </header>
-    <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-sm text-center space-y-6">{children}</div>
-    </main>
-  </div>
-);
 
 const Formulario = ({ token, nombre, email }: { token: string; nombre: string; email: string }) => {
   const navigate = useNavigate();
@@ -104,7 +88,7 @@ const Formulario = ({ token, nombre, email }: { token: string; nombre: string; e
       <button
         type="submit"
         disabled={enviando}
-        className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-full bg-gold text-accent-foreground font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-60"
+        className={`${botonDorado} w-full`}
       >
         {enviando && <Loader2 className="w-4 h-4 animate-spin" />} Crear mi contraseña
       </button>
@@ -127,7 +111,7 @@ const AccesoCliente = () => {
   if (!token || info.isError) {
     return (
       <Pantalla>
-        <p className="text-gold font-body text-xs tracking-[0.3em] uppercase">Tu área en Afín</p>
+        <p className={rotulo}>Tu área en Afín</p>
         <h1 className="font-display text-3xl font-bold text-primary-foreground">
           {token ? <>No podemos abrir <em className="italic font-normal">tu enlace</em></> : <>Necesitas tu <em className="italic font-normal">enlace personal</em></>}
         </h1>
@@ -148,7 +132,7 @@ const AccesoCliente = () => {
 
   return (
     <Pantalla>
-      <p className="text-gold font-body text-xs tracking-[0.3em] uppercase">Tu área en Afín</p>
+      <p className={rotulo}>Tu área en Afín</p>
       <h1 className="font-display text-4xl font-bold text-primary-foreground leading-tight">
         Crea tu <em className="italic font-normal">contraseña</em>
       </h1>
