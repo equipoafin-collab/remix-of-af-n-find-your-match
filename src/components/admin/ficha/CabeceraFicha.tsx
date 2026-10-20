@@ -8,6 +8,7 @@ import { EstadoBadge, PlanBadge, SinRevisarBadge } from "@/components/admin/Badg
 import type { Cliente, Perfil } from "@/types/admin";
 import CambiarEstado from "./CambiarEstado";
 import EditarPlan from "./EditarPlan";
+import EnlacePago from "./EnlacePago";
 
 const calidadPerfil = (p: Perfil) => {
   let score = 0;
@@ -76,6 +77,7 @@ const CabeceraFicha = ({ cliente: p }: { cliente: Cliente }) => {
           <div className="flex items-center gap-2 flex-wrap mt-2">
             <PlanBadge plan={p.plan} />
             <EditarPlan cliente={p} />
+            <EnlacePago cliente={p} />
             <EstadoBadge estado={p.estado_cliente} />
             {!p.revisado && <SinRevisarBadge />}
             <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-body font-medium border ${calidad.bg} ${calidad.color}`}>
