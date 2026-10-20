@@ -1144,6 +1144,7 @@ export type Database = {
       }
     }
     Functions: {
+      actualizar_mi_perfil: { Args: { _cambios: Json }; Returns: string[] }
       cambiar_estado_cliente: {
         Args: {
           _motivo?: string
@@ -1180,6 +1181,10 @@ export type Database = {
       mi_perfil: { Args: never; Returns: Json }
       mi_perfil_id: { Args: never; Returns: string }
       pedir_renovacion: { Args: never; Returns: boolean }
+      perfil_cambiado_por_cliente: {
+        Args: { _matching: boolean; _perfil_id: string; _que: string }
+        Returns: undefined
+      }
       perfil_tiene_area: { Args: { _perfil_id: string }; Returns: boolean }
       puede_ver_foto: { Args: { _ruta: string }; Returns: boolean }
       reembolsar_pago_stripe: {
