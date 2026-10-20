@@ -434,8 +434,10 @@ export type Database = {
           informe: Json | null
           informe_enviado_at: string | null
           lugar: string | null
+          motivos_cliente: string[]
           perfil_a: string
           perfil_b: string
+          presentado_at: string | null
           quiere_repetir_a: boolean | null
           quiere_repetir_b: boolean | null
           sugerencia_id: string | null
@@ -453,8 +455,10 @@ export type Database = {
           informe?: Json | null
           informe_enviado_at?: string | null
           lugar?: string | null
+          motivos_cliente?: string[]
           perfil_a: string
           perfil_b: string
+          presentado_at?: string | null
           quiere_repetir_a?: boolean | null
           quiere_repetir_b?: boolean | null
           sugerencia_id?: string | null
@@ -472,8 +476,10 @@ export type Database = {
           informe?: Json | null
           informe_enviado_at?: string | null
           lugar?: string | null
+          motivos_cliente?: string[]
           perfil_a?: string
           perfil_b?: string
+          presentado_at?: string | null
           quiere_repetir_a?: boolean | null
           quiere_repetir_b?: boolean | null
           sugerencia_id?: string | null

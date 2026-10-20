@@ -10,6 +10,7 @@ import type { MatchEstado, Perfil } from "@/types/admin";
 import { ESTADO_MATCH as ESTADO } from "@/lib/matches";
 import PanelInforme from "./PanelInforme";
 import PanelFeedback from "./PanelFeedback";
+import PresentarMatch from "./PresentarMatch";
 
 const badge = "px-2 py-0.5 rounded-full text-xs font-body font-medium border";
 const campo = "mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm";
@@ -129,6 +130,7 @@ export const FilaMatch = ({ match, perfilId }: { match: MatchConPersonas; perfil
             </p>
           )}
         </div>
+        <PresentarMatch match={match} />
         <button
           onClick={() => setVerInforme(!verInforme)}
           className={`inline-flex items-center gap-1 ${badge} py-1 ${match.informe_enviado_at ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-background text-foreground border-border hover:bg-muted"}`}

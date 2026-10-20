@@ -95,3 +95,16 @@ export function useGuardarFeedback() {
     onError: (error) => toast({ title: "No se pudo guardar el feedback", description: error.message, variant: "destructive" }),
   });
 }
+
+/** T18.1 · Motivos de la sugerencia que originó el match, para precargar los que leerán los clientes (nunca los riesgos). */
+export function useMotivosSugerencia(sugerenciaId: string | null, activo: boolean) {
+  return useQuery({
+    queryKey: ["motivos-sugerencia", sugerenciaId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("match_sugerencias").select("motivos").eq("id", sugerenciaId as string).maybeSingle();
+      if (error) throw error;
+      return data?.motivos ?? [];
+    },
+    enabled: activo && !!sugerenciaId,
+  });
+}

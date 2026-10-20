@@ -751,9 +751,10 @@ Decisiones (valores por defecto; confirmar con Vero):
 
 ### FASE 18 — Mis matches
 
-- [ ] **T18.1 · Presentar un match en el área** · Depende de T15.1
+- [x] **T18.1 · Presentar un match en el área** · Depende de T15.1
   - Migración: `matches.presentado_at` y `matches.motivos_cliente text[]`. En `MatchesTab`, "Presentar en su área": la psicóloga revisa los motivos que verán (precargados de `match_sugerencias.motivos`; los riesgos, nunca) y lo presenta a los dos a la vez.
   - Aceptación: un match sin presentar no aparece en el área de ninguno; al presentarlo aparece a los dos.
+  > Nota de implementación: migración `20261020240000_t18_1_presentar_match.sql` con `presentado_at` y `motivos_cliente` (5 como mucho, con CHECK). Sin cambios de RLS: solo la administradora escribe en `matches`. En cada match de la ficha (y en Matches Aprobados, que usa la misma fila), "Presentar en su área" (`PresentarMatch`) abre un diálogo con los motivos de la sugerencia precargados (`useMotivosSugerencia`; los riesgos nunca), uno por línea. Avisa de que los leerán los dos, así que nada de religión, política, salud, apellidos ni contacto. `limpiarMotivos` (con test) quita vacíos y repetidos, recorta a 160 caracteres y se queda con 5. Ya presentado, el botón pasa a "En su área desde el…" y deja guardar otros motivos o retirarlo. Que el cliente lo vea es T18.2 (`mis_matches()` solo con `presentado_at`). Probado en Postgres 15 (52 migraciones y la nueva dos veces): por defecto sin presentar y sin motivos, la administradora presenta, el CHECK rechaza 6 motivos y un cliente ni lo lee ni lo cambia. En local, con una sesión de administradora y respuestas simuladas: la precarga, presentar (envía motivos y fecha), reabrir con lo guardado y "Retirar". La precarga tenía un fallo (el formulario se montaba antes de llegar los motivos), corregido.
 
 - [ ] **T18.2 · Ver mis matches** · Depende de T18.1, T15.2
   - `mis_matches()`: de la otra persona, nombre de pila, edad, zona, aficiones, foto (política de lectura en `fotos-perfil` para las fotos de sus matches presentados) y `motivos_cliente`; estado en palabras del cliente (Presentado → Cita agendada → Cita realizada → Seguís conociéndoos / Cerrado; textos en `src/lib/` con test); fecha y lugar de la cita; informe si es Premium y está enviado.
@@ -902,3 +903,4 @@ Fases 15-19, área del cliente (añadidas el 20/10/2026): **F15 Acceso** → **T
 | 20/10/2026 | T16.3 | El cliente pide a su psicóloga pausar o reanudar su búsqueda, la baja (con confirmación) o una copia de sus datos: tarea y aviso, sin cambios automáticos. Cierra la Fase 16. |
 | 20/10/2026 | T17.1 | Calendario del cliente: sus sesiones (próximas y pasadas, la cancelada tachada) en lista y en el mes, "Te quedan N sesiones" y "Añadir a mi calendario" con un `.ics` de título neutro. |
 | 20/10/2026 | T17.2 (sin cerrar) | Botón "Reservar sesión" en el calendario del cliente, con su nombre y email en Calendly; espera la dirección de Calendly (`CALENDLY_SESIONES` en `src/lib/enlaces.ts`) y, mientras tanto, no sale. |
+| 20/10/2026 | T18.1 | "Presentar en su área" en cada match de la ficha: la psicóloga revisa los motivos (precargados de la sugerencia, sin riesgos) y lo presenta a los dos; puede editarlos o retirarlo. |
