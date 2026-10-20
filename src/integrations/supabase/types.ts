@@ -1177,9 +1177,11 @@ export type Database = {
         Returns: boolean
       }
       mi_area: { Args: never; Returns: Json }
+      mi_perfil: { Args: never; Returns: Json }
       mi_perfil_id: { Args: never; Returns: string }
       pedir_renovacion: { Args: never; Returns: boolean }
       perfil_tiene_area: { Args: { _perfil_id: string }; Returns: boolean }
+      puede_ver_foto: { Args: { _ruta: string }; Returns: boolean }
       reembolsar_pago_stripe: {
         Args: { _payment_intent: string }
         Returns: Json
