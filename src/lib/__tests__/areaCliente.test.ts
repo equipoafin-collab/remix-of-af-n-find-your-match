@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { avisarFinPlan, cuandoCita, diasHastaFin, fechaLarga } from "../areaCliente";
+import { avisarFinPlan, cuandoCita, diasHastaFin, fechaLarga, SOLICITUDES, solicitudesDisponibles } from "../areaCliente";
 
 const hoy = new Date(2026, 9, 20, 23, 30); // 20/10/2026 por la noche, hora local
 
@@ -30,5 +30,19 @@ describe("cuandoCita", () => {
     expect(cuandoCita(new Date(2026, 9, 20, 18, 0).toISOString(), ahora)).toBe("hoy a las 18:00");
     expect(cuandoCita(new Date(2026, 9, 21, 9, 5).toISOString(), ahora)).toBe("mañana a las 09:05");
     expect(cuandoCita(new Date(2026, 9, 23, 18, 0).toISOString(), ahora)).toBe("el viernes 23 de octubre a las 18:00");
+  });
+});
+
+describe("solicitudes a la psicóloga (T16.3)", () => {
+  it("los mismos tipos que pedir_a_psicologa", async () => {
+    const { readFileSync } = await import("node:fs");
+    const sql = readFileSync("supabase/migrations/20261020220000_t16_3_solicitudes.sql", "utf8");
+    const tipos = [...sql.matchAll(/^\s+\('([a-z]+)', '/gm)].map((m) => m[1]);
+    expect(tipos.sort()).toEqual(Object.keys(SOLICITUDES).sort());
+  });
+
+  it("ofrece pausar o reanudar según esté, además de la copia de datos y la baja", () => {
+    expect(solicitudesDisponibles(false)).toEqual(["pausa", "datos", "baja"]);
+    expect(solicitudesDisponibles(true)).toEqual(["reanudar", "datos", "baja"]);
   });
 });

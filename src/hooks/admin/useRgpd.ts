@@ -28,13 +28,17 @@ export function registrarLectura(accion: Lectura, perfilIds: string[]) {
 
 interface Archivo { bucket: string; ruta: string }
 
-/** Foto, vídeos y antecedentes del cliente en Storage. */
+/** Fotos, vídeos y antecedentes del cliente en Storage. */
 async function archivosDelCliente(perfil: Pick<Perfil, "id" | "email" | "nombre_completo" | "foto_url">): Promise<Archivo[]> {
   const { data: videos, error } = await supabase.storage.from("videos-sesiones").list(perfil.id);
   if (error) throw error;
+  // T16.2: las fotos que sube desde su área (normalmente solo la actual, que ya es foto_url).
+  const { data: fotos, error: errorFotos } = await supabase.storage.from("fotos-perfil").list(`clientes/${perfil.id}`);
+  if (errorFotos) throw errorFotos;
   const documentos = await listarDocumentos(perfil);
+  const rutasFotos = new Set([...(perfil.foto_url ? [perfil.foto_url] : []), ...fotos.filter((f) => !f.name.startsWith(".")).map((f) => `clientes/${perfil.id}/${f.name}`)]);
   return [
-    ...(perfil.foto_url ? [{ bucket: "fotos-perfil", ruta: perfil.foto_url }] : []),
+    ...[...rutasFotos].map((ruta) => ({ bucket: "fotos-perfil", ruta })),
     ...videos.filter((f) => !f.name.startsWith(".")).map((f) => ({ bucket: "videos-sesiones", ruta: `${perfil.id}/${f.name}` })),
     ...documentos.map((d) => ({ bucket: "antecedentes", ruta: d.path })),
   ];

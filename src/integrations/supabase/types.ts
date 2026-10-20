@@ -1180,6 +1180,7 @@ export type Database = {
       mi_area: { Args: never; Returns: Json }
       mi_perfil: { Args: never; Returns: Json }
       mi_perfil_id: { Args: never; Returns: string }
+      pedir_a_psicologa: { Args: { _tipo: string }; Returns: boolean }
       pedir_renovacion: { Args: never; Returns: boolean }
       perfil_cambiado_por_cliente: {
         Args: { _matching: boolean; _perfil_id: string; _que: string }
