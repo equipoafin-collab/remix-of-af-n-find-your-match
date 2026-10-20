@@ -76,3 +76,21 @@ export function cuandoCita(iso: string, ahora = new Date()) {
   // Intl pone coma tras el día de la semana ("viernes, 23 de octubre").
   return `el ${d.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" }).replace(",", "")} a las ${hora}`;
 }
+
+/** T17.1 · Una cita de mis_citas(): sus sesiones con la psicóloga (las de sus matches llegarán con T18). */
+export interface Cita {
+  id: string;
+  fecha_hora: string;
+  duracion_min: number;
+  tipo: "primera" | "seguimiento";
+  estado: "programada" | "realizada" | "cancelada" | "no_asistio";
+}
+
+/** Próximas (programadas desde ahora, la más cercana primero) y pasadas (la más reciente primero). */
+export function separarCitas(citas: Cita[], ahora = new Date()) {
+  const proxima = (c: Cita) => c.estado === "programada" && new Date(c.fecha_hora) >= ahora;
+  return {
+    proximas: citas.filter(proxima).sort((a, b) => a.fecha_hora.localeCompare(b.fecha_hora)),
+    pasadas: citas.filter((c) => !proxima(c)).sort((a, b) => b.fecha_hora.localeCompare(a.fecha_hora)),
+  };
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { avisarFinPlan, cuandoCita, diasHastaFin, fechaLarga, SOLICITUDES, solicitudesDisponibles } from "../areaCliente";
+import { avisarFinPlan, cuandoCita, diasHastaFin, fechaLarga, separarCitas, SOLICITUDES, solicitudesDisponibles, type Cita } from "../areaCliente";
 
 const hoy = new Date(2026, 9, 20, 23, 30); // 20/10/2026 por la noche, hora local
 
@@ -44,5 +44,25 @@ describe("solicitudes a la psicóloga (T16.3)", () => {
   it("ofrece pausar o reanudar según esté, además de la copia de datos y la baja", () => {
     expect(solicitudesDisponibles(false)).toEqual(["pausa", "datos", "baja"]);
     expect(solicitudesDisponibles(true)).toEqual(["reanudar", "datos", "baja"]);
+  });
+});
+
+describe("separarCitas (T17.1)", () => {
+  const ahora = new Date("2026-10-20T10:00:00Z");
+  const cita = (id: string, fecha_hora: string, estado: Cita["estado"] = "programada"): Cita => ({ id, fecha_hora, duracion_min: 50, tipo: "seguimiento", estado });
+  const { proximas, pasadas } = separarCitas([
+    cita("a", "2026-10-30T16:00:00Z"),
+    cita("b", "2026-10-23T16:00:00Z"),
+    cita("c", "2026-10-25T16:00:00Z", "cancelada"),
+    cita("d", "2026-10-09T16:00:00Z", "realizada"),
+    cita("e", "2026-10-15T16:00:00Z"),
+  ], ahora);
+
+  it("próximas: solo programadas desde ahora, la más cercana primero", () => {
+    expect(proximas.map((c) => c.id)).toEqual(["b", "a"]);
+  });
+
+  it("pasadas: canceladas, realizadas y programadas que ya pasaron, la más reciente primero", () => {
+    expect(pasadas.map((c) => c.id)).toEqual(["c", "e", "d"]);
   });
 });
