@@ -1,6 +1,7 @@
 import { useOutletContext } from "react-router-dom";
 import { CalendarPlus, Check, ChevronDown, Loader2, MapPin } from "lucide-react";
 import FotoPerfil from "@/components/admin/FotoPerfil";
+import FeedbackCita from "@/components/cliente/FeedbackCita";
 import { rotuloClaro } from "@/components/cliente/estilos";
 import { useMisMatches } from "@/hooks/cliente/useMiArea";
 import { cuandoCita, ESTADO_MATCH_CLIENTE, type ContextoArea, type MiMatch } from "@/lib/areaCliente";
@@ -117,6 +118,7 @@ const TarjetaMatch = ({ match }: { match: MiMatch }) => {
         </div>
       )}
 
+      <FeedbackCita match={match} />
       {match.informe && <Informe informe={match.informe} />}
     </article>
   );

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Constants } from "@/integrations/supabase/types";
-import { avisarFinPlan, cuandoCita, diasHastaFin, ESTADO_MATCH_CLIENTE, fechaLarga, separarCitas, SOLICITUDES, solicitudesDisponibles, type Cita } from "../areaCliente";
+import { avisarFinPlan, cuandoCita, diasHastaFin, ESTADO_MATCH_CLIENTE, fechaLarga, puedeDejarFeedback, separarCitas, SOLICITUDES, solicitudesDisponibles, type Cita } from "../areaCliente";
 
 const hoy = new Date(2026, 9, 20, 23, 30); // 20/10/2026 por la noche, hora local
 
@@ -80,5 +80,22 @@ describe("estado del match para el cliente (T18.2)", () => {
     expect(ESTADO_MATCH_CLIENTE.informe_enviado).toEqual({ texto: "Presentado", paso: 1 });
     expect(ESTADO_MATCH_CLIENTE.cita_agendada.paso).toBe(2);
     expect(ESTADO_MATCH_CLIENTE.continuan).toEqual({ texto: "Seguís conociéndoos", paso: 3 });
+  });
+});
+
+describe("puedeDejarFeedback (T18.3)", () => {
+  const ahora = new Date("2026-10-20T10:00:00Z");
+  it("desde que pasa la cita hasta que la psicóloga lo registra", () => {
+    expect(puedeDejarFeedback({ estado: "cita_realizada", fecha_cita: null }, ahora)).toBe(true);
+    expect(puedeDejarFeedback({ estado: "cita_agendada", fecha_cita: "2026-10-19T19:00:00Z" }, ahora)).toBe(true);
+    expect(puedeDejarFeedback({ estado: "cita_agendada", fecha_cita: "2026-10-24T19:00:00Z" }, ahora)).toBe(false);
+    expect(puedeDejarFeedback({ estado: "feedback_registrado", fecha_cita: "2026-10-19T19:00:00Z" }, ahora)).toBe(false);
+    expect(puedeDejarFeedback({ estado: "informe_enviado", fecha_cita: null }, ahora)).toBe(false);
+  });
+
+  it("la migración usa las mismas reglas", async () => {
+    const { readFileSync } = await import("node:fs");
+    const sql = readFileSync("supabase/migrations/20261020260000_t18_3_feedback_cliente.sql", "utf8");
+    expect(sql).toContain("_m.estado = 'cita_realizada' OR (_m.estado = 'cita_agendada' AND _m.fecha_cita <= now())");
   });
 });

@@ -111,7 +111,13 @@ export interface MiMatch {
   otra: { nombre: string; edad: number; zona: string | null; aficiones: string | null; foto_url: string | null };
   /** Solo si es Premium y la psicóloga ya lo envió. */
   informe: InformeCompatibilidad | null;
+  /** Su propio feedback de la cita (T18.3); nunca el de la otra persona. */
+  mi_feedback: { valoracion: number | null; quiere_repetir: boolean | null; comentario: string | null };
 }
+
+/** T18.3 · ¿Puede dejar (o cambiar) su feedback? Desde que pasa la cita hasta que la psicóloga lo da por registrado. */
+export const puedeDejarFeedback = (m: Pick<MiMatch, "estado" | "fecha_cita">, ahora = new Date()) =>
+  m.estado === "cita_realizada" || (m.estado === "cita_agendada" && !!m.fecha_cita && new Date(m.fecha_cita) <= ahora);
 
 /** El estado del match en palabras del cliente y en qué paso va (1 presentado, 2 cita, 3 tras la cita). */
 export const ESTADO_MATCH_CLIENTE: Record<MatchEstado, { texto: string; paso: 1 | 2 | 3 }> = {

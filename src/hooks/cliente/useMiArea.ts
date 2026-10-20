@@ -125,3 +125,17 @@ export function useMisMatches(userId: string | undefined) {
     enabled: !!userId,
   });
 }
+
+/** T18.3 · Su feedback de la cita con un match (solo su lado). */
+export function useDejarFeedback() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (f: { matchId: string; valoracion: number; quiereRepetir: boolean; comentario: string }) => {
+      const { error } = await supabase.rpc("dejar_feedback", {
+        _match_id: f.matchId, _valoracion: f.valoracion, _quiere_repetir: f.quiereRepetir, _comentario: f.comentario,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["mis-matches"] }),
+  });
+}

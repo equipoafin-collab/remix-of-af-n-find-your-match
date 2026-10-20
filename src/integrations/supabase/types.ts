@@ -1164,6 +1164,15 @@ export type Database = {
         Returns: Json
       }
       dashboard_resumen: { Args: never; Returns: Json }
+      dejar_feedback: {
+        Args: {
+          _comentario: string
+          _match_id: string
+          _quiere_repetir: boolean
+          _valoracion: number
+        }
+        Returns: undefined
+      }
       estado_automatizaciones: {
         Args: never
         Returns: {
