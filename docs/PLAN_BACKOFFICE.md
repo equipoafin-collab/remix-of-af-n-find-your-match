@@ -678,6 +678,112 @@ Decisión (15/10/2026): la psicóloga genera desde la ficha un enlace de pago de
   - Paginar donde hoy hay tope de 1.000 filas (anotado con `ponytail:`): candidatos de `sugerencias-calcular` y `procesar-cola-matching`, listados globales, `listUsers` de administradoras y las carpetas de antecedentes (las nuevas van por `perfil_id` desde T13.3; el tope solo afecta a las antiguas `user_*`).
   - Aceptación: con 2.000 perfiles de prueba, todo funciona y nada se corta.
 
+### Área del cliente (Fases 15-19)
+
+> Añadida el 20/10/2026. Hasta ahora todo es para la psicóloga: el cliente rellena el cuestionario y no vuelve a entrar. Estas fases le dan un **área privada** (`/mi-area`, pensada para móvil) con su calendario de citas, los matches que le presenta la psicóloga, su perfil y rondas de 4 propuestas para elegir con quién se ve más.
+
+**Regla de seguridad del área (vale para todas las tareas):** el cliente **nunca lee tablas directamente**. Todo pasa por funciones `mi_*` / `mis_*` (`SECURITY DEFINER`, filtran por `auth.uid()`) que devuelven solo las columnas permitidas. No se añade ninguna política de lectura para clientes en `sesiones`, `notas_privadas`, `perfil_aprendizaje`, `match_sugerencias`, `alertas` ni `tareas`. De otra persona se ve como mucho: nombre de pila, edad, zona, foto, aficiones y los motivos que escribe la psicóloga; nunca apellidos, contacto, religión, política, DISC, notas ni feedback.
+
+Decisiones (valores por defecto; confirmar con Vero):
+
+| Tema | Por defecto |
+|---|---|
+| Quién tiene área | Solo quien ha pagado: un pago `pagado` y el plan vigente (estado activo o pausado). Si pasa `plan_fin` sin renovar, o pasa a finalizado o baja, **pierde el acceso**: al entrar solo ve "Tu plan ha terminado" y "Quiero renovar", sin ningún dato. Al pagar la renovación vuelve a entrar con la misma contraseña. Los leads, nunca. |
+| Cómo entra | Usuario = su email (el del cuestionario y el del pago). La contraseña la elige el cliente con un enlace de un solo uso (7 días) que la psicóloga envía desde la ficha; nunca se le da una contraseña. Mejoras: crearla justo al pagar (T15.3) y, con F12, enlace y "He olvidado mi contraseña" por email. |
+| Resúmenes y notas de sesión | Nunca visibles. Solo un "mensaje para ti" opcional que la psicóloga escribe a propósito (T17.3). |
+| Cuándo ve un match | Cuando la psicóloga pulsa "Presentar en su área", no al crearse (`propuesto` es interno). |
+| Informe de compatibilidad | Visible en el match (Premium) cuando se ha marcado como enviado. |
+| Reservar sesión | Calendly (T10.3). Sin T9.4, la sesión aparece cuando la psicóloga la apunta; con T9.4, sola. |
+| Rondas de 4 propuestas | Las elige la psicóloga entre sus Sugerencias (preseleccionadas las 4 mejores), una ronda abierta por cliente, caduca a los 7 días. Solo personas que han aceptado aparecer (T19.1). |
+| Elegir en una ronda | No crea un match (la otra persona no sabe nada): avisa a la psicóloga y alimenta el aprendizaje. |
+
+### FASE 15 — Acceso del cliente
+
+- [x] **T15.1 · Cuenta del cliente: acceso solo con el plan pagado**
+  - Migración: `perfiles.user_id uuid UNIQUE` (FK a `auth.users`, `ON DELETE SET NULL`), `mi_perfil_id()` y `tiene_area()` (`SECURITY DEFINER`: plan con un pago `pagado`, `plan_fin` sin pasar y estado activo o pausado), y tabla `accesos_cliente` (`perfil_id`, `token_hash`, `caduca_at` a 7 días, `usado_at`; RLS solo admin).
+  - Edge Function `acceso-cliente` con dos acciones. `enlace` (solo admin): exige el plan pagado, crea la cuenta de Auth con el email del perfil si no existe (sin rol; si el email es de una administradora, error), la guarda en `perfiles.user_id` y devuelve `/mi-area/acceso?t=<token>`, con auditoría. `activar` (pública): con el token y la contraseña elegida, `updateUserById` y token usado. Token propio de 7 días porque el enlace de Supabase caduca en 1 hora (el cliente lo abrirá cuando pueda), y se gasta solo al pulsar el botón, como `/admin/acceso`, para que los antivirus del correo no lo invaliden.
+  - Ficha: botón "Dar acceso al área" en la cabecera (solo con el plan pagado) con `CompartirEnlace` (Copiar, correo y WhatsApp con `wa.me`). Hasta F12 es también el "He olvidado mi contraseña": la psicóloga genera otro enlace. `suprimir_cliente` (T9.3) borra la cuenta. Ojo: `buscarPorEmail` de `administradoras` asume que en Auth solo hay administradoras; al cliente se le busca por `perfiles.user_id`.
+  - Aceptación: sin pago no hay botón; con el enlace el cliente elige contraseña y entra con email y contraseña; un enlace usado o caducado no sirve; la cuenta no entra en `/admin` ni lee ninguna tabla con la API.
+  > Nota de implementación: migración `20261020180000_t15_1_acceso_cliente.sql`. `perfil_tiene_area(perfil_id)` sin `SECURITY DEFINER` (con RLS, la administradora lo sabe de cualquiera y nadie más de nadie), `tiene_area()` y `mi_perfil_id()` para el cliente, y `usuario_por_email` solo para el servidor. El enlace se crea como el de T13.3, con un insert de la administradora en `accesos_cliente` (token de 64 caracteres, 7 días), sin acción `enlace` en la Edge Function: un trigger rechaza el insert sin plan pagado y borra los enlaces anteriores sin usar. La cuenta se crea al activar, no al dar el enlace. `acceso-cliente` es pública con dos acciones: `info` (nombre de pila y usuario) y `activar` (gasta el token antes de tocar la cuenta y lo devuelve si algo falla). Decide qué hacer con la cuenta `pasoCuenta` (`_shared/acceso.ts`, con test, junto a `errorContrasena`: 8 caracteres como mínimo y 72 bytes como máximo): crearla; ponerle contraseña si ya la tenía; o enlazar una cuenta suelta con su email (Auth tiene el registro público desactivado, así que solo pudo crearla Afín). Nunca toca la de una administradora ni la de otro perfil. `v_clientes` se vuelve a crear (como en T9.5) para traer `user_id` y `con_area`; el botón "Acceso al área" de la cabecera solo sale con `con_area` y avisa de si ya tiene cuenta ("he olvidado mi contraseña"). `CompartirEnlace` gana "WhatsApp" (`wa.me`) para todos sus enlaces. La página `/mi-area/acceso?t=…` (adelantada de T15.2) tiene la estética de la portada: crea la contraseña, entra y lleva a `/mi-area`, que llega en T15.2. `suprimir_cliente` borra también su cuenta. La política de inserción pública de `perfiles` (T1.1) añade `user_id IS NULL`. Probado en Postgres 15 (imagen de Supabase, las 46 migraciones en orden y la nueva dos veces): con datos en todas las tablas, una cuenta de cliente no ve ninguna fila de ninguna tabla, vista ni Storage; las únicas funciones con privilegios que puede llamar son `mi_perfil_id`, `tiene_area` y `has_role`; vencer el plan, la baja o el reembolso quitan el área y la pausa no; suprimir borra la cuenta. En local, la página con la función simulada en el navegador (validaciones, error del servidor y móvil). La Edge Function y el botón de la ficha se prueban tras aplicar la migración y fusionar.
+
+- [x] **T15.2 · Entrada y estructura de `/mi-area`** · Depende de T15.1
+  - `/mi-area/login` (email, contraseña y "he olvidado mi contraseña"), `/mi-area/acceso` (hecha en T15.1) y `ClienteLayout` con barra inferior en móvil: Inicio · Calendario · Matches · Propuestas · Perfil. Estética de la portada, no del admin: Playfair Display en títulos (con palabras en cursiva), Inter en textos, bloques azul marino con titulares crema, etiquetas doradas en mayúsculas espaciadas, tarjetas `rounded-2xl`, iconos en baldosa y botones dorados en píldora. Rutas con `React.lazy` (no engordan la portada, T10.2). Hooks en `src/hooks/cliente/`. Inicio: próxima cita, sesiones que quedan, propuesta pendiente y último match. "¿Has olvidado tu contraseña?" dice "pide un enlace nuevo a tu psicóloga" hasta F12. Si `tiene_area()` es falso (plan vencido sin renovar, finalizado o baja) el área se cierra: todas las `mi_*` devuelven vacío y solo se ve "Tu plan ha terminado" con "Quiero renovar" (`pedir_renovacion()`: tarea y alerta para la psicóloga, que envía el enlace de pago de T11.4). Al pagar, T11.3 alarga `plan_fin` y vuelve a entrar con la misma contraseña. En Inicio, 15 días antes de `plan_fin`: "Tu plan termina el dd/mm".
+  - Aceptación: a 375 px sin scroll horizontal; sin sesión lleva al login; una cuenta sin perfil vinculado ve un aviso, no un error; con el plan vencido no se ve ningún dato, ni en la app ni con la API; al renovar entra sin enlace nuevo.
+  > Nota de implementación: migración `20261020190000_t15_2_mi_area.sql` con `mi_area()`: un JSON con el resumen del área, `NULL` si la cuenta no tiene perfil y, sin área, solo `con_area`, `plan_fin` y `renovacion_pedida`. También `pedir_renovacion()`: tarea `renovacion_plan` y aviso `otra` con la clave `renovacion_pedida:<perfil>:<plan_fin>`, una por periodo, que se reabren si la psicóloga ya las había cerrado. La tarea es `manual` porque `evaluar_automatizaciones` completa las automáticas de renovación que no genera ella. `ClienteLayout` (`src/components/cliente/`) lee la sesión (`useSesion`) y `mi_area` (`useMiArea`, con la cuenta en la clave de la caché; hooks en `src/hooks/cliente/`). Sin sesión lleva a `/mi-area/login`; si la cuenta no tiene perfil muestra un aviso con "Cerrar sesión"; sin área, solo la pantalla "Tu plan ha terminado". Con área: cabecera con la marca y "Salir", barra inferior en el móvil y navegación arriba desde `md`; Inicio recibe el resumen por `Outlet context`. Inicio enseña el saludo en bloque azul marino, el aviso de fin de plan (`avisarFinPlan`, 15 días, con "Quiero renovar"), las sesiones que quedan, el plan y la próxima sesión (`cuandoCita`: hoy, mañana o el día de la semana). Lógica en `src/lib/areaCliente.ts`, con test. Las tarjetas de último match y propuesta pendiente llegarán con T18.2 y T19.3, porque esos datos aún no existen. Calendario, Matches, Propuestas y Perfil enseñan "Muy pronto" hasta sus fases. `Pantalla` y las clases (`estilos.ts`) se comparten con `/mi-area/acceso`. Probado en Postgres 15 (47 migraciones y la nueva dos veces): el resumen con área abierta y cerrada, las canceladas fuera de la próxima sesión, pedir dos veces, reabrir, las automatizaciones sin tocarla, y anónimos y administradoras sin acceso. En local, con la sesión y las respuestas simuladas en el navegador: login con error y "he olvidado", Inicio a 375 px sin scroll horizontal, "Quiero renovar", la barra inferior, el área cerrada, "Cerrar sesión" y el escritorio.
+
+- [x] **T15.3 · (Mejora) Crear la contraseña justo al pagar** · Depende de T15.1, T11.3
+  - `success_url` de `stripe-checkout` con `?session_id={CHECKOUT_SESSION_ID}`. En `/pago/ok`, si el perfil aún no tiene cuenta: "Crea tu contraseña para entrar en tu área". `acceso-cliente` con la acción `activar_tras_pago` pregunta a Stripe si esa sesión está pagada y de qué perfil (no espera al webhook) y crea la cuenta con esa contraseña. Solo vale una vez; si ya tiene cuenta, botón "Entrar". Los pagos manuales siguen con el enlace de T15.1.
+  - Aceptación: pagar → crear contraseña → dentro del área, sin que intervenga la psicóloga.
+  > Nota de implementación: sin migración. `success_url` lleva `?session_id={CHECKOUT_SESSION_ID}`. `acceso-cliente` gana `info_pago` y `activar_pago`: lee la sesión de Stripe con `STRIPE_SECRET_KEY` y solo la acepta si `pagoCobradoReciente` (completa, cobrada y de hace 7 días como mucho; `_shared/stripe.ts`, con test) y si es de un pago nuestro de ese perfil (`pagos.stripe_checkout_id` y `client_reference_id`). Si el aviso de Stripe aún no ha llegado, llama a `confirmar_pago_stripe` como él (idempotente), así el plan ya está activo al entrar. Solo crea la cuenta si el perfil no tiene: después, "Entrar", y la contraseña se cambia con el enlace de la ficha. La creación de la cuenta es la de T15.1, y la cuenta suelta con el mismo email que se enlaza excluye ya al propio perfil. La auditoría guarda `via: enlace | pago`. En `/pago/ok?session_id=…`: "Crea tu contraseña" o "Tu plan ya está activo" con "Entrar en mi área"; sin `session_id`, o si no se puede (cancelado, pago diferido aún sin cobrar…), la página de siempre. El formulario (`CrearContrasena`) y la llamada (`llamarAccesoCliente`) se comparten con `/mi-area/acceso`. Probado: `deno check` de `acceso-cliente`, `stripe-checkout` y `stripe-webhook`; en local, con la función simulada en el navegador, los dos estados y el envío. `stripe-checkout` ya existía: tras fusionar hay que pedir a Lovable que la vuelva a desplegar.
+
+### FASE 16 — Mi perfil y mi plan
+
+- [ ] **T16.1 · Ver mi perfil** · Depende de T15.2
+  - `mi_perfil()`: respuestas del cuestionario por secciones (mismas etiquetas que `CuestionarioTab`; si hace falta, moverlas a `src/lib/`), plan con fechas, sesiones contratadas / realizadas / pendientes (como `v_clientes`), DISC con su PDF (`generateDiscPdf`) y su foto (política de lectura en `fotos-perfil` solo para la ruta de su `foto_url`). Nada de `revisado`, notas ni aprendizaje.
+  - Aceptación: el cliente ve todo lo que rellenó y su plan; con la API no consigue más que eso.
+
+- [ ] **T16.2 · Editar mis preferencias y mi foto** · Depende de T16.1
+  - `actualizar_mi_perfil(cambios jsonb)` con lista blanca (zona, `acepta_otras_zonas`, edad buscada, `valores_importantes`, aficiones, foto…; la lista, en `src/lib/` con test y repetida en la función). Al guardar, `encolar_matching` (T5.4) recalcula sus sugerencias y se abre una alerta `info` para la psicóloga ("ha cambiado sus preferencias", una por día con `clave_unica`).
+  - Aceptación: un campo fuera de la lista se rechaza; el cambio se ve en la ficha y en las sugerencias recalculadas.
+
+- [ ] **T16.3 · Solicitudes a la psicóloga** · Depende de T16.1
+  - Botones "Pausar mi búsqueda", "Darme de baja" y "Quiero una copia de mis datos": crean una tarea `manual` y una alerta para la psicóloga, que decide (los cambios de estado siguen las reglas de T1.5 y la exportación es la de T9.3). Sin cambios automáticos desde el área.
+  - Aceptación: cada solicitud aparece una sola vez en Tareas y Alertas; el cliente ve "solicitud enviada".
+
+### FASE 17 — Mi calendario
+
+- [ ] **T17.1 · Citas con la psicóloga y con mis matches** · Depende de T15.2
+  - `mis_citas(desde, hasta)`: sesiones (fecha, duración, tipo y estado; sin notas, resumen ni vídeo) + citas de matches presentados (T18.1) con fecha, lugar y nombre de pila. UI: `Calendar` de shadcn (ya instalado) con los días marcados y lista de próximas y pasadas debajo (en móvil, la lista primero); "Te quedan N sesiones, hasta el dd/mm". Botón "Añadir a mi calendario" con un `.ics` generado en el navegador (`src/lib/ics.ts`, sin dependencias, con test).
+  - Aceptación: una sesión creada en la ficha aparece en el área; una cancelada se ve tachada; el `.ics` se abre en Google Calendar y en el de iPhone.
+
+- [ ] **T17.2 · Reservar mi próxima sesión** · Depende de T17.1, T10.3 (recomendado T9.4)
+  - Botón "Reservar sesión" (solo si le quedan sesiones) que abre Calendly con nombre y email ya rellenos (`?name=&email=`, en `src/lib/enlaces.ts` de T10.3). Cambiar o cancelar, con los enlaces del email de Calendly.
+  - Aceptación: con T9.4, la reserva aparece en su calendario y en la ficha sin apuntar nada a mano; sin T9.4, aparece cuando la psicóloga la registra.
+
+- [ ] **T17.3 · (Opcional) "Para ti, tras la sesión"** · Depende de T17.1
+  - Columna `sesiones.mensaje_cliente` que la psicóloga escribe a propósito en la sesión (no se genera con IA ni sale del resumen). Se ve en esa sesión del calendario.
+  - Aceptación: sin mensaje no se muestra nada; el resumen IA sigue sin ser accesible.
+
+### FASE 18 — Mis matches
+
+- [ ] **T18.1 · Presentar un match en el área** · Depende de T15.1
+  - Migración: `matches.presentado_at` y `matches.motivos_cliente text[]`. En `MatchesTab`, "Presentar en su área": la psicóloga revisa los motivos que verán (precargados de `match_sugerencias.motivos`; los riesgos, nunca) y lo presenta a los dos a la vez.
+  - Aceptación: un match sin presentar no aparece en el área de ninguno; al presentarlo aparece a los dos.
+
+- [ ] **T18.2 · Ver mis matches** · Depende de T18.1, T15.2
+  - `mis_matches()`: de la otra persona, nombre de pila, edad, zona, aficiones, foto (política de lectura en `fotos-perfil` para las fotos de sus matches presentados) y `motivos_cliente`; estado en palabras del cliente (Presentado → Cita agendada → Cita realizada → Seguís conociéndoos / Cerrado; textos en `src/lib/` con test); fecha y lugar de la cita; informe si es Premium y está enviado.
+  - Aceptación: se ve lo anterior y nada más (comprobado con la API con la cuenta del cliente).
+
+- [ ] **T18.3 · Mi feedback tras la cita** · Depende de T18.2
+  - Tras `cita_realizada`: valoración 1-5, "¿Te gustaría volver a verle?" y comentario. `dejar_feedback(match_id, …)` escribe solo su lado (`_a` o `_b`), sella `feedback_at`, avisa a la psicóloga y, cuando están los dos, completa la tarea `registrar_feedback` (T6.4). Se puede cambiar hasta que la psicóloga pase el match a `feedback_registrado`. Nunca ve el feedback del otro.
+  - Aceptación: con los dos feedbacks, la tarea se cierra sola y el feedback aparece en la ficha como si lo hubiera apuntado la psicóloga.
+
+### FASE 19 — Propuestas: "¿Con quién te ves más?"
+
+- [ ] **T19.1 · Aceptar aparecer en propuestas** · Depende de T10.4 (texto de la asesoría)
+  - Migración: `perfiles.mostrar_en_propuestas` (false por defecto) y `mostrar_en_propuestas_at`. Casilla en Mi perfil y en el cuestionario: "Acepto que Afín muestre mi nombre de pila, edad, zona, foto y aficiones a otras personas compatibles". Solo se puede proponer a quien la tiene marcada.
+  - Aceptación: alguien sin la casilla nunca aparece en una ronda, aunque sea la mejor sugerencia.
+
+- [ ] **T19.2 · Rondas de 4 propuestas (backoffice)** · Depende de T19.1, T4.5
+  - Tabla `propuestas_rondas` (`perfil_id`, `candidatos uuid[]` de 4, `frases jsonb` por candidato, `elegido_id`, `ninguno`, `motivo`, `enviada_at`, `respondida_at`, `caduca_at`; RLS solo admin; una abierta por cliente con índice único parcial). En Sugerencias: "Enviar ronda" con las 4 mejores con consentimiento preseleccionadas, cambiables, y una frase por candidato ("por qué te lo proponemos") a partir de sus motivos.
+  - Aceptación: no se puede enviar una ronda con menos de 4, con alguien sin consentimiento ni con otra abierta.
+
+- [ ] **T19.3 · Elegir en el área** · Depende de T19.2, T15.2
+  - `mi_ronda()` y `responder_ronda(ronda_id, elegido_id | null, motivo)`. 4 tarjetas (foto, nombre de pila, edad, zona, 3 aficiones y la frase; cuadrícula 2×2, carrusel en móvil), "Me veo más con…" o "Ninguno me encaja" con los chips de T5.3 (edad, distancia, valores, físico, otro). Confirmación antes de enviar; después, "Tu psicóloga lo revisará y te contará". En toda el área se habla de "tu psicóloga", sin nombre.
+  - Aceptación: una ronda se responde una vez; caducada no se responde; el cliente no puede ver a nadie fuera de su ronda abierta (las fotos, con la misma política que T18.2).
+
+- [ ] **T19.4 · La elección vuelve a la psicóloga y al aprendizaje** · Depende de T19.3, T5.3
+  - Al responder: alerta "X se ve más con Y" con enlace a esa sugerencia (aceptarla crea el match como hoy, T6.1). `actualizar-aprendizaje` recibe la ronda como una decisión más (el elegido, a favor; los descartados con motivo, en contra) dentro del contexto de T5.1. Una ronda caducada sin respuesta abre una alerta `info`.
+  - Aceptación: tras 2-3 rondas, "Lo que la IA ha aprendido" de la ficha recoge lo elegido y el ranking cambia.
+
+- [ ] **T19.5 · (Opcional) Perfiles tipo, sin personas reales** · Depende de T19.3
+  - Para el principio (antes de tener sugerencias) o si el consentimiento de T19.1 tarda: la IA genera 4 perfiles ficticios sin foto a partir de lo que busca el cliente, cambiando una dimensión en cada uno (edad, estilo de vida, valores, ambición). Misma pantalla, marcada como "perfiles de ejemplo", y mismo aprendizaje.
+  - Aceptación: nunca se mezclan con personas reales y el cliente sabe que son de ejemplo.
+
+- [ ] **T19.6 · (Opcional) Avisos por email** · Depende de T12.1
+  - "Tienes una nueva propuesta", "Te hemos presentado a alguien" y "¿Qué tal la cita?", con enlace al área y sin contenido (ni nombres ni fotos en el email). Se integra con los recordatorios de T12.4.
+  - Aceptación: cada aviso sale una vez por evento y se puede desactivar en Configuración.
+
 ---
 
 ## 5. Checklist de QA final (mapeo 1:1 con el PDF)
@@ -714,6 +820,8 @@ F0 Cimientos ──► F1 Cliente único ──► F2 Ficha ──► F3 Sesione
 Prioridad si hay que recortar (MVP útil para la psicóloga): **F0 → F1 → F2 → T3.1-T3.3 → F4 → T6.1-T6.4 → T7.1-T7.3 → F8**. Lo opcional: T3.5, T5.5, T7.5, T9.4.
 
 Fases 10-14 (añadidas el 15/10/2026): **F10** primero (pequeña; T10.3 y T10.4 esperan a Vero y a la asesoría) → **F11 Stripe** en cuanto esté T11.0 (T11.5 necesita además T10.4) → **F12 Emails** (necesita dominio propio) → **F13 Roles y documentos** → **F14**, que se puede intercalar (T14.1 es de una hora). T9.4 (Calendly) sigue opcional y necesita el plan Standard de Calendly.
+
+Fases 15-19, área del cliente (añadidas el 20/10/2026): **F15 Acceso** → **T16.1 + T17.1** (perfil y calendario: lo que más valor da con menos riesgo) → **F18 Matches** (T18.3 quita a la psicóloga el pedir feedback a mano) → **F16** y **T17.2** → **F19 Propuestas**, la última porque muestra a otras personas: espera al texto legal (T10.4) y al consentimiento (T19.1). T19.5 permite probar la pantalla de propuestas antes, sin personas reales.
 
 ---
 
@@ -780,3 +888,7 @@ Fases 10-14 (añadidas el 15/10/2026): **F10** primero (pequeña; T10.3 y T10.4 
 | 20/10/2026 | T10.2 | Rutas cargadas al entrar en ellas: la portada descarga un 69 % menos de JS (453 KB en vez de 1.457 KB). |
 | 20/10/2026 | T13.1, T13.2 | Descartadas: Vero y la psicóloga son administradoras y ven todo; los clientes no entran al CRM. |
 | 20/10/2026 | T13.3 | Enlace personal (7 días) desde la ficha para que el cliente suba su certificado; la página ya no pide email ni nombre y se retira la subida anónima. |
+| 20/10/2026 | — | Plan ampliado con las Fases 15-19, área del cliente (`/mi-area`): acceso solo con el plan pagado (enlace desde la ficha o al pagar), perfil y plan, calendario de citas, matches presentados con feedback del cliente y rondas de 4 propuestas para elegir con quién se ve más. |
+| 20/10/2026 | T15.1 | Cuenta del cliente: enlace de acceso desde la ficha (solo con el plan pagado, 7 días, un solo uso), Edge Function `acceso-cliente` y página para crear la contraseña; la cuenta no lee ninguna tabla y se borra al suprimir al cliente. |
+| 20/10/2026 | T15.2 | Área del cliente `/mi-area`: entrada con email y contraseña, estructura con barra inferior, Inicio (próxima sesión, sesiones, aviso de fin de plan) y área cerrada sin datos con "Quiero renovar" (tarea y aviso para la psicóloga). |
+| 20/10/2026 | T15.3 | Tras pagar con Stripe, `/pago/ok` deja crear la contraseña del área (o entrar si ya la tiene); `acceso-cliente` comprueba el pago en Stripe y lo confirma si el aviso aún no ha llegado. |

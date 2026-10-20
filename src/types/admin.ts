@@ -25,4 +25,6 @@ export type Cliente = Perfil & {
   tareas_pendientes: number;
   alertas_abiertas: number;
   matches_abiertos: number;
+  /** T15.1: plan con un pago cobrado, sin vencer y cliente activo o en pausa (puede tener área). */
+  con_area: boolean;
 };

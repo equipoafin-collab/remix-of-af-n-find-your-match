@@ -1,7 +1,7 @@
-import { Copy, Mail } from "lucide-react";
+import { Copy, Mail, MessageCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-/** Un enlace para enviar a alguien: el campo para seleccionarlo, "Copiar" y "Abrir en el correo" ya redactado. */
+/** Un enlace para enviar a alguien: el campo para seleccionarlo, "Copiar" y "Abrir en el correo" o WhatsApp ya redactado. */
 const CompartirEnlace = ({ enlace, email, asunto, cuerpo, etiqueta, cerrar }: {
   enlace: string; email: string; asunto: string; cuerpo: string; etiqueta: string; cerrar?: () => void;
 }) => {
@@ -21,6 +21,9 @@ const CompartirEnlace = ({ enlace, email, asunto, cuerpo, etiqueta, cerrar }: {
         </button>
         <a href={correo} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border font-body text-sm text-foreground hover:bg-muted">
           <Mail className="w-4 h-4" /> Abrir en el correo
+        </a>
+        <a href={`https://wa.me/?text=${encodeURIComponent(cuerpo)}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border font-body text-sm text-foreground hover:bg-muted">
+          <MessageCircle className="w-4 h-4" /> WhatsApp
         </a>
         {cerrar && <button onClick={cerrar} className="px-3 py-1.5 rounded-lg font-body text-sm text-muted-foreground hover:text-foreground">Cerrar</button>}
       </div>

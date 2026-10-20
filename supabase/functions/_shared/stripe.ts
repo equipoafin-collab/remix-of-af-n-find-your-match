@@ -30,7 +30,7 @@ export function parametrosCheckout(d: DatosCheckout): URLSearchParams {
     customer_email: d.email,
     client_reference_id: d.perfilId,
     expires_at: String(d.caducaEn),
-    success_url: `${d.origen}/pago/ok`,
+    success_url: `${d.origen}/pago/ok?session_id={CHECKOUT_SESSION_ID}`, // Stripe pone el id: T15.3 crea ahí la cuenta del área
     cancel_url: `${d.origen}/pago/cancelado`,
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": "eur",
@@ -43,6 +43,19 @@ export function parametrosCheckout(d: DatosCheckout): URLSearchParams {
   });
   return p;
 }
+
+/** Id de una Checkout Session (cs_test_… o cs_live_…). */
+export const SESION_CHECKOUT = /^cs_(test|live)_[A-Za-z0-9]+$/;
+
+/** Días que sirve la vuelta de un pago (/pago/ok?session_id=…) para crear la cuenta del área (T15.3). */
+export const DIAS_VUELTA_PAGO = 7;
+
+/** ¿La Checkout Session está cobrada y es de hace como mucho DIAS_VUELTA_PAGO? (GET /v1/checkout/sessions/:id) */
+export const pagoCobradoReciente = (sesion: { status?: string; payment_status?: string; created?: number }, ahora = Date.now() / 1000) =>
+  sesion.status === "complete" &&
+  sesion.payment_status === "paid" &&
+  typeof sesion.created === "number" &&
+  ahora - sesion.created <= DIAS_VUELTA_PAGO * 86_400;
 
 const hex = (bytes: ArrayBuffer) => [...new Uint8Array(bytes)].map((b) => b.toString(16).padStart(2, "0")).join("");
 
