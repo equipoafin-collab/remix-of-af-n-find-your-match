@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import { conceptoPago, importeCentimos, parametrosCheckout, verificarFirmaStripe } from "../../../supabase/functions/_shared/stripe";
+import { conceptoPago, importeCentimos, pagoCobradoReciente, parametrosCheckout, SESION_CHECKOUT, verificarFirmaStripe } from "../../../supabase/functions/_shared/stripe";
 
 describe("parametrosCheckout", () => {
   const p = parametrosCheckout({
@@ -19,7 +19,7 @@ describe("parametrosCheckout", () => {
     expect(p.get("client_reference_id")).toBe("perfil-1");
     expect(p.get("metadata[perfil_id]")).toBe("perfil-1");
     expect(p.get("payment_intent_data[metadata][perfil_id]")).toBe("perfil-1");
-    expect(p.get("success_url")).toBe("https://afin.example/pago/ok");
+    expect(p.get("success_url")).toBe("https://afin.example/pago/ok?session_id={CHECKOUT_SESSION_ID}");
     expect(p.get("cancel_url")).toBe("https://afin.example/pago/cancelado");
   });
 
@@ -46,5 +46,26 @@ describe("verificarFirmaStripe", () => {
     expect(await verificarFirmaStripe(cuerpo, `t=${ahora - 301},v1=${firma(ahora - 301)}`, secreto, ahora)).toBe(false);
     expect(await verificarFirmaStripe(cuerpo, null, secreto, ahora)).toBe(false);
     expect(await verificarFirmaStripe(cuerpo, `v1=${firma(ahora)}`, secreto, ahora)).toBe(false);
+  });
+});
+
+describe("vuelta del pago (T15.3)", () => {
+  const ahora = 1_800_000_000;
+  const cobrada = { status: "complete", payment_status: "paid", created: ahora - 3600 };
+
+  it("solo sirve una sesión cobrada de hace 7 días como mucho", () => {
+    expect(pagoCobradoReciente(cobrada, ahora)).toBe(true);
+    expect(pagoCobradoReciente({ ...cobrada, created: ahora - 7 * 86_400 }, ahora)).toBe(true);
+    expect(pagoCobradoReciente({ ...cobrada, created: ahora - 7 * 86_400 - 1 }, ahora)).toBe(false);
+    expect(pagoCobradoReciente({ ...cobrada, payment_status: "unpaid" }, ahora)).toBe(false); // pago diferido aún sin cobrar
+    expect(pagoCobradoReciente({ ...cobrada, status: "open" }, ahora)).toBe(false);
+    expect(pagoCobradoReciente({ status: "complete", payment_status: "paid" }, ahora)).toBe(false);
+  });
+
+  it("reconoce los ids de Checkout Session y nada más", () => {
+    expect(SESION_CHECKOUT.test("cs_test_a1B2c3")).toBe(true);
+    expect(SESION_CHECKOUT.test("cs_live_a1B2c3")).toBe(true);
+    expect(SESION_CHECKOUT.test("cs_test_a1/../x")).toBe(false);
+    expect(SESION_CHECKOUT.test("pi_123")).toBe(false);
   });
 });
