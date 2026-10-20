@@ -574,9 +574,10 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
   - Aceptación: no se puede enviar el test sin la casilla; cada resultado nuevo guarda versión y fecha; la exportación (T9.3) los incluye.
   > Nota de implementación: migración `20261020140000_t10_1_consentimiento_disc.sql` (`consentimiento_version` y `consentimiento_at` con default `now()`; los anteriores, NULL). Casilla obligatoria antes de "Ver mi resultado", con enlace a la política de privacidad y `VERSION_CONSENTIMIENTO`. No se exige también en la RLS: la web publicada no se actualiza hasta volver a publicar en Lovable y el test de la versión antigua dejaría de guardar. La exportación ya incluye las columnas (lee `disc_results` entero). Hay que aplicar la migración antes de fusionar: el insert no comprueba errores y, sin la columna, el resultado no se guardaría.
 
-- [ ] **T10.2 · Web pública más rápida**
+- [x] **T10.2 · Web pública más rápida**
   - Hoy cualquier visitante descarga todo el CRM (un solo fichero JS de ~1,45 MB, 433 KB comprimido). Cargar las rutas de `/admin` (y lo pesado que solo usan ellas, como jsPDF) con `React.lazy` + `Suspense`.
   - Aceptación: el build separa el admin en otros ficheros; la portada descarga al menos un 50 % menos de JS; todas las rutas públicas y del admin siguen funcionando.
+  > Nota de implementación: en `App.tsx` todas las rutas salvo la portada y la 404 con `React.lazy` y un `Suspense` general; dentro de `AdminLayout` otro `Suspense` alrededor del `Outlet`, para que el menú no desaparezca al cambiar de sección. jsPDF sale solo con el cuestionario, el test y el informe. El fichero de entrada pasa de 1.457 KB (435 KB comprimido) a 453 KB (145 KB): un 69 % menos. Probado en local: portada, `/perfil`, `/quiz`, `/privacidad`, Dashboard, Pagos, ficha y 404, sin errores en consola.
 
 - [ ] **T10.3 · Calendly: citas actualizadas y enlaces en un solo sitio** · Depende de: Vero (reconectar el calendario y decidir una o dos citas, y si pasa al plan Standard)
   - La web enlaza a `equipo-afin/30min` (ya no existe) y a `equipo-afin/plan-esencial` (sin calendario conectado). Llevar todas las direcciones a una constante (`src/lib/enlaces.ts`): Precios, diálogo de planes, final del test DISC, final del cuestionario y Pagos.
@@ -773,3 +774,4 @@ Fases 10-14 (añadidas el 15/10/2026): **F10** primero (pequeña; T10.3 y T10.4 
 | 20/10/2026 | T11.0, T11.5 | Stripe en modo de pruebas configurado (claves y webhook) y primer pago de prueba de punta a punta: el plan se activa solo y un aviso repetido no lo duplica. |
 | 20/10/2026 | T11.5 | Pruebas en modo de pruebas completas: pago rechazado, enlace caducado y reembolso (con su aviso). Queda el paso a modo real. |
 | 20/10/2026 | T10.1 | Casilla de consentimiento obligatoria en el test DISC, con la versión y la fecha guardadas en `disc_results`. |
+| 20/10/2026 | T10.2 | Rutas cargadas al entrar en ellas: la portada descarga un 69 % menos de JS (453 KB en vez de 1.457 KB). |
