@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { ChevronDown, Download, Loader2 } from "lucide-react";
+import { Camera, ChevronDown, Download, Loader2, Pencil } from "lucide-react";
 import { calculateDisc } from "@/components/DiscSurvey";
 import FotoPerfil from "@/components/admin/FotoPerfil";
 import { rotuloClaro } from "@/components/cliente/estilos";
-import { useMiPerfil } from "@/hooks/cliente/useMiArea";
+import EditarPreferencias from "@/components/cliente/EditarPreferencias";
+import { toast } from "@/hooks/use-toast";
+import { useCambiarFoto, useMiPerfil } from "@/hooks/cliente/useMiArea";
 import { fechaLarga, type ContextoArea, type MiAreaAbierta } from "@/lib/areaCliente";
 import { respondidos, SECCIONES_PERFIL, type MiPerfil } from "@/lib/cuestionario";
 import { DISC_META, resumenDisc } from "@/lib/disc";
@@ -56,6 +59,64 @@ const Disc = ({ perfil }: { perfil: MiPerfil }) => {
   );
 };
 
+/** T16.2 · Lo que puede cambiar él mismo, con "Editar". */
+const Preferencias = ({ perfil }: { perfil: MiPerfil }) => {
+  const [abierto, setAbierto] = useState(false);
+  const filas = [
+    ["Provincia", perfil.zona && `${perfil.zona}${perfil.acepta_otras_zonas ? " y otras provincias" : ""}`],
+    ["Edad que buscas", perfil.edad_min_busca && perfil.edad_max_busca ? `De ${perfil.edad_min_busca} a ${perfil.edad_max_busca} años` : null],
+    ["Tus valores", perfil.valores_importantes?.join(", ")],
+    ["Tus aficiones", perfil.hobbies],
+  ];
+  return (
+    <section className={`${tarjeta} p-5 space-y-3`}>
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-display text-lg font-bold text-foreground">Tus preferencias</p>
+        <button onClick={() => setAbierto(true)} className="inline-flex items-center gap-1 font-body text-sm font-semibold text-gold-texto hover:underline">
+          <Pencil className="w-3.5 h-3.5" /> Editar
+        </button>
+      </div>
+      <dl className="space-y-2">
+        {filas.map(([etiqueta, valor]) => (
+          <div key={etiqueta}>
+            <dt className="font-body text-xs text-muted-foreground">{etiqueta}</dt>
+            <dd className="font-body text-sm text-foreground line-clamp-2">{valor || "Sin indicar"}</dd>
+          </div>
+        ))}
+      </dl>
+      <EditarPreferencias perfil={perfil} abierto={abierto} cambiarAbierto={setAbierto} />
+    </section>
+  );
+};
+
+/** T16.2 · Su foto, con "Cambiar foto". */
+const Foto = ({ perfil }: { perfil: MiPerfil }) => {
+  const cambiar = useCambiarFoto();
+  const elegir = (fichero: File | undefined) => {
+    if (!fichero) return;
+    cambiar.mutate(fichero, {
+      onSuccess: () => toast({ title: "Foto cambiada", description: "Tu psicóloga recibe un aviso para verla." }),
+      onError: (e) => toast({ title: "No se pudo cambiar la foto", description: e.message, variant: "destructive" }),
+    });
+  };
+  return (
+    <div className="relative shrink-0">
+      <FotoPerfil path={perfil.foto_url} nombre={perfil.nombre_completo} className="w-16 h-16 rounded-full text-xl" />
+      <label className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center cursor-pointer shadow" title="Cambiar foto">
+        {cambiar.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+        <span className="sr-only">Cambiar foto</span>
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="sr-only"
+          disabled={cambiar.isPending}
+          onChange={(e) => { elegir(e.target.files?.[0]); e.target.value = ""; }}
+        />
+      </label>
+    </div>
+  );
+};
+
 const Escala = ({ valor }: { valor: number }) => (
   <span className="inline-flex gap-1" aria-label={`${valor} de 5`}>
     {[1, 2, 3, 4, 5].map((n) => (
@@ -64,7 +125,7 @@ const Escala = ({ valor }: { valor: number }) => (
   </span>
 );
 
-/** T16.1 · Su perfil: plan, DISC y sus respuestas del cuestionario por secciones. */
+/** T16.1 · Su perfil: plan, preferencias (T16.2), DISC y sus respuestas del cuestionario por secciones. */
 const PerfilCliente = () => {
   const { area, userId } = useOutletContext<ContextoArea>();
   const perfil = useMiPerfil(userId);
@@ -79,7 +140,7 @@ const PerfilCliente = () => {
   return (
     <div className="space-y-4">
       <header className="flex items-center gap-4">
-        <FotoPerfil path={p.foto_url} nombre={p.nombre_completo} className="w-16 h-16 rounded-full text-xl shrink-0" />
+        <Foto perfil={p} />
         <div>
           <p className={rotuloClaro}>Tu perfil</p>
           <h1 className="font-display text-3xl font-bold text-foreground leading-tight">
@@ -89,6 +150,7 @@ const PerfilCliente = () => {
       </header>
 
       <Plan area={area} />
+      <Preferencias perfil={p} />
       <Disc perfil={p} />
 
       {SECCIONES_PERFIL.map((s) => {
@@ -114,7 +176,7 @@ const PerfilCliente = () => {
         );
       })}
 
-      <p className="font-body text-xs text-muted-foreground text-center">¿Algo no está bien? Díselo a tu psicóloga y lo cambiará.</p>
+      <p className="font-body text-xs text-muted-foreground text-center">¿Quieres cambiar algo más? Díselo a tu psicóloga y lo cambiará.</p>
     </div>
   );
 };

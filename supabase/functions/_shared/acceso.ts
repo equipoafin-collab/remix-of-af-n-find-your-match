@@ -39,3 +39,15 @@ export function pasoCuenta(userIdDelPerfil: string | null, existente: CuentaExis
   }
   return { paso: "actualizar", userId: existente.id };
 }
+
+// T16.2 · Fotos que sube el cliente desde su área: en fotos-perfil/clientes/<perfil_id>/, solo imágenes.
+const EXTENSIONES_FOTO: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+
+export const extensionFoto = (tipo: unknown) => (typeof tipo === "string" ? EXTENSIONES_FOTO[tipo] ?? null : null);
+
+export const carpetaFotosCliente = (perfilId: string) => `clientes/${perfilId}/`;
+
+/** ¿Es una foto subida a su carpeta (un solo nivel, sin "..")? Así nunca apunta a la foto de otra persona. */
+export const esFotoDelCliente = (ruta: unknown, perfilId: string): ruta is string =>
+  typeof ruta === "string" && /^[\w-]+\.(jpg|png|webp)$/.test(ruta.slice(carpetaFotosCliente(perfilId).length)) &&
+  ruta.startsWith(carpetaFotosCliente(perfilId));

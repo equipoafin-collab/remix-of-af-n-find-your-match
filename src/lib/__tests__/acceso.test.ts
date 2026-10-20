@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { errorContrasena, pasoCuenta, primerNombre, TOKEN_ACCESO } from "../../../supabase/functions/_shared/acceso";
+import { errorContrasena, esFotoDelCliente, extensionFoto, pasoCuenta, primerNombre, TOKEN_ACCESO } from "../../../supabase/functions/_shared/acceso";
 
 describe("errorContrasena", () => {
   it("pide al menos 8 caracteres", () => {
@@ -46,5 +46,23 @@ describe("token y nombre", () => {
   it("saluda por el nombre de pila", () => {
     expect(primerNombre("  Lucía Martín ")).toBe("Lucía");
     expect(primerNombre(null)).toBe("");
+  });
+});
+
+describe("fotos del cliente (T16.2)", () => {
+  it("solo imágenes JPG, PNG o WebP", () => {
+    expect(extensionFoto("image/jpeg")).toBe("jpg");
+    expect(extensionFoto("image/webp")).toBe("webp");
+    expect(extensionFoto("image/svg+xml")).toBeNull();
+    expect(extensionFoto(undefined)).toBeNull();
+  });
+
+  it("solo rutas de su carpeta: nunca la foto de otra persona", () => {
+    expect(esFotoDelCliente("clientes/p1/1729000000000.jpg", "p1")).toBe(true);
+    expect(esFotoDelCliente("clientes/p2/1729000000000.jpg", "p1")).toBe(false);
+    expect(esFotoDelCliente("perfiles/otra.jpg", "p1")).toBe(false);
+    expect(esFotoDelCliente("clientes/p1/../p2/x.jpg", "p1")).toBe(false);
+    expect(esFotoDelCliente("clientes/p1/sub/x.jpg", "p1")).toBe(false);
+    expect(esFotoDelCliente(42, "p1")).toBe(false);
   });
 });

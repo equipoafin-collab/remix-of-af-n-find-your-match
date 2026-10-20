@@ -2,6 +2,7 @@
 // cuestionario y con sus mismas preguntas. Solo lo que devuelve mi_perfil(): nada del CRM.
 import type { Perfil } from "@/types/admin";
 import type { DiscType } from "./disc";
+import { MAX_VALORES, PROVINCIAS, VALORES_IMPORTANTES } from "./preguntasClave";
 
 /** Columnas de perfiles que devuelve mi_perfil(): las mismas que su lista en la migración T16.1 (lo comprueba un test). */
 export const CAMPOS_MI_PERFIL = [
@@ -109,4 +110,24 @@ export function respondidos(campos: Campo[], p: MiPerfil) {
   return campos
     .map((c) => ({ ...c, v: c.valor(p) }))
     .filter((c): c is Campo & { v: string | number } => c.v !== null && c.v !== undefined && String(c.v).trim() !== "");
+}
+
+/** T16.2 · Lo que el cliente puede cambiar desde su área: la misma lista que actualizar_mi_perfil (lo comprueba un test). */
+export const CAMPOS_EDITABLES = ["zona", "acepta_otras_zonas", "edad_min_busca", "edad_max_busca", "valores_importantes", "hobbies"] as const;
+
+export type Preferencias = Pick<MiPerfil, (typeof CAMPOS_EDITABLES)[number]>;
+
+/** El primer problema de las preferencias, con las mismas reglas que actualizar_mi_perfil; null si valen. */
+export function errorPreferencias(p: Preferencias): string | null {
+  if (!p.zona || !PROVINCIAS.includes(p.zona)) return "Elige una provincia de la lista";
+  const { edad_min_busca: min, edad_max_busca: max } = p;
+  if (!Number.isInteger(min) || !Number.isInteger(max) || min < 18 || max > 99 || min > max) {
+    return "La edad que buscas va de 18 a 99 y la mínima no puede pasar de la máxima";
+  }
+  const valores = p.valores_importantes ?? [];
+  if (!valores.length || valores.length > MAX_VALORES || new Set(valores).size < valores.length || valores.some((v) => !VALORES_IMPORTANTES.includes(v))) {
+    return `Elige de 1 a ${MAX_VALORES} valores de la lista`;
+  }
+  if (!p.hobbies?.trim() || p.hobbies.trim().length > 1000) return "Cuéntanos tus aficiones (hasta 1.000 caracteres)";
+  return null;
 }
