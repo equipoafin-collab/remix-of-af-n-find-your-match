@@ -255,6 +255,48 @@ export type Database = {
         }
         Relationships: []
       }
+      enlaces_subida: {
+        Row: {
+          caduca_at: string
+          created_at: string
+          created_by: string | null
+          id: string
+          perfil_id: string
+          token: string
+        }
+        Insert: {
+          caduca_at?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          perfil_id: string
+          token?: string
+        }
+        Update: {
+          caduca_at?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          perfil_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enlaces_subida_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enlaces_subida_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "v_clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       match_sugerencias: {
         Row: {
           calculado_at: string
