@@ -569,9 +569,10 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
 
 > Añadida el 15/10/2026, tras la revisión del plan terminado (Fases 0-9). Las tareas que esperan algo de fuera lo dicen en "Depende de".
 
-- [ ] **T10.1 · Consentimiento en el test DISC (`/quiz`)**
+- [x] **T10.1 · Consentimiento en el test DISC (`/quiz`)**
   - `/quiz` guarda nombre, email y teléfono en `disc_results` sin casilla de consentimiento ni enlace a la política de privacidad. Añadir la misma casilla que `/perfil` (obligatoria para enviar) y guardar `disc_results.consentimiento_version` y `consentimiento_at` como en T9.3 (migración).
   - Aceptación: no se puede enviar el test sin la casilla; cada resultado nuevo guarda versión y fecha; la exportación (T9.3) los incluye.
+  > Nota de implementación: migración `20261020140000_t10_1_consentimiento_disc.sql` (`consentimiento_version` y `consentimiento_at` con default `now()`; los anteriores, NULL). Casilla obligatoria antes de "Ver mi resultado", con enlace a la política de privacidad y `VERSION_CONSENTIMIENTO`. No se exige también en la RLS: la web publicada no se actualiza hasta volver a publicar en Lovable y el test de la versión antigua dejaría de guardar. La exportación ya incluye las columnas (lee `disc_results` entero). Hay que aplicar la migración antes de fusionar: el insert no comprueba errores y, sin la columna, el resultado no se guardaría.
 
 - [ ] **T10.2 · Web pública más rápida**
   - Hoy cualquier visitante descarga todo el CRM (un solo fichero JS de ~1,45 MB, 433 KB comprimido). Cargar las rutas de `/admin` (y lo pesado que solo usan ellas, como jsPDF) con `React.lazy` + `Suspense`.
@@ -771,3 +772,4 @@ Fases 10-14 (añadidas el 15/10/2026): **F10** primero (pequeña; T10.3 y T10.4 
 | 20/10/2026 | T11.4 | Botón "Enlace de pago" en la ficha (plan, meses, total y enlace para enviar), estado de los pagos en la ficha y en Pagos, y páginas `/pago/ok` y `/pago/cancelado`. |
 | 20/10/2026 | T11.0, T11.5 | Stripe en modo de pruebas configurado (claves y webhook) y primer pago de prueba de punta a punta: el plan se activa solo y un aviso repetido no lo duplica. |
 | 20/10/2026 | T11.5 | Pruebas en modo de pruebas completas: pago rechazado, enlace caducado y reembolso (con su aviso). Queda el paso a modo real. |
+| 20/10/2026 | T10.1 | Casilla de consentimiento obligatoria en el test DISC, con la versión y la fecha guardadas en `disc_results`. |
