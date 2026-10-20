@@ -1,17 +1,37 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Upload, FileText, ShieldCheck, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Upload, FileText, ShieldCheck, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { claveSegura } from "@/lib/storage";
+import { mensajeDeFuncion } from "@/hooks/admin/mensajeDeFuncion";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 
+// T13.3 · Se sube con el enlace personal que envía Afín (?token=…): subir-documento valida el token y da una URL
+// firmada para la carpeta del perfil. Sin enlace válido no se puede subir.
+async function subirDocumento<T>(token: string, accion: "info" | "subir"): Promise<T> {
+  const { data, error } = await supabase.functions.invoke("subir-documento", { body: { token, accion } });
+  if (error) {
+    const sinConexion = !(error instanceof FunctionsHttpError);
+    throw new Error(sinConexion ? "No se pudo conectar. Revisa tu conexión e inténtalo de nuevo." : await mensajeDeFuncion(error, "No se pudo preparar la subida."));
+  }
+  return data as T;
+}
+
 const PerfilDocumentos = () => {
+  const token = useSearchParams()[0].get("token") ?? "";
+  const enlace = useQuery({
+    queryKey: ["enlace-subida", token],
+    queryFn: () => subirDocumento<{ nombre: string }>(token, "info"),
+    enabled: !!token,
+    retry: false,
+  });
   const [file, setFile] = useState<File | null>(null);
   const [consent, setConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [userId, setUserId] = useState("");
   const { toast } = useToast();
 
   const handleUpload = async () => {
@@ -23,17 +43,17 @@ const PerfilDocumentos = () => {
       toast({ title: "Archivo requerido", description: "Selecciona un archivo PDF antes de subir.", variant: "destructive" });
       return;
     }
-    if (!userId.trim()) {
-      toast({ title: "ID requerido", description: "Introduce tu identificador de usuario.", variant: "destructive" });
-      return;
-    }
 
     setLoading(true);
-    const filePath = `user_${claveSegura(userId)}/${Date.now()}.pdf`;
-    // Sin upsert: la subida anónima solo tiene permiso de INSERT.
-    const { error } = await supabase.storage
-      .from("antecedentes")
-      .upload(filePath, file, { cacheControl: "3600", upsert: false, contentType: "application/pdf" });
+    let error: Error | null = null;
+    try {
+      const subida = await subirDocumento<{ ruta: string; token: string }>(token, "subir");
+      ({ error } = await supabase.storage
+        .from("antecedentes")
+        .uploadToSignedUrl(subida.ruta, subida.token, file, { contentType: "application/pdf" }));
+    } catch (e) {
+      error = e instanceof Error ? e : new Error(String(e));
+    }
     setLoading(false);
 
     if (error) {
@@ -94,8 +114,22 @@ const PerfilDocumentos = () => {
             </div>
           </div>
 
-          {/* Success state */}
-          {success ? (
+          {!token || enlace.isError ? (
+            <div className="bg-card rounded-2xl border border-border p-8 text-center space-y-3">
+              <h2 className="font-display text-xl font-semibold text-foreground">
+                {token ? "No podemos abrir tu enlace" : "Necesitas tu enlace personal"}
+              </h2>
+              <p className="font-body text-sm text-muted-foreground">
+                {token ? enlace.error?.message : "Para subir tu certificado usa el enlace personal que te hemos enviado por correo."}{" "}
+                Si no lo tienes, escríbenos a{" "}
+                <a href="mailto:equipo.afin@gmail.com" className="text-gold-texto hover:underline">equipo.afin@gmail.com</a>.
+              </p>
+            </div>
+          ) : enlace.isPending ? (
+            <div className="flex justify-center py-12" aria-label="Cargando">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : success ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -116,19 +150,9 @@ const PerfilDocumentos = () => {
           ) : (
             /* Upload form */
             <div className="bg-card rounded-2xl border border-border p-6 space-y-6">
-              {/* User ID */}
-              <div>
-                <label className="block font-body text-sm font-medium text-foreground mb-1.5">
-                  Tu email o nombre completo
-                </label>
-                <input
-                  type="text"
-                  value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
-                  placeholder="nombre@email.com"
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-gold/50"
-                />
-              </div>
+              {enlace.data.nombre && (
+                <p className="font-body text-foreground">Hola, {enlace.data.nombre}. Sube aquí tu certificado.</p>
+              )}
 
               {/* File input */}
               <div>
@@ -182,7 +206,7 @@ const PerfilDocumentos = () => {
               {/* Submit */}
               <button
                 onClick={handleUpload}
-                disabled={loading || !file || !consent || !userId.trim()}
+                disabled={loading || !file || !consent}
                 className="w-full py-3.5 rounded-full bg-gold text-accent-foreground font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
               >
                 {loading ? "Subiendo documento..." : "Subir documento"}

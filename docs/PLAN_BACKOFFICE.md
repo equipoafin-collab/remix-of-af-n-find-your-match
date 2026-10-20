@@ -645,17 +645,20 @@ Decisión (15/10/2026): la psicóloga genera desde la ficha un enlace de pago de
 
 ### FASE 13 — Roles y subida de documentos
 
-- [ ] **T13.1 · Rol de gestión sin datos clínicos**
+> Decisión (20/10/2026): T13.1 y T13.2 se descartan. Vero y la psicóloga son administradoras y ven todo; el resto son clientes, que no entran al CRM. Si algún día entra alguien que no deba ver datos clínicos, se retoman.
+
+- ~~**T13.1 · Rol de gestión sin datos clínicos**~~ · Descartada
   - Hoy todas las administradoras ven todo. Nuevo rol `gestion` que trabaja con perfiles, planes, pagos, matches, tareas y alertas, pero no ve notas privadas, notas ni resúmenes de sesión, vídeos ni el aprendizaje de la IA. RLS por rol en esas tablas (y una vista de `sesiones` sin las columnas clínicas para el rol de gestión); selector de rol al invitar en Administradoras. Confirmar con Vero quién lleva cada rol.
   - Aceptación: una cuenta de gestión no puede leer datos clínicos ni desde la app ni con la API.
 
-- [ ] **T13.2 · La app según el rol** · Depende de T13.1
+- ~~**T13.2 · La app según el rol**~~ · Descartada
   - Ocultar a gestión las pestañas Notas y Sesiones (o solo su parte clínica), el vídeo, el buscador de Notas Privadas y el panel de resumen.
   - Aceptación: no queda ningún botón que lleve a un error de permisos.
 
-- [ ] **T13.3 · Enlace personal para subir documentos**
+- [x] **T13.3 · Enlace personal para subir documentos**
   - Hoy `/perfil/documentos` reconoce a la persona por el email o el nombre que escribe a mano, y cualquiera puede subir. Generar desde la ficha un enlace personal con caducidad (tabla `enlaces_subida`); la página sube con una URL firmada que da una Edge Function a la carpeta `antecedentes/<perfil_id>/`. Se quita la subida anónima abierta; lo ya subido se sigue viendo como ahora.
   - Aceptación: un documento subido con el enlace aparece en su ficha; sin enlace válido no se puede subir nada.
+  > Nota de implementación: tabla `enlaces_subida` (migración `20261020160000_t13_3_enlaces_subida.sql`, solo admin): token aleatorio de 64 caracteres, caduca a los 7 días y se borra con el perfil. En la pestaña Documentos, "Enlace para subir documentos" lo crea (`useCrearEnlaceSubida`) y lo comparte con `CompartirEnlace`, con el correo redactado; avisa si se crea en local. La Edge Function pública `subir-documento` valida el token: `info` devuelve solo el nombre de pila y `subir` da una URL firmada a `antecedentes/<perfil_id>/<fecha>.pdf` y registra `subida_documento` en `auditoria`; el bucket ya limita a PDF de 10 MB. `/perfil/documentos` ya no pide email ni nombre: sin enlace, o con uno caducado, explica cómo pedirlo. `esCarpetaDelPerfil` reconoce también la carpeta `<perfil_id>`, así que la ficha, la exportación y la supresión de T9.3 ven lo subido de las dos formas (con test). La segunda migración, `20261020170000_t13_3_quitar_subida_anonima.sql`, quita la subida anónima: se aplica **después** de publicar, para no romper la página antigua mientras siga publicada. Probado en Postgres 15: solo admin crea y ve enlaces, el token y la caducidad, el borrado en cascada y la política retirada; en local, la página sin enlace y la pestaña Documentos.
 
 ### FASE 14 — Calidad técnica
 
@@ -667,12 +670,12 @@ Decisión (15/10/2026): la psicóloga genera desde la ficha un enlace de pago de
   - Playwright contra un Supabase local en Docker (migraciones + `seed.sql`), nunca contra la base de datos real: cuestionario → ficha → sugerencia aceptada → match → cita → feedback, y el pago de T11 con Stripe en modo de pruebas.
   - Aceptación: los flujos corren en local y en el CI.
 
-- [ ] **T14.3 · Registro de lecturas en el servidor** · Depende de T13.1
+- [ ] **T14.3 · Registro de lecturas en el servidor**
   - Leer notas, sesiones y vídeos a través de funciones `SECURITY DEFINER` que registran la lectura y quitar el SELECT directo de esas tablas, para que no haya lectura sin registro (hoy lo registra el navegador, T9.3).
   - Aceptación: no se puede leer una nota sin que quede en `auditoria`.
 
 - [ ] **T14.4 · Por encima de 1.000 perfiles**
-  - Paginar donde hoy hay tope de 1.000 filas (anotado con `ponytail:`): candidatos de `sugerencias-calcular` y `procesar-cola-matching`, listados globales, `listUsers` de administradoras y las carpetas de antecedentes (estas desaparecen con T13.3).
+  - Paginar donde hoy hay tope de 1.000 filas (anotado con `ponytail:`): candidatos de `sugerencias-calcular` y `procesar-cola-matching`, listados globales, `listUsers` de administradoras y las carpetas de antecedentes (las nuevas van por `perfil_id` desde T13.3; el tope solo afecta a las antiguas `user_*`).
   - Aceptación: con 2.000 perfiles de prueba, todo funciona y nada se corta.
 
 ---
@@ -775,3 +778,5 @@ Fases 10-14 (añadidas el 15/10/2026): **F10** primero (pequeña; T10.3 y T10.4 
 | 20/10/2026 | T11.5 | Pruebas en modo de pruebas completas: pago rechazado, enlace caducado y reembolso (con su aviso). Queda el paso a modo real. |
 | 20/10/2026 | T10.1 | Casilla de consentimiento obligatoria en el test DISC, con la versión y la fecha guardadas en `disc_results`. |
 | 20/10/2026 | T10.2 | Rutas cargadas al entrar en ellas: la portada descarga un 69 % menos de JS (453 KB en vez de 1.457 KB). |
+| 20/10/2026 | T13.1, T13.2 | Descartadas: Vero y la psicóloga son administradoras y ven todo; los clientes no entran al CRM. |
+| 20/10/2026 | T13.3 | Enlace personal (7 días) desde la ficha para que el cliente suba su certificado; la página ya no pide email ni nombre y se retira la subida anónima. |

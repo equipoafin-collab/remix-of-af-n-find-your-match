@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { esCarpetaDelPerfil } from "@/lib/storage";
 import type { Perfil } from "@/types/admin";
@@ -11,7 +11,7 @@ export interface Documento {
 type PerfilDocumentos = Pick<Perfil, "id" | "email" | "nombre_completo">;
 
 /** Certificados de antecedentes que la persona subió desde /perfil/documentos (también para exportar y suprimir, T9.3). */
-export async function listarDocumentos(perfil: Omit<PerfilDocumentos, "id">): Promise<Documento[]> {
+export async function listarDocumentos(perfil: PerfilDocumentos): Promise<Documento[]> {
   const bucket = supabase.storage.from("antecedentes");
   // ponytail: lista hasta 1.000 carpetas; con más, guardar la carpeta en el perfil al subir.
   const { data: carpetas, error } = await bucket.list("", { limit: 1000 });
@@ -33,5 +33,16 @@ export function useDocumentos(perfil: PerfilDocumentos) {
   return useQuery({
     queryKey: ["documentos", perfil.id],
     queryFn: () => listarDocumentos(perfil),
+  });
+}
+
+/** T13.3 · Enlace personal (7 días) para que el cliente suba sus documentos sin cuenta. */
+export function useCrearEnlaceSubida() {
+  return useMutation({
+    mutationFn: async (perfilId: string) => {
+      const { data, error } = await supabase.from("enlaces_subida").insert({ perfil_id: perfilId }).select("token, caduca_at").single();
+      if (error) throw error;
+      return { enlace: `${window.location.origin}/perfil/documentos?token=${data.token}`, caduca_at: data.caduca_at };
+    },
   });
 }
