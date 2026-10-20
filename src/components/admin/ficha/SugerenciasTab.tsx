@@ -7,6 +7,7 @@ import type { Perfil } from "@/types/admin";
 import { NOMBRES_DIMENSION } from "@/lib/profileMatching";
 import { MOTIVOS_RECHAZO as MOTIVOS } from "../../../../supabase/functions/_shared/aprendizaje";
 import AprendizajeCliente from "./AprendizajeCliente";
+import RondaPropuestas from "./RondaPropuestas";
 import {
   useCalculoAutomatico,
   useDecidirSugerencia,
@@ -162,7 +163,8 @@ const SugerenciasTab = ({ perfil }: { perfil: Perfil }) => {
         <h2 className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-gold" /> Candidatos sugeridos
         </h2>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <RondaPropuestas perfilId={perfil.id} sugerencias={sugerencias} />
           {calculando && (
             <span className="font-body text-xs text-muted-foreground inline-flex items-center gap-1.5">
               <Loader2 className="w-3.5 h-3.5 animate-spin" /> Actualizando…
