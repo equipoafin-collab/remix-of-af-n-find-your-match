@@ -1,7 +1,7 @@
 import { useOutletContext } from "react-router-dom";
 import { CalendarClock, Loader2 } from "lucide-react";
 import { usePedirRenovacion } from "@/hooks/cliente/useMiArea";
-import { avisarFinPlan, cuandoCita, fechaLarga, type MiAreaAbierta } from "@/lib/areaCliente";
+import { avisarFinPlan, cuandoCita, fechaLarga, type ContextoArea, type MiAreaAbierta } from "@/lib/areaCliente";
 import { botonDorado, rotulo, rotuloClaro } from "@/components/cliente/estilos";
 
 const tarjeta = "bg-card border border-border rounded-2xl p-4";
@@ -30,7 +30,7 @@ const FinDelPlan = ({ area }: { area: MiAreaAbierta }) => {
 
 /** T15.2 · Inicio del área: saludo, próxima sesión, sesiones que quedan y fin del plan. */
 const InicioCliente = () => {
-  const area = useOutletContext<MiAreaAbierta>();
+  const { area } = useOutletContext<ContextoArea>();
   const cita = area.proxima_sesion;
 
   return (

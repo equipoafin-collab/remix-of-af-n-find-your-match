@@ -2,7 +2,7 @@ import { Link, Navigate, NavLink, Outlet } from "react-router-dom";
 import { CalendarDays, Heart, Home, Loader2, LogOut, User, Users, type LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMiArea, usePedirRenovacion, useSesion } from "@/hooks/cliente/useMiArea";
-import { diasHastaFin, fechaLarga, type MiAreaCerrada } from "@/lib/areaCliente";
+import { diasHastaFin, fechaLarga, type ContextoArea, type MiAreaCerrada } from "@/lib/areaCliente";
 import Pantalla from "./Pantalla";
 import { botonDorado, rotulo } from "./estilos";
 
@@ -109,7 +109,7 @@ const ClienteLayout = () => {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 pt-5 pb-28 md:pb-10">
-        <Outlet context={datos} />
+        <Outlet context={{ area: datos, userId: sesion.user.id } satisfies ContextoArea} />
       </main>
 
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-card border-t border-border pb-[env(safe-area-inset-bottom)]" aria-label="Secciones">

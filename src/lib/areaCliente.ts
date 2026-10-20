@@ -22,6 +22,12 @@ export interface MiAreaAbierta {
 
 export type MiArea = MiAreaCerrada | MiAreaAbierta;
 
+/** Lo que ClienteLayout pasa a cada sección (Outlet context): el área y la cuenta, para la caché. */
+export interface ContextoArea {
+  area: MiAreaAbierta;
+  userId: string;
+}
+
 /** El aviso "tu plan termina" sale estos días antes de plan_fin. */
 export const DIAS_AVISO_FIN_PLAN = 15;
 

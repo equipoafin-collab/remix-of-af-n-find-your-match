@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { MiArea } from "@/lib/areaCliente";
+import type { MiPerfil } from "@/lib/cuestionario";
 
 /** Sesión actual; undefined mientras se lee. Se actualiza al entrar, salir o caducar. */
 export function useSesion() {
@@ -38,5 +39,18 @@ export function usePedirRenovacion() {
       return data;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["mi-area"] }),
+  });
+}
+
+/** T16.1 · Sus respuestas del cuestionario (mi_perfil): null con el área cerrada. */
+export function useMiPerfil(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["mi-perfil", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("mi_perfil");
+      if (error) throw error;
+      return data as unknown as MiPerfil | null;
+    },
+    enabled: !!userId,
   });
 }
