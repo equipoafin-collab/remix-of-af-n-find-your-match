@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import type { Cita, MiArea, TipoSolicitud } from "@/lib/areaCliente";
+import type { Cita, MiArea, MiMatch, TipoSolicitud } from "@/lib/areaCliente";
 import type { MiPerfil, Preferencias } from "@/lib/cuestionario";
 import { extensionFoto } from "../../../supabase/functions/_shared/acceso";
 import { llamarFuncion } from "./accesoCliente";
@@ -110,5 +110,32 @@ export function useMisCitas(userId: string | undefined) {
       return data as unknown as Cita[];
     },
     enabled: !!userId,
+  });
+}
+
+/** T18.2 · Sus matches presentados (mis_matches), el más reciente primero. */
+export function useMisMatches(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["mis-matches", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("mis_matches");
+      if (error) throw error;
+      return data as unknown as MiMatch[];
+    },
+    enabled: !!userId,
+  });
+}
+
+/** T18.3 · Su feedback de la cita con un match (solo su lado). */
+export function useDejarFeedback() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (f: { matchId: string; valoracion: number; quiereRepetir: boolean; comentario: string }) => {
+      const { error } = await supabase.rpc("dejar_feedback", {
+        _match_id: f.matchId, _valoracion: f.valoracion, _quiere_repetir: f.quiereRepetir, _comentario: f.comentario,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["mis-matches"] }),
   });
 }

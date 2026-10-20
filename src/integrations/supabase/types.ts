@@ -434,8 +434,10 @@ export type Database = {
           informe: Json | null
           informe_enviado_at: string | null
           lugar: string | null
+          motivos_cliente: string[]
           perfil_a: string
           perfil_b: string
+          presentado_at: string | null
           quiere_repetir_a: boolean | null
           quiere_repetir_b: boolean | null
           sugerencia_id: string | null
@@ -453,8 +455,10 @@ export type Database = {
           informe?: Json | null
           informe_enviado_at?: string | null
           lugar?: string | null
+          motivos_cliente?: string[]
           perfil_a: string
           perfil_b: string
+          presentado_at?: string | null
           quiere_repetir_a?: boolean | null
           quiere_repetir_b?: boolean | null
           sugerencia_id?: string | null
@@ -472,8 +476,10 @@ export type Database = {
           informe?: Json | null
           informe_enviado_at?: string | null
           lugar?: string | null
+          motivos_cliente?: string[]
           perfil_a?: string
           perfil_b?: string
+          presentado_at?: string | null
           quiere_repetir_a?: boolean | null
           quiere_repetir_b?: boolean | null
           sugerencia_id?: string | null
@@ -1158,6 +1164,15 @@ export type Database = {
         Returns: Json
       }
       dashboard_resumen: { Args: never; Returns: Json }
+      dejar_feedback: {
+        Args: {
+          _comentario: string
+          _match_id: string
+          _quiere_repetir: boolean
+          _valoracion: number
+        }
+        Returns: undefined
+      }
       estado_automatizaciones: {
         Args: never
         Returns: {
@@ -1181,6 +1196,7 @@ export type Database = {
       mi_perfil: { Args: never; Returns: Json }
       mi_perfil_id: { Args: never; Returns: string }
       mis_citas: { Args: never; Returns: Json }
+      mis_matches: { Args: never; Returns: Json }
       pedir_a_psicologa: { Args: { _tipo: string }; Returns: boolean }
       pedir_renovacion: { Args: never; Returns: boolean }
       perfil_cambiado_por_cliente: {

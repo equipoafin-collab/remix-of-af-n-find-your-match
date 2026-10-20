@@ -25,3 +25,13 @@ export function embudoMatches(matches: { estado: MatchEstado; fecha_cita: string
     continuan: matches.filter((m) => m.estado === "continuan").length,
   };
 }
+
+/** T18.1 · Motivos que leen los dos clientes al presentarles el match (CHECK en la base de datos). */
+export const MAX_MOTIVOS_CLIENTE = 5;
+export const MAX_LARGO_MOTIVO = 160;
+
+/** Un motivo por línea: sin vacíos ni repetidos, recortados y como mucho MAX_MOTIVOS_CLIENTE. */
+export function limpiarMotivos(texto: string) {
+  const motivos = texto.split("\n").map((m) => m.trim().slice(0, MAX_LARGO_MOTIVO)).filter(Boolean);
+  return [...new Set(motivos)].slice(0, MAX_MOTIVOS_CLIENTE);
+}

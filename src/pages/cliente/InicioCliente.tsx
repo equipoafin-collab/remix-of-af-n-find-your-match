@@ -1,7 +1,8 @@
-import { useOutletContext } from "react-router-dom";
-import { CalendarClock, Loader2 } from "lucide-react";
-import { usePedirRenovacion } from "@/hooks/cliente/useMiArea";
-import { avisarFinPlan, cuandoCita, fechaLarga, type ContextoArea, type MiAreaAbierta } from "@/lib/areaCliente";
+import { Link, useOutletContext } from "react-router-dom";
+import { CalendarClock, ChevronRight, Loader2 } from "lucide-react";
+import FotoPerfil from "@/components/admin/FotoPerfil";
+import { useMisMatches, usePedirRenovacion } from "@/hooks/cliente/useMiArea";
+import { avisarFinPlan, cuandoCita, ESTADO_MATCH_CLIENTE, fechaLarga, type ContextoArea, type MiAreaAbierta, type MiMatch } from "@/lib/areaCliente";
 import { botonDorado, rotulo, rotuloClaro } from "@/components/cliente/estilos";
 
 const tarjeta = "bg-card border border-border rounded-2xl p-4";
@@ -28,9 +29,25 @@ const FinDelPlan = ({ area }: { area: MiAreaAbierta }) => {
   );
 };
 
-/** T15.2 · Inicio del área: saludo, próxima sesión, sesiones que quedan y fin del plan. */
+/** T18.2 · Su último match presentado, con la cita si la hay. */
+const UltimoMatch = ({ match }: { match: MiMatch }) => (
+  <Link to="/mi-area/matches" className={`${tarjeta} flex items-center gap-3 hover:bg-muted/40 transition-colors`}>
+    <FotoPerfil path={match.otra.foto_url} nombre={match.otra.nombre} className="w-10 h-10 rounded-full text-sm shrink-0" />
+    <div className="flex-1 min-w-0">
+      <p className={rotuloClaro}>Tu último match</p>
+      <p className="font-body text-sm font-semibold text-foreground">{match.otra.nombre}, {match.otra.edad}</p>
+      <p className="font-body text-sm text-muted-foreground first-letter:uppercase">
+        {match.estado === "cita_agendada" && match.fecha_cita ? `Cita ${cuandoCita(match.fecha_cita)}` : ESTADO_MATCH_CLIENTE[match.estado].texto}
+      </p>
+    </div>
+    <ChevronRight className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+  </Link>
+);
+
+/** T15.2 · Inicio del área: saludo, próxima sesión, sesiones que quedan, fin del plan y (T18.2) su último match. */
 const InicioCliente = () => {
-  const { area } = useOutletContext<ContextoArea>();
+  const { area, userId } = useOutletContext<ContextoArea>();
+  const ultimo = useMisMatches(userId).data?.[0];
   const cita = area.proxima_sesion;
 
   return (
@@ -87,6 +104,8 @@ const InicioCliente = () => {
           </div>
         )}
       </section>
+
+      {ultimo && <UltimoMatch match={ultimo} />}
     </div>
   );
 };
