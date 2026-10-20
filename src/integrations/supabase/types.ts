@@ -479,42 +479,66 @@ export type Database = {
       }
       pagos: {
         Row: {
+          caduca_at: string | null
           created_at: string
           email: string
+          enlace_pago: string | null
+          estado: Database["public"]["Enums"]["pago_estado"]
           fecha: string
           id: string
           importe: number | null
+          meses: number | null
           nombre_completo: string
           notas: string | null
+          origen: Database["public"]["Enums"]["pago_origen"]
+          pagado_at: string | null
           perfil_id: string | null
           perfil_suprimido_at: string | null
           plan: Database["public"]["Enums"]["plan_tipo"]
+          stripe_checkout_id: string | null
+          stripe_payment_intent: string | null
           telefono: string | null
         }
         Insert: {
+          caduca_at?: string | null
           created_at?: string
           email: string
+          enlace_pago?: string | null
+          estado?: Database["public"]["Enums"]["pago_estado"]
           fecha?: string
           id?: string
           importe?: number | null
+          meses?: number | null
           nombre_completo: string
           notas?: string | null
+          origen?: Database["public"]["Enums"]["pago_origen"]
+          pagado_at?: string | null
           perfil_id?: string | null
           perfil_suprimido_at?: string | null
           plan: Database["public"]["Enums"]["plan_tipo"]
+          stripe_checkout_id?: string | null
+          stripe_payment_intent?: string | null
           telefono?: string | null
         }
         Update: {
+          caduca_at?: string | null
           created_at?: string
           email?: string
+          enlace_pago?: string | null
+          estado?: Database["public"]["Enums"]["pago_estado"]
           fecha?: string
           id?: string
           importe?: number | null
+          meses?: number | null
           nombre_completo?: string
           notas?: string | null
+          origen?: Database["public"]["Enums"]["pago_origen"]
+          pagado_at?: string | null
           perfil_id?: string | null
           perfil_suprimido_at?: string | null
           plan?: Database["public"]["Enums"]["plan_tipo"]
+          stripe_checkout_id?: string | null
+          stripe_payment_intent?: string | null
           telefono?: string | null
         }
         Relationships: [
@@ -1081,6 +1105,8 @@ export type Database = {
         | "feedback_registrado"
         | "continuan"
         | "cerrado"
+      pago_estado: "pendiente" | "pagado" | "caducado" | "reembolsado"
+      pago_origen: "manual" | "stripe"
       plan_tipo: "esencial" | "premium"
       resumen_estado: "sin_generar" | "borrador" | "revisado"
       sesion_estado: "programada" | "realizada" | "cancelada" | "no_asistio"
@@ -1244,6 +1270,8 @@ export const Constants = {
         "continuan",
         "cerrado",
       ],
+      pago_estado: ["pendiente", "pagado", "caducado", "reembolsado"],
+      pago_origen: ["manual", "stripe"],
       plan_tipo: ["esencial", "premium"],
       resumen_estado: ["sin_generar", "borrador", "revisado"],
       sesion_estado: ["programada", "realizada", "cancelada", "no_asistio"],

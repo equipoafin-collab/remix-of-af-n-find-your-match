@@ -5,6 +5,10 @@ import { WEIGHTS } from "@/lib/profileMatching";
 export interface Configuracion {
   /** Sesiones al mes según el plan. */
   sesiones_por_plan: Record<PlanTipo, number>;
+  /** Precio al mes de cada plan, en euros con IVA incluido (T11.1); el enlace de pago cobra precio × meses. */
+  precio_plan: Record<PlanTipo, number>;
+  /** Meses que propone el enlace de pago (la psicóloga los puede cambiar). */
+  meses_plan: number;
   umbral_pocas_sesiones: number;
   dias_sin_seguimiento: number;
   umbral_alta_compatibilidad: number;
@@ -20,6 +24,8 @@ export interface Configuracion {
 /** Mismos valores que inserta la migración T0.5; se usan si falta alguna fila. */
 export const CONFIGURACION_POR_DEFECTO: Configuracion = {
   sesiones_por_plan: { esencial: 1, premium: 2 },
+  precio_plan: { esencial: 160, premium: 250 },
+  meses_plan: 3,
   umbral_pocas_sesiones: 1,
   dias_sin_seguimiento: 21,
   umbral_alta_compatibilidad: 80,
@@ -36,10 +42,11 @@ export const construirConfiguracion = (filas: { clave: string; valor: Json }[]):
   ...Object.fromEntries(filas.filter((f) => f.clave in CONFIGURACION_POR_DEFECTO).map((f) => [f.clave, f.valor])),
 });
 
-type ClaveEntera = "umbral_pocas_sesiones" | "dias_sin_seguimiento" | "dias_feedback" | "umbral_alta_compatibilidad" | "num_sugerencias" | "num_candidatos_ia";
+type ClaveEntera = "umbral_pocas_sesiones" | "dias_sin_seguimiento" | "dias_feedback" | "umbral_alta_compatibilidad" | "num_sugerencias" | "num_candidatos_ia" | "meses_plan";
 
 /** T9.2 · Números enteros editables en Configuración, con sus límites. */
-export const CAMPOS_ENTEROS: { clave: ClaveEntera; grupo: "avisos" | "matching"; label: string; ayuda: string; min: number; max: number }[] = [
+export const CAMPOS_ENTEROS: { clave: ClaveEntera; grupo: "planes" | "avisos" | "matching"; label: string; ayuda: string; min: number; max: number }[] = [
+  { clave: "meses_plan", grupo: "planes", label: "Meses del enlace de pago", ayuda: "Duración que propone el enlace de pago; se puede cambiar al crearlo.", min: 1, max: 24 },
   { clave: "umbral_pocas_sesiones", grupo: "avisos", label: "Pocas sesiones", ayuda: "Avisa cuando a un cliente activo le quedan estas sesiones o menos (0: sin aviso).", min: 0, max: 10 },
   { clave: "dias_sin_seguimiento", grupo: "avisos", label: "Días sin seguimiento", ayuda: "Avisa si un cliente activo lleva estos días sin nota, sesión ni feedback.", min: 1, max: 365 },
   { clave: "dias_feedback", grupo: "avisos", label: "Plazo del feedback (días)", ayuda: "Días tras la cita para registrar el feedback de cada cliente.", min: 1, max: 60 },
@@ -49,6 +56,7 @@ export const CAMPOS_ENTEROS: { clave: ClaveEntera; grupo: "avisos" | "matching";
 ];
 
 const MAX_SESIONES_MES = 8;
+const MAX_PRECIO_MES = 10_000;
 const entero = (v: number, min: number, max: number) => Number.isInteger(v) && v >= min && v <= max;
 
 /** Errores de la configuración antes de guardarla; vacío si todo es válido. Los pesos deben sumar 100 %. */
@@ -58,6 +66,9 @@ export function validarConfiguracion(c: Configuracion): string[] {
     .map((f) => `${f.label}: un número entero entre ${f.min} y ${f.max}.`);
   for (const [plan, n] of Object.entries(c.sesiones_por_plan)) {
     if (!entero(n, 0, MAX_SESIONES_MES)) errores.push(`Sesiones al mes (${plan}): un número entero entre 0 y ${MAX_SESIONES_MES}.`);
+  }
+  for (const [plan, precio] of Object.entries(c.precio_plan)) {
+    if (!(precio > 0 && precio <= MAX_PRECIO_MES)) errores.push(`Precio al mes (${plan}): más de 0 y hasta ${MAX_PRECIO_MES} €.`);
   }
   if (!(c.peso_ia >= 0 && c.peso_ia <= 1)) errores.push("Peso de la IA: entre 0 y 100 %.");
   const pesos = Object.values(c.pesos_algoritmo);

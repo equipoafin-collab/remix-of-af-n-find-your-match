@@ -35,12 +35,13 @@ const Campo = ({ label, ayuda, children }: { label: string; ayuda?: string; chil
   </label>
 );
 
-const Numero = ({ value, onChange, min, max, sufijo }: { value: number | string; onChange: (n: number) => void; min: number; max: number; sufijo?: string }) => (
+const Numero = ({ value, onChange, min, max, sufijo, step }: { value: number | string; onChange: (n: number) => void; min: number; max: number; sufijo?: string; step?: number }) => (
   <span className="flex items-center gap-2">
     <input
       type="number"
       min={min}
       max={max}
+      step={step}
       value={typeof value === "number" && Number.isNaN(value) ? "" : value}
       onChange={(e) => onChange(aNumero(e.target.value))}
       className={campo}
@@ -59,7 +60,7 @@ const FormConfiguracion = ({ guardada }: { guardada: Config }) => {
   const hayCambios = Object.keys(cambios).length > 0;
   const sumaPesos = Math.round(Object.values(c.pesos_algoritmo).reduce((a, b) => a + b, 0) * 100);
 
-  const enteros = (grupo: "avisos" | "matching") =>
+  const enteros = (grupo: "planes" | "avisos" | "matching") =>
     CAMPOS_ENTEROS.filter((f) => f.grupo === grupo).map((f) => (
       <Campo key={f.clave} label={f.label} ayuda={f.ayuda}>
         <Numero value={c[f.clave]} min={f.min} max={f.max} onChange={(n) => poner(f.clave, n)} />
@@ -88,6 +89,12 @@ const FormConfiguracion = ({ guardada }: { guardada: Config }) => {
             </Campo>
           ))}
           <p className="font-body text-xs text-muted-foreground">Para sugerir las sesiones contratadas al editar el plan de un cliente.</p>
+          {(["esencial", "premium"] as PlanTipo[]).map((plan) => (
+            <Campo key={plan} label={`Precio al mes · ${plan === "esencial" ? "Esencial" : "Premium"}`} ayuda={plan === "premium" ? "Euros con IVA incluido. El enlace de pago cobra precio × meses." : undefined}>
+              <Numero value={c.precio_plan[plan]} min={0} max={10000} step={0.01} sufijo="€" onChange={(n) => poner("precio_plan", { ...c.precio_plan, [plan]: n })} />
+            </Campo>
+          ))}
+          {enteros("planes")}
           <h3 className="font-body text-xs text-muted-foreground uppercase tracking-wider pt-2">Avisos</h3>
           {enteros("avisos")}
         </div>

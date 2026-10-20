@@ -39,6 +39,13 @@ describe("validarConfiguracion", () => {
     expect(validarConfiguracion({ ...valida, dias_feedback: 2.5 })).toHaveLength(1);
     expect(validarConfiguracion({ ...valida, num_sugerencias: NaN })).toHaveLength(1);
     expect(validarConfiguracion({ ...valida, sesiones_por_plan: { esencial: 1, premium: 9 } })).toHaveLength(1);
+    expect(validarConfiguracion({ ...valida, meses_plan: 0 })).toHaveLength(1);
+  });
+
+  it("los precios al mes son positivos y admiten céntimos", () => {
+    expect(validarConfiguracion({ ...valida, precio_plan: { esencial: 159.9, premium: 250 } })).toEqual([]);
+    expect(validarConfiguracion({ ...valida, precio_plan: { esencial: 0, premium: 250 } })).toHaveLength(1);
+    expect(validarConfiguracion({ ...valida, precio_plan: { esencial: 160, premium: NaN } })).toHaveLength(1);
   });
 
   it("el peso de la IA va de 0 a 1 y los pesos del algoritmo suman 1", () => {
