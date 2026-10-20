@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -115,7 +115,10 @@ const AdminLayout = () => {
         <Navegacion salir={logout} />
       </aside>
       <section className="flex-1 min-w-0">
-        <Outlet />
+        {/* T10.2: cada sección se descarga al entrar; el menú se queda mientras tanto. */}
+        <Suspense fallback={<p className="p-8 font-body text-sm text-muted-foreground">Cargando…</p>}>
+          <Outlet />
+        </Suspense>
       </section>
     </main>
   );

@@ -160,6 +160,8 @@ export type Database = {
           compatibility_tip_3: string | null
           conflict_style_1: string | null
           conflict_style_2: string | null
+          consentimiento_at: string | null
+          consentimiento_version: string | null
           created_at: string
           email: string
           id: string
@@ -191,6 +193,8 @@ export type Database = {
           compatibility_tip_3?: string | null
           conflict_style_1?: string | null
           conflict_style_2?: string | null
+          consentimiento_at?: string | null
+          consentimiento_version?: string | null
           created_at?: string
           email: string
           id?: string
@@ -222,6 +226,8 @@ export type Database = {
           compatibility_tip_3?: string | null
           conflict_style_1?: string | null
           conflict_style_2?: string | null
+          consentimiento_at?: string | null
+          consentimiento_version?: string | null
           created_at?: string
           email?: string
           id?: string

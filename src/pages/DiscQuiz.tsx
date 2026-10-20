@@ -5,6 +5,8 @@ import { ArrowRight, ArrowLeft, Heart, Sparkles, Zap, Sun, Shield, Target, Check
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { generateDiscPdf } from "@/lib/generateDiscPdf";
+import { VERSION_CONSENTIMIENTO } from "@/lib/rgpd";
+import { useToast } from "@/hooks/use-toast";
 
 type DiscType = "D" | "I" | "S" | "C";
 
@@ -237,6 +239,8 @@ const DiscQuiz = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [telefono, setTelefono] = useState("");
+  const [consent, setConsent] = useState(false);
+  const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<{
     scores: Record<DiscType, number>;
@@ -269,17 +273,18 @@ const DiscQuiz = () => {
   }, [answers]);
 
   const handleSubmit = async () => {
-    if (!name.trim() || !email.trim() || !telefono.trim()) return;
+    if (!name.trim() || !email.trim() || !telefono.trim() || !consent) return;
     setSaving(true);
     const res = calculateResults();
 
     const primary = DISC_DESCRIPTIONS[res.primary];
     const secondary = DISC_DESCRIPTIONS[res.secondary];
 
-    await supabase.from("disc_results").insert({
+    const { error } = await supabase.from("disc_results").insert({
       name: name.trim(),
       email: email.trim(),
       telefono: telefono.trim(),
+      consentimiento_version: VERSION_CONSENTIMIENTO, // T10.1: qué texto aceptó (la fecha la pone la BD)
       score_d: res.scores.D,
       score_i: res.scores.I,
       score_s: res.scores.S,
@@ -305,6 +310,12 @@ const DiscQuiz = () => {
       compatibility_tip_2: primary.comunicacion,
       compatibility_tip_3: primary.actividades,
     });
+    // Sin guardar, el contacto se perdería: se avisa y se puede reintentar.
+    if (error) {
+      setSaving(false);
+      toast({ title: "No hemos podido guardar tu resultado", description: "Inténtalo de nuevo en unos segundos.", variant: "destructive" });
+      return;
+    }
 
     setResult(res);
     setSaving(false);
@@ -594,6 +605,14 @@ const DiscQuiz = () => {
                       className="rounded-xl h-12 bg-background border-border focus:ring-2 focus:ring-disc/30 transition-shadow"
                     />
                   </div>
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 w-5 h-5 accent-[hsl(var(--ring))] rounded" />
+                    <span className="font-body text-sm text-muted-foreground leading-relaxed">
+                      He leído y acepto la{" "}
+                      <a href="/privacidad" target="_blank" className="text-gold-texto underline hover:opacity-80">política de privacidad</a>.
+                      Consiento que Afín guarde mi resultado y mis datos de contacto para contactarme sobre sus servicios.
+                    </span>
+                  </label>
                 </motion.div>
 
                 <motion.button
@@ -601,7 +620,7 @@ const DiscQuiz = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.45 }}
                   onClick={handleSubmit}
-                  disabled={!name.trim() || !email.trim() || !telefono.trim() || saving}
+                  disabled={!name.trim() || !email.trim() || !telefono.trim() || !consent || saving}
                   className="w-full group relative inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-disc to-disc-glow text-white font-body font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   {saving ? (
