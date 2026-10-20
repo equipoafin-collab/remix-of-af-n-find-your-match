@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { generateDiscPdf } from "@/lib/generateDiscPdf";
 import { VERSION_CONSENTIMIENTO } from "@/lib/rgpd";
+import { useToast } from "@/hooks/use-toast";
 
 type DiscType = "D" | "I" | "S" | "C";
 
@@ -239,6 +240,7 @@ const DiscQuiz = () => {
   const [email, setEmail] = useState("");
   const [telefono, setTelefono] = useState("");
   const [consent, setConsent] = useState(false);
+  const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<{
     scores: Record<DiscType, number>;
@@ -278,7 +280,7 @@ const DiscQuiz = () => {
     const primary = DISC_DESCRIPTIONS[res.primary];
     const secondary = DISC_DESCRIPTIONS[res.secondary];
 
-    await supabase.from("disc_results").insert({
+    const { error } = await supabase.from("disc_results").insert({
       name: name.trim(),
       email: email.trim(),
       telefono: telefono.trim(),
@@ -308,6 +310,12 @@ const DiscQuiz = () => {
       compatibility_tip_2: primary.comunicacion,
       compatibility_tip_3: primary.actividades,
     });
+    // Sin guardar, el contacto se perdería: se avisa y se puede reintentar.
+    if (error) {
+      setSaving(false);
+      toast({ title: "No hemos podido guardar tu resultado", description: "Inténtalo de nuevo en unos segundos.", variant: "destructive" });
+      return;
+    }
 
     setResult(res);
     setSaving(false);
