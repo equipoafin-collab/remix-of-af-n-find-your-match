@@ -7,6 +7,7 @@ import type { Perfil, PlanTipo } from "@/types/admin";
 import { useActualizarPago, useCrearPago, useEliminarPago, usePagos } from "@/hooks/admin/usePagos";
 import { PlanBadge } from "@/components/admin/Badges";
 import BuscadorPerfil from "@/components/admin/BuscadorPerfil";
+import { ESTADO_PAGO, estadoVisible, urlStripe } from "@/lib/pagos";
 
 const formVacio = () => ({
   perfil: null as Perfil | null,
@@ -131,7 +132,7 @@ const Pagos = () => {
           <table className="w-full">
             <thead>
               <tr className="bg-muted">
-                {["Cliente", "Email", "Plan", "Importe", "Fecha", "Notas", ""].map((h) => (
+                {["Cliente", "Email", "Plan", "Importe", "Estado", "Fecha", "Notas", ""].map((h) => (
                   <th key={h} className="text-left px-4 py-3 font-body text-xs font-semibold text-muted-foreground uppercase">{h}</th>
                 ))}
               </tr>
@@ -156,10 +157,20 @@ const Pagos = () => {
                   <td className="px-4 py-3 font-body text-sm text-muted-foreground">{c.email}</td>
                   <td className="px-4 py-3"><PlanBadge plan={c.plan} /></td>
                   <td className="px-4 py-3 font-body text-sm text-muted-foreground tabular-nums">{c.importe != null ? euros(c.importe) : "—"}</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-body font-medium border whitespace-nowrap ${ESTADO_PAGO[estadoVisible(c)].color}`}>
+                      {ESTADO_PAGO[estadoVisible(c)].label}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 font-body text-xs text-muted-foreground">{new Date(c.fecha).toLocaleDateString("es-ES")}</td>
                   <td className="px-4 py-3 font-body text-xs text-muted-foreground max-w-xs truncate">{c.notas || "—"}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
+                      {urlStripe(c) && (
+                        <a href={urlStripe(c)!} target="_blank" rel="noopener noreferrer" className="text-gold-texto hover:underline text-xs inline-flex items-center gap-1 whitespace-nowrap">
+                          Stripe <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
                       {c.plan === "esencial" && (
                         <a href="https://calendly.com/equipo-afin/30min" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-xs inline-flex items-center gap-1">
                           Calendly <ExternalLink className="w-3 h-3" />
@@ -173,7 +184,7 @@ const Pagos = () => {
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={7} className="p-8 text-center font-body text-sm text-muted-foreground">No hay pagos</td></tr>
+                <tr><td colSpan={8} className="p-8 text-center font-body text-sm text-muted-foreground">No hay pagos</td></tr>
               )}
             </tbody>
           </table>

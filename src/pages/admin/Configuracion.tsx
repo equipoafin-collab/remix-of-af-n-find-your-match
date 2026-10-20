@@ -1,5 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from "react";
-import { Settings, Play, Loader2, CheckCircle2, XCircle, UserPlus, Save, Copy, Mail, Link2 } from "lucide-react";
+import { Settings, Play, Loader2, CheckCircle2, XCircle, UserPlus, Save, Link2 } from "lucide-react";
+import CompartirEnlace from "@/components/admin/CompartirEnlace";
 import { toast } from "@/hooks/use-toast";
 import { useEjecutarAutomatizaciones, useEstadoAutomatizaciones } from "@/hooks/admin/useAutomatizaciones";
 import { useConfiguracion, useGuardarConfiguracion } from "@/hooks/admin/useConfiguracion";
@@ -35,12 +36,13 @@ const Campo = ({ label, ayuda, children }: { label: string; ayuda?: string; chil
   </label>
 );
 
-const Numero = ({ value, onChange, min, max, sufijo }: { value: number | string; onChange: (n: number) => void; min: number; max: number; sufijo?: string }) => (
+const Numero = ({ value, onChange, min, max, sufijo, step }: { value: number | string; onChange: (n: number) => void; min: number; max: number; sufijo?: string; step?: number }) => (
   <span className="flex items-center gap-2">
     <input
       type="number"
       min={min}
       max={max}
+      step={step}
       value={typeof value === "number" && Number.isNaN(value) ? "" : value}
       onChange={(e) => onChange(aNumero(e.target.value))}
       className={campo}
@@ -59,7 +61,7 @@ const FormConfiguracion = ({ guardada }: { guardada: Config }) => {
   const hayCambios = Object.keys(cambios).length > 0;
   const sumaPesos = Math.round(Object.values(c.pesos_algoritmo).reduce((a, b) => a + b, 0) * 100);
 
-  const enteros = (grupo: "avisos" | "matching") =>
+  const enteros = (grupo: "planes" | "avisos" | "matching") =>
     CAMPOS_ENTEROS.filter((f) => f.grupo === grupo).map((f) => (
       <Campo key={f.clave} label={f.label} ayuda={f.ayuda}>
         <Numero value={c[f.clave]} min={f.min} max={f.max} onChange={(n) => poner(f.clave, n)} />
@@ -88,6 +90,12 @@ const FormConfiguracion = ({ guardada }: { guardada: Config }) => {
             </Campo>
           ))}
           <p className="font-body text-xs text-muted-foreground">Para sugerir las sesiones contratadas al editar el plan de un cliente.</p>
+          {(["esencial", "premium"] as PlanTipo[]).map((plan) => (
+            <Campo key={plan} label={`Precio al mes · ${plan === "esencial" ? "Esencial" : "Premium"}`} ayuda={plan === "premium" ? "Euros con IVA incluido. El enlace de pago cobra precio × meses." : undefined}>
+              <Numero value={c.precio_plan[plan]} min={0} max={10000} step={0.01} sufijo="€" onChange={(n) => poner("precio_plan", { ...c.precio_plan, [plan]: n })} />
+            </Campo>
+          ))}
+          {enteros("planes")}
           <h3 className="font-body text-xs text-muted-foreground uppercase tracking-wider pt-2">Avisos</h3>
           {enteros("avisos")}
         </div>
@@ -145,39 +153,25 @@ const FormConfiguracion = ({ guardada }: { guardada: Config }) => {
 };
 
 /** Enlace de acceso recién creado: de un solo uso; la administradora lo envía por email o mensaje. */
-const PanelEnlace = ({ email, enlace, cerrar }: { email: string; enlace: string; cerrar: () => void }) => {
-  const copiar = () =>
-    navigator.clipboard.writeText(enlace).then(
-      () => toast({ title: "Enlace copiado" }),
-      () => toast({ title: "No se pudo copiar", description: "Selecciónalo y cópialo a mano.", variant: "destructive" }),
-    );
-  const correo = `mailto:${email}?${new URLSearchParams({
-    subject: "Tu acceso al CRM de Afín",
-    body: `Hola:\n\nEntra en el CRM de Afín con este enlace y elige tu contraseña:\n${enlace}\n\nEs de un solo uso y caduca pronto.`,
-  }).toString().replace(/\+/g, "%20")}`;
-
-  return (
-    <div className="px-5 py-4 border-t border-border bg-gold/5 space-y-2">
-      <p className="font-body text-sm text-foreground">
-        Enlace de acceso para <span className="font-semibold">{email}</span>. Envíaselo por email o mensaje: al abrirlo pulsará
-        "Entrar" y elegirá su contraseña. Es de un solo uso y caduca pronto (por defecto, en 1 hora).
-      </p>
-      {location.hostname === "localhost" && (
-        <p className="font-body text-xs text-amber-700">Lo has creado en local: el enlace solo funciona en este ordenador. Créalo desde la app publicada.</p>
-      )}
-      <input readOnly value={enlace} onFocus={(e) => e.target.select()} aria-label="Enlace de acceso" className="w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-xs" />
-      <div className="flex gap-2 flex-wrap">
-        <button onClick={copiar} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-foreground text-background font-body text-sm font-semibold">
-          <Copy className="w-4 h-4" /> Copiar
-        </button>
-        <a href={correo} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border font-body text-sm text-foreground hover:bg-muted">
-          <Mail className="w-4 h-4" /> Abrir en el correo
-        </a>
-        <button onClick={cerrar} className="px-3 py-1.5 rounded-lg font-body text-sm text-muted-foreground hover:text-foreground">Cerrar</button>
-      </div>
-    </div>
-  );
-};
+const PanelEnlace = ({ email, enlace, cerrar }: { email: string; enlace: string; cerrar: () => void }) => (
+  <div className="px-5 py-4 border-t border-border bg-gold/5 space-y-2">
+    <p className="font-body text-sm text-foreground">
+      Enlace de acceso para <span className="font-semibold">{email}</span>. Envíaselo por email o mensaje: al abrirlo pulsará
+      "Entrar" y elegirá su contraseña. Es de un solo uso y caduca pronto (por defecto, en 1 hora).
+    </p>
+    {location.hostname === "localhost" && (
+      <p className="font-body text-xs text-amber-700">Lo has creado en local: el enlace solo funciona en este ordenador. Créalo desde la app publicada.</p>
+    )}
+    <CompartirEnlace
+      enlace={enlace}
+      email={email}
+      etiqueta="Enlace de acceso"
+      asunto="Tu acceso al CRM de Afín"
+      cuerpo={`Hola:\n\nEntra en el CRM de Afín con este enlace y elige tu contraseña:\n${enlace}\n\nEs de un solo uso y caduca pronto.`}
+      cerrar={cerrar}
+    />
+  </div>
+);
 
 // T9.2 · Quién entra en el CRM. Sin emails automáticos: se da un enlace de acceso (ver la Edge Function).
 // Quitar el acceso no borra la cuenta.

@@ -25,6 +25,7 @@ import DiscQuiz from "./pages/DiscQuiz";
 import NotFound from "./pages/NotFound";
 import Legal from "./pages/Legal";
 import QuienesSomos from "./pages/QuienesSomos";
+import PagoResultado from "./pages/PagoResultado";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,8 @@ const App = () => (
           <Route path="/terminos" element={<Legal />} />
           <Route path="/privacidad" element={<Legal />} />
           <Route path="/aviso-legal" element={<Legal />} />
+          <Route path="/pago/ok" element={<PagoResultado />} />
+          <Route path="/pago/cancelado" element={<PagoResultado />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

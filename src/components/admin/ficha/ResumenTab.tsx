@@ -7,6 +7,7 @@ import { ListaTareas } from "@/components/admin/tareas/ListaTareas";
 import { Field, Section } from "./Campos";
 import VideoPresentacion from "./VideoPresentacion";
 import EvolucionCliente from "./EvolucionCliente";
+import PagosCliente from "./PagosCliente";
 
 const MAX_PROXIMAS = 5;
 
@@ -36,6 +37,7 @@ const ResumenTab = ({ perfil: p }: { perfil: Perfil }) => (
       ))}
     </Section>
     <ProximasTareas perfil={p} />
+    <PagosCliente perfil={p} />
     <EvolucionCliente perfil={p} />
     <VideoPresentacion perfil={p} />
   </div>
