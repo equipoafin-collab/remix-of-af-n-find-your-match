@@ -160,6 +160,8 @@ export type Database = {
           compatibility_tip_3: string | null
           conflict_style_1: string | null
           conflict_style_2: string | null
+          consentimiento_at: string | null
+          consentimiento_version: string | null
           created_at: string
           email: string
           id: string
@@ -191,6 +193,8 @@ export type Database = {
           compatibility_tip_3?: string | null
           conflict_style_1?: string | null
           conflict_style_2?: string | null
+          consentimiento_at?: string | null
+          consentimiento_version?: string | null
           created_at?: string
           email: string
           id?: string
@@ -222,6 +226,8 @@ export type Database = {
           compatibility_tip_3?: string | null
           conflict_style_1?: string | null
           conflict_style_2?: string | null
+          consentimiento_at?: string | null
+          consentimiento_version?: string | null
           created_at?: string
           email?: string
           id?: string
@@ -248,6 +254,48 @@ export type Database = {
           weakness_3?: string | null
         }
         Relationships: []
+      }
+      enlaces_subida: {
+        Row: {
+          caduca_at: string
+          created_at: string
+          created_by: string | null
+          id: string
+          perfil_id: string
+          token: string
+        }
+        Insert: {
+          caduca_at?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          perfil_id: string
+          token?: string
+        }
+        Update: {
+          caduca_at?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          perfil_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enlaces_subida_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enlaces_subida_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "v_clientes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       match_sugerencias: {
         Row: {

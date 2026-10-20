@@ -19,7 +19,12 @@ describe("claveSegura", () => {
 });
 
 describe("esCarpetaDelPerfil", () => {
-  const perfil = { email: "Maria.Lopez@gmail.com", nombre_completo: "María López" };
+  const perfil = { id: "6f1c2b9e-0000-4000-8000-000000000001", email: "Maria.Lopez@gmail.com", nombre_completo: "María López" };
+
+  it("reconoce la carpeta del enlace personal por el id del perfil", () => {
+    expect(esCarpetaDelPerfil(perfil.id, perfil)).toBe(true);
+    expect(esCarpetaDelPerfil("6f1c2b9e-0000-4000-8000-000000000002", perfil)).toBe(false);
+  });
 
   it("reconoce la carpeta por email aunque cambien las mayúsculas", () => {
     expect(esCarpetaDelPerfil("user_maria.lopez@GMAIL.com", perfil)).toBe(true);
@@ -31,6 +36,6 @@ describe("esCarpetaDelPerfil", () => {
 
   it("no confunde la carpeta de otra persona ni la de un perfil sin email", () => {
     expect(esCarpetaDelPerfil("user_maria", perfil)).toBe(false);
-    expect(esCarpetaDelPerfil("user_", { email: null, nombre_completo: " " })).toBe(false);
+    expect(esCarpetaDelPerfil("user_", { id: "x", email: null, nombre_completo: " " })).toBe(false);
   });
 });

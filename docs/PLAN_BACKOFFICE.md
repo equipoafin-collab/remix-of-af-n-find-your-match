@@ -569,13 +569,15 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
 
 > Añadida el 15/10/2026, tras la revisión del plan terminado (Fases 0-9). Las tareas que esperan algo de fuera lo dicen en "Depende de".
 
-- [ ] **T10.1 · Consentimiento en el test DISC (`/quiz`)**
+- [x] **T10.1 · Consentimiento en el test DISC (`/quiz`)**
   - `/quiz` guarda nombre, email y teléfono en `disc_results` sin casilla de consentimiento ni enlace a la política de privacidad. Añadir la misma casilla que `/perfil` (obligatoria para enviar) y guardar `disc_results.consentimiento_version` y `consentimiento_at` como en T9.3 (migración).
   - Aceptación: no se puede enviar el test sin la casilla; cada resultado nuevo guarda versión y fecha; la exportación (T9.3) los incluye.
+  > Nota de implementación: migración `20261020140000_t10_1_consentimiento_disc.sql` (`consentimiento_version` y `consentimiento_at` con default `now()`; los anteriores, NULL). Casilla obligatoria antes de "Ver mi resultado", con enlace a la política de privacidad y `VERSION_CONSENTIMIENTO`. No se exige también en la RLS: la web publicada no se actualiza hasta volver a publicar en Lovable y el test de la versión antigua dejaría de guardar. La exportación ya incluye las columnas (lee `disc_results` entero). Hay que aplicar la migración antes de fusionar: el insert no comprueba errores y, sin la columna, el resultado no se guardaría.
 
-- [ ] **T10.2 · Web pública más rápida**
+- [x] **T10.2 · Web pública más rápida**
   - Hoy cualquier visitante descarga todo el CRM (un solo fichero JS de ~1,45 MB, 433 KB comprimido). Cargar las rutas de `/admin` (y lo pesado que solo usan ellas, como jsPDF) con `React.lazy` + `Suspense`.
   - Aceptación: el build separa el admin en otros ficheros; la portada descarga al menos un 50 % menos de JS; todas las rutas públicas y del admin siguen funcionando.
+  > Nota de implementación: en `App.tsx` todas las rutas salvo la portada y la 404 con `React.lazy` y un `Suspense` general; dentro de `AdminLayout` otro `Suspense` alrededor del `Outlet`, para que el menú no desaparezca al cambiar de sección. jsPDF sale solo con el cuestionario, el test y el informe. El fichero de entrada pasa de 1.457 KB (435 KB comprimido) a 453 KB (145 KB): un 69 % menos. Probado en local: portada, `/perfil`, `/quiz`, `/privacidad`, Dashboard, Pagos, ficha y 404, sin errores en consola.
 
 - [ ] **T10.3 · Calendly: citas actualizadas y enlaces en un solo sitio** · Depende de: Vero (reconectar el calendario y decidir una o dos citas, y si pasa al plan Standard)
   - La web enlaza a `equipo-afin/30min` (ya no existe) y a `equipo-afin/plan-esencial` (sin calendario conectado). Llevar todas las direcciones a una constante (`src/lib/enlaces.ts`): Precios, diálogo de planes, final del test DISC, final del cuestionario y Pagos.
@@ -589,9 +591,10 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
 
 Decisión (15/10/2026): la psicóloga genera desde la ficha un enlace de pago del plan para ese cliente; al pagarlo, el pago se registra solo y el plan se activa. Decidido el 20/10/2026: **un solo pago por el plan completo** (precio al mes × meses), **IVA incluido** en el precio, **facturas fuera de Stripe** (asesoría o su herramienta; Stripe solo cobra) y **meses elegidos por la psicóloga** al crear el enlace (3 por defecto). Precios de la web: Esencial 160 €/mes, Premium 250 €/mes. Los precios viven en `configuracion` y se cobran con `price_data`, así que Vero los cambia desde Configuración sin tocar Stripe. Lo que no es código lo hacen Vero y Vicente: Claude no crea la cuenta ni introduce datos personales, bancarios ni claves; en el panel de Stripe solo configura, en modo de pruebas y con permiso expreso, lo que la tarea diga.
 
-- [ ] **T11.0 · Cuenta de Stripe en modo de pruebas (no código)**
+- [x] **T11.0 · Cuenta de Stripe en modo de pruebas (no código)**
   - Vero crea la cuenta a nombre de Afín, activa la verificación en dos pasos e invita a Vicente con rol de desarrollador. Decide: pago único o cuota, precio e IVA de cada plan y quién emite las facturas (Stripe o la asesoría). Vicente pega la clave secreta de pruebas en Lovable Cloud → Secrets (`STRIPE_SECRET_KEY`). Revisar antes qué hace la sección "Pagos" de Lovable por si ahorra trabajo.
   - Aceptación: cuenta en modo de pruebas, clave en Secrets y las cuatro decisiones apuntadas en este plan.
+  > Nota de implementación: cuenta "Afin Matchmaking" en el entorno de prueba de Stripe; `STRIPE_SECRET_KEY` y `STRIPE_WEBHOOK_SECRET` en Lovable Cloud → Secrets (desde oct 2026 sin entrada en el menú: `…?view=more&subview=cloud&section=secrets`). La sección "Pagos" de Lovable pide permiso de gestión de pagos que la cuenta de Vicente no tiene; no se usa. Decisiones, arriba (20/10/2026).
 
 - [x] **T11.1 · Modelo de datos de los pagos con Stripe** · Depende de T11.0 (las decisiones)
   - Migración: en `pagos`, `origen` (`manual` | `stripe`), `estado` (`pendiente` | `pagado` | `caducado` | `reembolsado`; los manuales, `pagado`), `stripe_checkout_id` (único, para no registrar dos veces el mismo pago), `stripe_payment_intent`, `enlace_pago`, `caduca_at`. El trigger de T1.2 solo copia el plan al perfil cuando el pago está `pagado`. En `configuracion`, `precio_plan` (`{esencial: 160, premium: 250}`, euros al mes con IVA incluido) y `meses_plan` (duración por defecto, 3), editables en Configuración (`CAMPOS_ENTEROS` / `validarConfiguracion`).
@@ -616,6 +619,7 @@ Decisión (15/10/2026): la psicóloga genera desde la ficha un enlace de pago de
 - [ ] **T11.5 · Paso a producción** · Depende de T11.3, T11.4, T10.4 y de la cuenta de Stripe verificada
   - Pruebas completas en modo de pruebas (pago, pago rechazado, caducado y reembolso). Después Vero activa los pagos reales y Vicente cambia las claves y el endpoint del webhook a modo real. Añadir Stripe a la política de privacidad.
   - Aceptación: un primer pago real pequeño, que se registra y se reembolsa correctamente.
+  > Avance (20/10/2026): endpoint "CRM Afín - pagos de planes" dado de alta en el entorno de prueba (`we_1UScTnJb15IRisQSacN3296v`, carga completa, los 5 eventos). Pago de prueba de punta a punta desde la ficha de "Prueba Claude T4.2" (Esencial, 1 mes, 160 €, tarjeta 4242): vuelta a `/pago/ok`, aviso entregado con 200 y `activado: true`, pago `pagado`, plan Esencial del 20/10 al 20/11/2026 con 1 sesión, nota automática y auditoría; el reenvío manual del mismo aviso respondió `activado: false` sin tocar nada. Después, el mismo día: pago rechazado con la tarjeta 4000 0000 0000 0002 (Stripe no cobra, el cliente puede reintentar y el pago sigue pendiente); enlace caducado a mano desde el Shell de Stripe (`stripe checkout sessions expire`) → "Enlace caducado"; y reembolso completo desde el panel → "Reembolsado" y aviso abierto para revisar el plan, que se conserva. **Solo falta el paso a modo real**, que espera a la cuenta verificada de Vero y a T10.4.
 
 ### FASE 12 — Emails a los clientes
 
@@ -641,17 +645,20 @@ Decisión (15/10/2026): la psicóloga genera desde la ficha un enlace de pago de
 
 ### FASE 13 — Roles y subida de documentos
 
-- [ ] **T13.1 · Rol de gestión sin datos clínicos**
+> Decisión (20/10/2026): T13.1 y T13.2 se descartan. Vero y la psicóloga son administradoras y ven todo; el resto son clientes, que no entran al CRM. Si algún día entra alguien que no deba ver datos clínicos, se retoman.
+
+- ~~**T13.1 · Rol de gestión sin datos clínicos**~~ · Descartada
   - Hoy todas las administradoras ven todo. Nuevo rol `gestion` que trabaja con perfiles, planes, pagos, matches, tareas y alertas, pero no ve notas privadas, notas ni resúmenes de sesión, vídeos ni el aprendizaje de la IA. RLS por rol en esas tablas (y una vista de `sesiones` sin las columnas clínicas para el rol de gestión); selector de rol al invitar en Administradoras. Confirmar con Vero quién lleva cada rol.
   - Aceptación: una cuenta de gestión no puede leer datos clínicos ni desde la app ni con la API.
 
-- [ ] **T13.2 · La app según el rol** · Depende de T13.1
+- ~~**T13.2 · La app según el rol**~~ · Descartada
   - Ocultar a gestión las pestañas Notas y Sesiones (o solo su parte clínica), el vídeo, el buscador de Notas Privadas y el panel de resumen.
   - Aceptación: no queda ningún botón que lleve a un error de permisos.
 
-- [ ] **T13.3 · Enlace personal para subir documentos**
+- [x] **T13.3 · Enlace personal para subir documentos**
   - Hoy `/perfil/documentos` reconoce a la persona por el email o el nombre que escribe a mano, y cualquiera puede subir. Generar desde la ficha un enlace personal con caducidad (tabla `enlaces_subida`); la página sube con una URL firmada que da una Edge Function a la carpeta `antecedentes/<perfil_id>/`. Se quita la subida anónima abierta; lo ya subido se sigue viendo como ahora.
   - Aceptación: un documento subido con el enlace aparece en su ficha; sin enlace válido no se puede subir nada.
+  > Nota de implementación: tabla `enlaces_subida` (migración `20261020160000_t13_3_enlaces_subida.sql`, solo admin): token aleatorio de 64 caracteres, caduca a los 7 días y se borra con el perfil. En la pestaña Documentos, "Enlace para subir documentos" lo crea (`useCrearEnlaceSubida`) y lo comparte con `CompartirEnlace`, con el correo redactado; avisa si se crea en local. La Edge Function pública `subir-documento` valida el token: `info` devuelve solo el nombre de pila y `subir` da una URL firmada a `antecedentes/<perfil_id>/<fecha>.pdf` y registra `subida_documento` en `auditoria`; el bucket ya limita a PDF de 10 MB. `/perfil/documentos` ya no pide email ni nombre: sin enlace, o con uno caducado, explica cómo pedirlo. `esCarpetaDelPerfil` reconoce también la carpeta `<perfil_id>`, así que la ficha, la exportación y la supresión de T9.3 ven lo subido de las dos formas (con test). La segunda migración, `20261020170000_t13_3_quitar_subida_anonima.sql`, quita la subida anónima: se aplica **después** de publicar, para no romper la página antigua mientras siga publicada. Probado en Postgres 15: solo admin crea y ve enlaces, el token y la caducidad, el borrado en cascada y la política retirada; en local, la página sin enlace y la pestaña Documentos.
 
 ### FASE 14 — Calidad técnica
 
@@ -663,12 +670,12 @@ Decisión (15/10/2026): la psicóloga genera desde la ficha un enlace de pago de
   - Playwright contra un Supabase local en Docker (migraciones + `seed.sql`), nunca contra la base de datos real: cuestionario → ficha → sugerencia aceptada → match → cita → feedback, y el pago de T11 con Stripe en modo de pruebas.
   - Aceptación: los flujos corren en local y en el CI.
 
-- [ ] **T14.3 · Registro de lecturas en el servidor** · Depende de T13.1
+- [ ] **T14.3 · Registro de lecturas en el servidor**
   - Leer notas, sesiones y vídeos a través de funciones `SECURITY DEFINER` que registran la lectura y quitar el SELECT directo de esas tablas, para que no haya lectura sin registro (hoy lo registra el navegador, T9.3).
   - Aceptación: no se puede leer una nota sin que quede en `auditoria`.
 
 - [ ] **T14.4 · Por encima de 1.000 perfiles**
-  - Paginar donde hoy hay tope de 1.000 filas (anotado con `ponytail:`): candidatos de `sugerencias-calcular` y `procesar-cola-matching`, listados globales, `listUsers` de administradoras y las carpetas de antecedentes (estas desaparecen con T13.3).
+  - Paginar donde hoy hay tope de 1.000 filas (anotado con `ponytail:`): candidatos de `sugerencias-calcular` y `procesar-cola-matching`, listados globales, `listUsers` de administradoras y las carpetas de antecedentes (las nuevas van por `perfil_id` desde T13.3; el tope solo afecta a las antiguas `user_*`).
   - Aceptación: con 2.000 perfiles de prueba, todo funciona y nada se corta.
 
 ### Área del cliente (Fases 15-19)
@@ -872,4 +879,10 @@ Fases 15-19, área del cliente (añadidas el 20/10/2026): **F15 Acceso** → **T
 | 20/10/2026 | T11.2 | Edge Function `stripe-checkout`: enlace de pago de Stripe (Checkout) para el plan y los meses elegidos, con el pago pendiente guardado y reutilización del enlace vigente. |
 | 20/10/2026 | T11.3 | Edge Function `stripe-webhook` con firma comprobada y `confirmar_pago_stripe` / `reembolsar_pago_stripe`: el pago se marca, el plan se activa una sola vez y un reembolso abre un aviso. |
 | 20/10/2026 | T11.4 | Botón "Enlace de pago" en la ficha (plan, meses, total y enlace para enviar), estado de los pagos en la ficha y en Pagos, y páginas `/pago/ok` y `/pago/cancelado`. |
+| 20/10/2026 | T11.0, T11.5 | Stripe en modo de pruebas configurado (claves y webhook) y primer pago de prueba de punta a punta: el plan se activa solo y un aviso repetido no lo duplica. |
+| 20/10/2026 | T11.5 | Pruebas en modo de pruebas completas: pago rechazado, enlace caducado y reembolso (con su aviso). Queda el paso a modo real. |
+| 20/10/2026 | T10.1 | Casilla de consentimiento obligatoria en el test DISC, con la versión y la fecha guardadas en `disc_results`. |
+| 20/10/2026 | T10.2 | Rutas cargadas al entrar en ellas: la portada descarga un 69 % menos de JS (453 KB en vez de 1.457 KB). |
+| 20/10/2026 | T13.1, T13.2 | Descartadas: Vero y la psicóloga son administradoras y ven todo; los clientes no entran al CRM. |
+| 20/10/2026 | T13.3 | Enlace personal (7 días) desde la ficha para que el cliente suba su certificado; la página ya no pide email ni nombre y se retira la subida anónima. |
 | 20/10/2026 | — | Plan ampliado con las Fases 15-19, área del cliente (`/mi-area`): acceso solo con el plan pagado (enlace desde la ficha o al pagar), perfil y plan, calendario de citas, matches presentados con feedback del cliente y rondas de 4 propuestas para elegir con quién se ve más. |

@@ -14,11 +14,12 @@ export const claveSegura = (texto: string) =>
   texto.trim().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^\w.@-]+/g, "_");
 
 /**
- * ¿Es de este perfil la carpeta de antecedentes? /perfil/documentos sube a
- * `user_<claveSegura(email o nombre)>/` con lo que escriba la persona, así que se compara sin mayúsculas.
+ * ¿Es de este perfil la carpeta de antecedentes? Con el enlace personal (T13.3) se sube a `<perfil_id>/`.
+ * Antes, /perfil/documentos subía a `user_<claveSegura(email o nombre)>/` con lo que escribiera la persona,
+ * así que esas se comparan sin mayúsculas.
  */
-export function esCarpetaDelPerfil(carpeta: string, perfil: { email: string | null; nombre_completo: string }) {
-  return [perfil.email, perfil.nombre_completo]
+export function esCarpetaDelPerfil(carpeta: string, perfil: { id: string; email: string | null; nombre_completo: string }) {
+  return carpeta === perfil.id || [perfil.email, perfil.nombre_completo]
     .filter((v): v is string => !!v?.trim())
     .some((v) => `user_${claveSegura(v)}`.toLowerCase() === carpeta.toLowerCase());
 }
