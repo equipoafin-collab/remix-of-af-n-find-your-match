@@ -2,9 +2,10 @@ import { useOutletContext } from "react-router-dom";
 import { es } from "date-fns/locale";
 import { CalendarPlus, Loader2 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
-import { rotuloClaro } from "@/components/cliente/estilos";
-import { useMisCitas } from "@/hooks/cliente/useMiArea";
-import { fechaLarga, separarCitas, type Cita, type ContextoArea } from "@/lib/areaCliente";
+import { botonDorado, rotuloClaro } from "@/components/cliente/estilos";
+import { useMiPerfil, useMisCitas } from "@/hooks/cliente/useMiArea";
+import { fechaLarga, separarCitas, type Cita, type ContextoArea, type MiAreaAbierta } from "@/lib/areaCliente";
+import { CALENDLY_SESIONES, enlaceReserva, sesionesPorReservar } from "@/lib/enlaces";
 import { descargarIcs } from "@/lib/ics";
 
 const tarjeta = "bg-card border border-border rounded-2xl";
@@ -51,6 +52,28 @@ const TarjetaCita = ({ cita, proxima }: { cita: Cita; proxima: boolean }) => {
   );
 };
 
+/** T17.2 · Reservar en Calendly con su nombre y email puestos: solo con el enlace configurado y sesiones por reservar. */
+const ReservarSesion = ({ area, programadas, userId }: { area: MiAreaAbierta; programadas: number; userId: string }) => {
+  const quedan = CALENDLY_SESIONES ? sesionesPorReservar(area.sesiones_pendientes, programadas) : 0;
+  const perfil = useMiPerfil(quedan ? userId : undefined);
+  if (!quedan) return null;
+  return (
+    <div className={`${tarjeta} p-4 space-y-3`}>
+      <p className="font-body text-sm text-foreground">
+        {quedan === 1 ? "Te queda 1 sesión por reservar." : `Te quedan ${quedan} sesiones por reservar.`} Elige día y hora en el calendario de tu psicóloga; la verás aquí cuando te la confirme.
+      </p>
+      <a
+        href={enlaceReserva(CALENDLY_SESIONES, perfil.data?.nombre_completo ?? area.nombre, perfil.data?.email ?? null)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`${botonDorado} w-full`}
+      >
+        Reservar sesión
+      </a>
+    </div>
+  );
+};
+
 /** T17.1 · Su calendario: próximas sesiones (con .ics), el mes con los días marcados y las pasadas. */
 const CalendarioCliente = () => {
   const { area, userId } = useOutletContext<ContextoArea>();
@@ -84,6 +107,7 @@ const CalendarioCliente = () => {
             ) : (
               <p className={`${tarjeta} p-4 font-body text-sm text-muted-foreground`}>Aún no tienes sesiones programadas. Cuando tu psicóloga te dé cita, la verás aquí.</p>
             )}
+            <ReservarSesion area={area} programadas={proximas.length} userId={userId} />
           </section>
           {pasadas.length > 0 && (
             <section className="space-y-2">
