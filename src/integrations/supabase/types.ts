@@ -1078,6 +1078,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      reembolsar_pago_stripe: {
+        Args: { _payment_intent: string }
+        Returns: Json
+      }
       registrar_auditoria: {
         Args: { _accion: string; _entidad: string; _entidad_id?: string }
         Returns: undefined
@@ -1086,7 +1090,6 @@ export type Database = {
         Args: { _accion: string; _perfil_ids: string[] }
         Returns: undefined
       }
-      reembolsar_pago_stripe: { Args: { _payment_intent: string }; Returns: Json }
       suprimir_cliente: { Args: { _perfil_id: string }; Returns: Json }
     }
     Enums: {
