@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { avisarFinPlan, cuandoCita, diasHastaFin, fechaLarga, separarCitas, SOLICITUDES, solicitudesDisponibles, type Cita } from "../areaCliente";
+import { Constants } from "@/integrations/supabase/types";
+import { avisarFinPlan, cuandoCita, diasHastaFin, ESTADO_MATCH_CLIENTE, fechaLarga, separarCitas, SOLICITUDES, solicitudesDisponibles, type Cita } from "../areaCliente";
 
 const hoy = new Date(2026, 9, 20, 23, 30); // 20/10/2026 por la noche, hora local
 
@@ -64,5 +65,20 @@ describe("separarCitas (T17.1)", () => {
 
   it("pasadas: canceladas, realizadas y programadas que ya pasaron, la más reciente primero", () => {
     expect(pasadas.map((c) => c.id)).toEqual(["c", "e", "d"]);
+  });
+});
+
+describe("estado del match para el cliente (T18.2)", () => {
+  it("todos los estados tienen texto y paso, sin palabras internas", () => {
+    for (const e of Constants.public.Enums.match_estado) {
+      expect(ESTADO_MATCH_CLIENTE[e].texto).toBeTruthy();
+      expect(ESTADO_MATCH_CLIENTE[e].texto).not.toMatch(/propuesto|informe|feedback/i);
+    }
+  });
+
+  it("presentado → cita → después", () => {
+    expect(ESTADO_MATCH_CLIENTE.informe_enviado).toEqual({ texto: "Presentado", paso: 1 });
+    expect(ESTADO_MATCH_CLIENTE.cita_agendada.paso).toBe(2);
+    expect(ESTADO_MATCH_CLIENTE.continuan).toEqual({ texto: "Seguís conociéndoos", paso: 3 });
   });
 });

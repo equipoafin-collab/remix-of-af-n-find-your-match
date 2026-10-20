@@ -33,6 +33,7 @@ const InicioCliente = lazy(() => import("./pages/cliente/InicioCliente"));
 const Proximamente = lazy(() => import("./pages/cliente/Proximamente"));
 const PerfilCliente = lazy(() => import("./pages/cliente/PerfilCliente"));
 const CalendarioCliente = lazy(() => import("./pages/cliente/CalendarioCliente"));
+const MatchesCliente = lazy(() => import("./pages/cliente/MatchesCliente"));
 
 const queryClient = new QueryClient();
 
@@ -58,7 +59,7 @@ const App = () => (
             <Route path="/mi-area" element={<ClienteLayout />}>
               <Route index element={<InicioCliente />} />
               <Route path="calendario" element={<CalendarioCliente />} />
-              <Route path="matches" element={<Proximamente titulo="Tus matches" />} />
+              <Route path="matches" element={<MatchesCliente />} />
               <Route path="propuestas" element={<Proximamente titulo="Tus propuestas" />} />
               <Route path="perfil" element={<PerfilCliente />} />
             </Route>

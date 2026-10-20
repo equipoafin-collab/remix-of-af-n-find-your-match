@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import type { Cita, MiArea, TipoSolicitud } from "@/lib/areaCliente";
+import type { Cita, MiArea, MiMatch, TipoSolicitud } from "@/lib/areaCliente";
 import type { MiPerfil, Preferencias } from "@/lib/cuestionario";
 import { extensionFoto } from "../../../supabase/functions/_shared/acceso";
 import { llamarFuncion } from "./accesoCliente";
@@ -108,6 +108,19 @@ export function useMisCitas(userId: string | undefined) {
       const { data, error } = await supabase.rpc("mis_citas");
       if (error) throw error;
       return data as unknown as Cita[];
+    },
+    enabled: !!userId,
+  });
+}
+
+/** T18.2 · Sus matches presentados (mis_matches), el más reciente primero. */
+export function useMisMatches(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["mis-matches", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("mis_matches");
+      if (error) throw error;
+      return data as unknown as MiMatch[];
     },
     enabled: !!userId,
   });
