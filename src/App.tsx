@@ -26,6 +26,7 @@ const DiscQuiz = lazy(() => import("./pages/DiscQuiz"));
 const Legal = lazy(() => import("./pages/Legal"));
 const QuienesSomos = lazy(() => import("./pages/QuienesSomos"));
 const PagoResultado = lazy(() => import("./pages/PagoResultado"));
+const AccesoCliente = lazy(() => import("./pages/AccesoCliente"));
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/perfil/documentos" element={<PerfilDocumentos />} />
+            <Route path="/mi-area/acceso" element={<AccesoCliente />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/acceso" element={<AccesoAdmin />} />
             <Route path="/admin" element={<AdminLayout />}>

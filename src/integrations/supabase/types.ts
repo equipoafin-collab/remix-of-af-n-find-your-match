@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      accesos_cliente: {
+        Row: {
+          caduca_at: string
+          created_at: string
+          created_by: string | null
+          id: string
+          perfil_id: string
+          token: string
+          usado_at: string | null
+        }
+        Insert: {
+          caduca_at?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          perfil_id: string
+          token?: string
+          usado_at?: string | null
+        }
+        Update: {
+          caduca_at?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          perfil_id?: string
+          token?: string
+          usado_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accesos_cliente_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accesos_cliente_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "v_clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alertas: {
         Row: {
           clave_unica: string | null
@@ -702,6 +747,7 @@ export type Database = {
           tiene_tatuajes: boolean | null
           tipo_relacion: string
           ultimo_seguimiento_at: string | null
+          user_id: string | null
           valores_importantes: string[]
           vida_en_10_anios: string
           video_presentacion_path: string | null
@@ -763,6 +809,7 @@ export type Database = {
           tiene_tatuajes?: boolean | null
           tipo_relacion: string
           ultimo_seguimiento_at?: string | null
+          user_id?: string | null
           valores_importantes?: string[]
           vida_en_10_anios: string
           video_presentacion_path?: string | null
@@ -824,6 +871,7 @@ export type Database = {
           tiene_tatuajes?: boolean | null
           tipo_relacion?: string
           ultimo_seguimiento_at?: string | null
+          user_id?: string | null
           valores_importantes?: string[]
           vida_en_10_anios?: string
           video_presentacion_path?: string | null
@@ -1022,6 +1070,7 @@ export type Database = {
           aprendizaje_ultima_relacion: string | null
           busca_genero: string | null
           ciudad: string | null
+          con_area: boolean | null
           conflicto: string[] | null
           consentimiento_at: string | null
           consentimiento_version: string | null
@@ -1077,6 +1126,7 @@ export type Database = {
           tiene_tatuajes: boolean | null
           tipo_relacion: string | null
           ultimo_seguimiento_at: string | null
+          user_id: string | null
           valores_importantes: string[] | null
           vida_en_10_anios: string | null
           video_presentacion_path: string | null
@@ -1126,6 +1176,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      mi_perfil_id: { Args: never; Returns: string }
+      perfil_tiene_area: { Args: { _perfil_id: string }; Returns: boolean }
       reembolsar_pago_stripe: {
         Args: { _payment_intent: string }
         Returns: Json
@@ -1139,6 +1191,8 @@ export type Database = {
         Returns: undefined
       }
       suprimir_cliente: { Args: { _perfil_id: string }; Returns: Json }
+      tiene_area: { Args: never; Returns: boolean }
+      usuario_por_email: { Args: { _email: string }; Returns: string }
     }
     Enums: {
       alerta_estado: "abierta" | "vista" | "resuelta"
