@@ -1054,6 +1054,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      confirmar_pago_stripe: {
+        Args: { _checkout_id: string; _payment_intent: string }
+        Returns: Json
+      }
       dashboard_resumen: { Args: never; Returns: Json }
       estado_automatizaciones: {
         Args: never
@@ -1082,6 +1086,7 @@ export type Database = {
         Args: { _accion: string; _perfil_ids: string[] }
         Returns: undefined
       }
+      reembolsar_pago_stripe: { Args: { _payment_intent: string }; Returns: Json }
       suprimir_cliente: { Args: { _perfil_id: string }; Returns: Json }
     }
     Enums: {
