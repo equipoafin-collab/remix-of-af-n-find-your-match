@@ -9,16 +9,23 @@ import { errorRonda, frasePorDefecto, MAX_FRASE, PERSONAS_POR_RONDA, preseleccio
 const fecha = (iso: string) => new Date(iso).toLocaleDateString("es-ES", { day: "numeric", month: "long" });
 const onError = (error: Error) => toast({ title: "No se pudo", description: error.message, variant: "destructive" });
 type Ronda = NonNullable<ReturnType<typeof useRondas>["data"]>[number];
+const nombreEn = (sugerencias: Sugerencia[], id: string | null) =>
+  sugerencias.find((s) => s.candidato_id === id)?.candidato?.nombre_completo ?? "Persona ya no sugerida";
+
+/** T19.4 · Qué respondió en la última ronda, para tenerlo en cuenta en la siguiente. */
+const resultado = (r: Ronda, sugerencias: Sugerencia[]) =>
+  r.estado === "caducada" ? "caducó sin respuesta."
+  : r.ninguno ? `no le encajó ninguna${r.motivo ? ` (${r.motivo})` : ""}.`
+  : `se ve más con ${nombreEn(sugerencias, r.elegido_id)}.`;
 
 const RondaAbierta = ({ ronda, sugerencias }: { ronda: Ronda; sugerencias: Sugerencia[] }) => {
   const cancelar = useCancelarRonda();
-  const nombre = (id: string) => sugerencias.find((s) => s.candidato_id === id)?.candidato?.nombre_completo ?? "Persona ya no sugerida";
   return (
     <div className="space-y-3">
       <p className="font-body text-sm text-foreground">
         Enviada el {fecha(ronda.enviada_at)}; caduca el {fecha(ronda.caduca_at)} si no responde. Aún no ha elegido.
       </p>
-      <ul className="font-body text-sm text-foreground list-disc pl-5">{ronda.candidatos.map((id) => <li key={id}>{nombre(id)}</li>)}</ul>
+      <ul className="font-body text-sm text-foreground list-disc pl-5">{ronda.candidatos.map((id) => <li key={id}>{nombreEn(sugerencias, id)}</li>)}</ul>
       <div className="flex justify-end">
         <button
           onClick={() => cancelar.mutate({ id: ronda.id, perfilId: ronda.perfil_id }, { onSuccess: () => toast({ title: "Ronda cancelada" }), onError })}
@@ -122,6 +129,7 @@ const RondaPropuestas = ({ perfilId, sugerencias }: { perfilId: string; sugerenc
   const [abierto, setAbierto] = useState(false);
   const { data: rondas = [] } = useRondas(perfilId);
   const abierta = rondas.find((r) => r.estado === "abierta" && new Date(r.caduca_at) > new Date());
+  const ultima = rondas.find((r) => r.estado === "respondida" || r.estado === "caducada");
 
   return (
     <>
@@ -139,6 +147,11 @@ const RondaPropuestas = ({ perfilId, sugerencias }: { perfilId: string; sugerenc
               {PERSONAS_POR_RONDA} personas para que diga con quién se ve más. Elegir no crea un match: la otra persona no sabe nada.
             </DialogDescription>
           </DialogHeader>
+          {!abierta && ultima && (
+            <p className="font-body text-sm text-foreground rounded-lg bg-muted px-3 py-2">
+              Última ronda ({fecha(ultima.enviada_at)}): {resultado(ultima, sugerencias)}
+            </p>
+          )}
           {abierto && (abierta
             ? <RondaAbierta ronda={abierta} sugerencias={sugerencias} />
             : <NuevaRonda perfilId={perfilId} sugerencias={sugerencias} cerrar={() => setAbierto(false)} />)}

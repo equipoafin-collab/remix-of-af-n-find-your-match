@@ -70,6 +70,7 @@ export type Database = {
           perfil_id: string | null
           resuelta_at: string | null
           severidad: Database["public"]["Enums"]["alerta_severidad"]
+          sugerencia_id: string | null
           tipo: Database["public"]["Enums"]["alerta_tipo"]
         }
         Insert: {
@@ -82,6 +83,7 @@ export type Database = {
           perfil_id?: string | null
           resuelta_at?: string | null
           severidad?: Database["public"]["Enums"]["alerta_severidad"]
+          sugerencia_id?: string | null
           tipo?: Database["public"]["Enums"]["alerta_tipo"]
         }
         Update: {
@@ -94,6 +96,7 @@ export type Database = {
           perfil_id?: string | null
           resuelta_at?: string | null
           severidad?: Database["public"]["Enums"]["alerta_severidad"]
+          sugerencia_id?: string | null
           tipo?: Database["public"]["Enums"]["alerta_tipo"]
         }
         Relationships: [
@@ -116,6 +119,13 @@ export type Database = {
             columns: ["perfil_id"]
             isOneToOne: false
             referencedRelation: "v_clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alertas_sugerencia_id_fkey"
+            columns: ["sugerencia_id"]
+            isOneToOne: false
+            referencedRelation: "match_sugerencias"
             referencedColumns: ["id"]
           },
         ]

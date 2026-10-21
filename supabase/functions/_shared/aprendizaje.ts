@@ -25,6 +25,26 @@ export interface Decision {
   motivo: string | null;
 }
 
+export interface RondaRespondida {
+  candidatos: string[];
+  elegido_id: string | null;
+  ninguno: boolean;
+  motivo: string | null;
+}
+
+/**
+ * T19.4 · Lo que el cliente respondió en sus rondas (T19.3), como decisiones: la persona elegida, aceptada; las demás,
+ * rechazadas (con su motivo si no le encajó ninguna). Sin elegida ni "ninguna" (la elegida se borró), no cuenta.
+ */
+export const decisionesDeRondas = (rondas: RondaRespondida[], desgloses: Map<string, Decision["desglose"]>): Decision[] =>
+  rondas.filter((r) => r.ninguno || r.elegido_id).flatMap((r) =>
+    r.candidatos.map((id) => ({
+      estado: id === r.elegido_id ? "aceptada" : "rechazada",
+      desglose: desgloses.get(id) ?? null,
+      motivo: r.ninguno ? r.motivo : null,
+    }))
+  );
+
 const media = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
 const DIMENSIONES = Object.keys(WEIGHTS) as Dimension[];
 
@@ -61,9 +81,9 @@ export function calcularAjustes(decisiones: Decision[]): Partial<Pesos> {
 
 export type Preferencias = { valora: string[]; evita: string[]; notas: string };
 
-export const SYSTEM_APRENDIZAJE = `Eres la asistente de una psicóloga de Afín, un servicio de matchmaking profesional. Recibes el contexto de un cliente (preguntas clave, cuestionario, resúmenes de sus sesiones, notas de la psicóloga, preferencias aprendidas hasta ahora y decisiones de la psicóloga sobre candidatos, con su motivo).
+export const SYSTEM_APRENDIZAJE = `Eres la asistente de una psicóloga de Afín, un servicio de matchmaking profesional. Recibes el contexto de un cliente (preguntas clave, cuestionario, resúmenes de sus sesiones, notas de la psicóloga, preferencias aprendidas hasta ahora, decisiones de la psicóloga sobre candidatos, con su motivo, y las rondas de propuestas que ha respondido el propio cliente).
 
-Resume qué valora y qué evita este cliente en una pareja, sobre todo a partir de lo que ha contado en sesión, las notas de la psicóloga y los candidatos que ella ha aceptado o rechazado (y por qué). Servirá para afinar las próximas sugerencias.
+Resume qué valora y qué evita este cliente en una pareja, sobre todo a partir de lo que ha contado en sesión, las notas de la psicóloga, los candidatos que ella ha aceptado o rechazado (y por qué) y con quién se ve más el propio cliente en sus rondas (o por qué no le encajó ninguno). Servirá para afinar las próximas sugerencias.
 
 REGLAS:
 - Escribe en español, en puntos breves y concretos ("Prefiere a alguien de Madrid o alrededores", no "valora la cercanía").
