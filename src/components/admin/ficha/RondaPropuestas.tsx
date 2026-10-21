@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { toast } from "@/hooks/use-toast";
 import { useCancelarRonda, useEnviarRonda, useRondas } from "@/hooks/admin/usePropuestas";
 import type { Sugerencia } from "@/hooks/admin/useSugerencias";
-import { errorRonda, frasePorDefecto, MAX_FRASE, PERSONAS_POR_RONDA, preseleccionar, puedeProponerse } from "@/lib/propuestas";
+import { errorRonda, MAX_FRASE, PERSONAS_POR_RONDA, preseleccionar, puedeProponerse } from "@/lib/propuestas";
 
 const fecha = (iso: string) => new Date(iso).toLocaleDateString("es-ES", { day: "numeric", month: "long" });
 const onError = (error: Error) => toast({ title: "No se pudo", description: error.message, variant: "destructive" });
@@ -39,14 +39,13 @@ const RondaAbierta = ({ ronda, sugerencias }: { ronda: Ronda; sugerencias: Suger
   );
 };
 
-// Se monta al abrir: preselecciona las 4 mejores con permiso y su primer motivo como frase.
+// Se monta al abrir: preselecciona las 4 mejores con permiso. Las frases empiezan vacías (T19.7): el motivo de la IA
+// está escrito para la psicóloga y solo se enseña como referencia.
 const NuevaRonda = ({ perfilId, sugerencias, cerrar }: { perfilId: string; sugerencias: Sugerencia[]; cerrar: () => void }) => {
   const enviar = useEnviarRonda();
   const pendientes = sugerencias.filter((s) => s.estado === "pendiente");
   const [elegidos, setElegidos] = useState<string[]>(() => preseleccionar(pendientes));
-  const [frases, setFrases] = useState<Record<string, string>>(() =>
-    Object.fromEntries(pendientes.map((s) => [s.candidato_id, frasePorDefecto(s.motivos)])),
-  );
+  const [frases, setFrases] = useState<Record<string, string>>({});
   const conPermiso = pendientes.filter(puedeProponerse).length;
   const problema = errorRonda(elegidos, frases);
 
@@ -96,14 +95,19 @@ const NuevaRonda = ({ perfilId, sugerencias, cerrar }: { perfilId: string; suger
                 {!permiso && <span className="font-body text-xs text-muted-foreground">Sin permiso para propuestas</span>}
               </label>
               {elegido && (
-                <input
-                  value={frases[s.candidato_id] ?? ""}
-                  onChange={(e) => setFrases((f) => ({ ...f, [s.candidato_id]: e.target.value }))}
-                  maxLength={MAX_FRASE}
-                  placeholder="Por qué se lo proponemos (opcional)"
-                  aria-label={`Frase para ${s.candidato?.nombre_completo}`}
-                  className="mt-2 w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm"
-                />
+                <>
+                  <input
+                    value={frases[s.candidato_id] ?? ""}
+                    onChange={(e) => setFrases((f) => ({ ...f, [s.candidato_id]: e.target.value }))}
+                    maxLength={MAX_FRASE}
+                    placeholder="Por qué se lo proponemos, hablándole al cliente (opcional)"
+                    aria-label={`Frase para ${s.candidato?.nombre_completo}`}
+                    className="mt-2 w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm"
+                  />
+                  {s.motivos[0] && (
+                    <p className="mt-1 font-body text-[11px] text-muted-foreground">IA, solo para ti (no se envía): {s.motivos[0]}</p>
+                  )}
+                </>
               )}
             </li>
           );

@@ -796,6 +796,28 @@ Decisiones (valores por defecto; confirmar con Vero):
   - "Tienes una nueva propuesta", "Te hemos presentado a alguien" y "¿Qué tal la cita?", con enlace al área y sin contenido (ni nombres ni fotos en el email). Se integra con los recordatorios de T12.4.
   - Aceptación: cada aviso sale una vez por evento y se puede desactivar en Configuración.
 
+- [x] **T19.7 · Arreglos de la prueba de principio a fin** · Depende de T18.3, T19.4
+  - Añadida el 21/10/2026 tras probar en producción el área completa con un cliente de prueba.
+  - Textos de la IA hacia el cliente: las frases de una ronda (T19.2) y los motivos al presentar un match (T18.1) se precargaban con los motivos de la IA, escritos para la psicóloga ("el cliente…") y que pueden citar sesiones, religión o ideología. Empiezan vacíos, con los de la IA a la vista como referencia que no se envía.
+  - El feedback que anota la psicóloga (T6.5) se veía en el área como si lo hubiera dejado el cliente. Ahora se guarda quién lo escribió: el cliente solo ve el suyo y, si la psicóloga ya había anotado algo, puede dar el propio. La nota de ella no se pierde: pasa a sus notas privadas.
+  - El feedback que deja el cliente desde su área (T18.3) no lanzaba el aprendizaje: la ficha lo lanza al abrirse, como con las rondas (T19.4).
+  - Aceptación: ningún texto de la IA llega al cliente sin que la psicóloga lo escriba; el cliente nunca ve como suyo lo que anotó ella; su feedback se aprende sin que la psicóloga decida nada.
+  > Nota de implementación: migración `20261021120000_t19_7_feedback_del_cliente.sql`. La prueba (21/10/2026), con "vicente" como cliente en la app publicada:
+  > - Funcionó: acceso por enlace y contraseña, match presentado, feedback, ronda de 4 candidatas de prueba creadas por SQL y borradas al acabar, aviso "Ver sugerencia", aprendizaje automático y ranking cambiado (la elegida pasó de 80 a 90 y la IA citó la ronda).
+  > - Salieron los tres fallos de esta tarea.
+  >
+  > Cambios:
+  > - **Textos de la IA:** `RondaPropuestas` empieza con las frases vacías y enseña bajo cada una "IA, solo para ti (no se envía): <primer motivo>". Se borra `frasePorDefecto`. `PresentarMatch` empieza con los motivos ya guardados o vacío, y enseña los de la IA en un recuadro "solo para ti"; ya no espera a cargarlos.
+  > - **Autoría del feedback:** `matches.feedback_a_cliente` y `feedback_b_cliente` (falso por defecto). Los de antes se rellenan desde `auditoria` (`cliente_feedback`), solo si nadie lo cambió después: reaplicar la migración no pisa una corrección de la psicóloga.
+  >   - `dejar_feedback` marca su lado. Si había algo anotado por la psicóloga, lo copia antes a sus notas privadas ("Feedback de la cita con X que anotaste antes de que Y dejara el suyo desde su área: 4/5 · quería volver a verle · «…»", no automática, para que la IA la lea).
+  >   - `mis_matches` solo devuelve `mi_feedback` si lo escribió él; si no, vacío, y el área le deja dar el suyo.
+  >   - En la ficha, `useGuardarFeedback` pone a falso el lado que cambia.
+  > - **Aprendizaje:** `useAprenderDelArea` (en `useAprendizaje.ts`) sustituye a `useAprenderDeRondas` y va en `PerfilDetalle`: se lanza al abrir la ficha en cualquier pestaña, no solo en Sugerencias. Mira la última ronda respondida y el último feedback escrito por el cliente; si alguno es posterior a lo aprendido, lanza `actualizar-aprendizaje` una vez.
+  >
+  > Pruebas:
+  > - Postgres 15 (58 migraciones y la nueva dos veces): lo anotado por la psicóloga no se ve en el área; el cliente deja el suyo y la nota se guarda; si lo cambia otra vez, no hay nota nueva; si la psicóloga lo corrige, deja de verse; el relleno y la reaplicación funcionan en los dos sentidos.
+  > - En local, con datos simulados: los dos diálogos vacíos con la referencia, y el aprendizaje lanzado desde Resumen por un feedback del cliente.
+
 ---
 
 ## 5. Checklist de QA final (mapeo 1:1 con el PDF)
@@ -915,3 +937,4 @@ Fases 15-19, área del cliente (añadidas el 20/10/2026): **F15 Acceso** → **T
 | 20/10/2026 | T19.2 | Rondas de 4 propuestas desde Sugerencias: las 4 mejores con permiso preseleccionadas, frase por persona, una abierta por cliente y 7 días; la base de datos comprueba las reglas. Crea `perfiles.mostrar_en_propuestas` (la casilla es T19.1). |
 | 21/10/2026 | T19.3 | El cliente ve su ronda en `/mi-area/propuestas` (4 tarjetas con foto, nombre de pila, edad, zona, aficiones y la frase) y dice con quién se ve más, o que ninguna con el motivo; una vez y antes de que caduque. Tarjeta "Nueva" en Inicio. |
 | 21/10/2026 | T19.4 | La respuesta vuelve a la psicóloga: alerta "X se ve más con Y" con "Ver sugerencia" (o "ninguna" con el motivo), marca en la sugerencia elegida y resultado de la última ronda al preparar la siguiente. Las rondas caducadas avisan cada hora. Lo elegido entra en el aprendizaje (pesos y contexto de la IA). |
+| 21/10/2026 | T19.7 | Arreglos tras la prueba de principio a fin en producción: los textos de la IA ya no se precargan en lo que lee el cliente (rondas y presentación de matches); el cliente solo ve como suyo el feedback que escribió él (lo anotado por la psicóloga pasa a sus notas si él deja el suyo); su feedback desde el área también se aprende al abrir la ficha. |

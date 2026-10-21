@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { usePerfil } from "@/hooks/admin/usePerfiles";
 import { useCalculoAutomatico } from "@/hooks/admin/useSugerencias";
+import { useAprenderDelArea } from "@/hooks/admin/useAprendizaje";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Perfil } from "@/types/admin";
 import CabeceraFicha from "@/components/admin/ficha/CabeceraFicha";
@@ -35,6 +36,8 @@ const PerfilDetalle = () => {
   const { data: cliente, isLoading: loading } = usePerfil(id);
   // T4.5: las sugerencias se ponen al día en segundo plano en cuanto se abre la ficha, en cualquier pestaña.
   useCalculoAutomatico(id);
+  // T19.7: y aprende de lo que el cliente haya hecho en su área desde la última vez (rondas y feedback).
+  useAprenderDelArea(id);
   const pestana = params.get("tab") ?? "resumen";
 
   if (loading) return <div className="p-8 font-body text-muted-foreground">Cargando perfil…</div>;

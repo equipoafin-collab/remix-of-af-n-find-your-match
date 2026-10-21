@@ -8,10 +8,11 @@ import { limpiarMotivos, MAX_MOTIVOS_CLIENTE } from "@/lib/matches";
 const fecha = (iso: string) => new Date(iso).toLocaleDateString("es-ES", { day: "numeric", month: "long" });
 const onError = (error: Error) => toast({ title: "Error", description: error.message, variant: "destructive" });
 
-// Se monta al abrir: con los motivos ya guardados o, si no hay, con los de la sugerencia.
+// Se monta al abrir, con los motivos ya guardados. Los de la IA (T19.7) solo se enseñan: están escritos para la
+// psicóloga y pueden citar sesiones, religión o ideología, así que no se precargan.
 const Formulario = ({ match, motivosSugerencia, cerrar }: { match: MatchConPersonas; motivosSugerencia: string[]; cerrar: () => void }) => {
   const actualizar = useActualizarMatch();
-  const [texto, setTexto] = useState((match.motivos_cliente.length ? match.motivos_cliente : motivosSugerencia).join("\n"));
+  const [texto, setTexto] = useState(match.motivos_cliente.join("\n"));
   const motivos = limpiarMotivos(texto);
   const presentado = !!match.presentado_at;
 
@@ -33,6 +34,12 @@ const Formulario = ({ match, motivosSugerencia, cerrar }: { match: MatchConPerso
       <p className="font-body text-xs text-amber-700">
         Lo leerán los dos: no pongas religión, política, salud, apellidos ni datos de contacto. Los riesgos no se muestran nunca.
       </p>
+      {motivosSugerencia.length > 0 && (
+        <div className="rounded-lg bg-muted px-3 py-2 font-body text-xs text-muted-foreground">
+          <p className="font-medium">Motivos de la IA, solo para ti (no se envían):</p>
+          <ul className="list-disc pl-4">{motivosSugerencia.map((m) => <li key={m}>{m}</li>)}</ul>
+        </div>
+      )}
       <div className="flex justify-between gap-2 flex-wrap">
         {presentado ? (
           <button
@@ -64,9 +71,7 @@ const Formulario = ({ match, motivosSugerencia, cerrar }: { match: MatchConPerso
 /** T18.1 · Presentar el match en el área de los dos clientes (hasta entonces no lo ven), con los motivos revisados. */
 const PresentarMatch = ({ match }: { match: MatchConPersonas }) => {
   const [abierto, setAbierto] = useState(false);
-  // Sin motivos guardados, se precargan los de la sugerencia: el formulario espera a tenerlos.
-  const precargar = !match.motivos_cliente.length && !!match.sugerencia_id;
-  const sugerencia = useMotivosSugerencia(match.sugerencia_id, abierto && precargar);
+  const sugerencia = useMotivosSugerencia(match.sugerencia_id, abierto);
   const presentado = !!match.presentado_at;
   const nombre = (p: MatchConPersonas["a"]) => p?.nombre_completo.trim().split(/\s+/)[0] ?? "?";
 
@@ -87,11 +92,7 @@ const PresentarMatch = ({ match }: { match: MatchConPersonas }) => {
               Al presentarlo, los dos lo ven en su área con el nombre de pila, la edad, la zona, la foto y las aficiones del otro, y estos motivos.
             </DialogDescription>
           </DialogHeader>
-          {abierto && (precargar && sugerencia.isPending ? (
-            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground mx-auto" />
-          ) : (
-            <Formulario match={match} motivosSugerencia={sugerencia.data ?? []} cerrar={() => setAbierto(false)} />
-          ))}
+          {abierto && <Formulario match={match} motivosSugerencia={sugerencia.data ?? []} cerrar={() => setAbierto(false)} />}
         </DialogContent>
       </Dialog>
     </>

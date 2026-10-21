@@ -68,6 +68,7 @@ export interface Feedback {
 /**
  * T6.5 · Feedback de los dos tras la cita. Con el de ambos, el match pasa a "feedback registrado"; cada texto
  * completa la tarea de su lado y cuenta como seguimiento (triggers). Después aprende de los dos (T5.3).
+ * El lado que cambia pasa a ser de la psicóloga (T19.7): el cliente ya no lo ve en su área como suyo.
  */
 export function useGuardarFeedback() {
   const queryClient = useQueryClient();
@@ -75,8 +76,12 @@ export function useGuardarFeedback() {
   return useMutation({
     mutationFn: async ({ match, feedback }: { match: MatchConPersonas; feedback: Feedback }) => {
       const ambos = !!feedback.feedback_a?.trim() && !!feedback.feedback_b?.trim();
+      const cambia = (lado: "a" | "b") =>
+        (["feedback", "valoracion", "quiere_repetir"] as const).some((c) => feedback[`${c}_${lado}`] !== match[`${c}_${lado}`]);
       const { error } = await supabase.from("matches").update({
         ...feedback,
+        ...(cambia("a") && { feedback_a_cliente: false }),
+        ...(cambia("b") && { feedback_b_cliente: false }),
         feedback_at: new Date().toISOString(),
         ...(ambos && match.estado === "cita_realizada" && { estado: "feedback_registrado" as const }),
       }).eq("id", match.id);
@@ -96,7 +101,7 @@ export function useGuardarFeedback() {
   });
 }
 
-/** T18.1 · Motivos de la sugerencia que originó el match, para precargar los que leerán los clientes (nunca los riesgos). */
+/** T18.1 · Motivos de la sugerencia que originó el match. Desde T19.7 solo se enseñan a la psicóloga como referencia. */
 export function useMotivosSugerencia(sugerenciaId: string | null, activo: boolean) {
   return useQuery({
     queryKey: ["motivos-sugerencia", sugerenciaId],

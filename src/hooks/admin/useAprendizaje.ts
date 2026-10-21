@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { useIsMutating, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -11,6 +12,7 @@ export type { Preferencias };
 export function useAprendizaje(perfilId: string) {
   return useQuery({
     queryKey: ["aprendizaje", perfilId],
+    enabled: !!perfilId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("perfil_aprendizaje").select("preferencias, ajustes_pesos, actualizado_at").eq("perfil_id", perfilId).maybeSingle();
@@ -46,6 +48,44 @@ export function useActualizarAprendizaje() {
     onSuccess: (_, perfilId) => queryClient.invalidateQueries({ queryKey: ["aprendizaje", perfilId] }),
     onError: (error) => toast({ title: "No se pudo actualizar lo aprendido", description: error.message, variant: "destructive" }),
   });
+}
+
+/**
+ * T19.4 / T19.7 · Lo que el cliente hace en su área (responder una ronda, dejar su feedback) no puede lanzar el
+ * aprendizaje, que es solo de administradoras: si es posterior a lo aprendido, se aprende al abrir su ficha.
+ * Un intento por novedad (si falla, no se reintenta en bucle).
+ */
+export function useAprenderDelArea(perfilId: string | undefined) {
+  const novedad = useQuery({
+    queryKey: ["novedad-area", perfilId],
+    enabled: !!perfilId,
+    queryFn: async () => {
+      const [rondas, matches] = await Promise.all([
+        supabase.from("propuestas_rondas").select("respondida_at").eq("perfil_id", perfilId as string)
+          .not("respondida_at", "is", null).order("respondida_at", { ascending: false }).limit(1),
+        supabase.from("matches").select("feedback_at")
+          .or(`and(perfil_a.eq.${perfilId},feedback_a_cliente.is.true),and(perfil_b.eq.${perfilId},feedback_b_cliente.is.true)`)
+          .not("feedback_at", "is", null).order("feedback_at", { ascending: false }).limit(1),
+      ]);
+      if (rondas.error) throw rondas.error;
+      if (matches.error) throw matches.error;
+      return [rondas.data[0]?.respondida_at, matches.data[0]?.feedback_at]
+        .reduce<string | null>((max, f) => (f && (!max || new Date(f) > new Date(max)) ? f : max), null);
+    },
+  });
+  const aprendizaje = useAprendizaje(perfilId ?? "");
+  const actualizando = useActualizandoAprendizaje(perfilId ?? "");
+  const { mutate: aprender } = useActualizarAprendizaje();
+  const intentada = useRef<string | null>(null);
+  const ultima = novedad.data ?? null;
+  const pendiente = !!ultima && aprendizaje.isSuccess &&
+    (!aprendizaje.data || new Date(aprendizaje.data.actualizadoAt) < new Date(ultima));
+
+  useEffect(() => {
+    if (!perfilId || !pendiente || actualizando || intentada.current === ultima) return;
+    intentada.current = ultima;
+    aprender(perfilId);
+  }, [perfilId, pendiente, actualizando, ultima, aprender]);
 }
 
 /** La psicóloga corrige las preferencias a mano; los ajustes de pesos los recalcula la función. */

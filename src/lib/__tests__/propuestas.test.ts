@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { DIAS_RONDA, diasParaCaducar, errorRonda, frasePorDefecto, MAX_FRASE, MOTIVOS_NINGUNA, motivoNinguna, PERSONAS_POR_RONDA, preseleccionar } from "../propuestas";
+import { DIAS_RONDA, diasParaCaducar, errorRonda, MAX_FRASE, MOTIVOS_NINGUNA, motivoNinguna, PERSONAS_POR_RONDA, preseleccionar } from "../propuestas";
 
 const s = (id: string, score: number, permiso = true) => ({ candidato_id: id, score, motivos: [`Motivo de ${id}`], candidato: { mostrar_en_propuestas: permiso } });
 
@@ -12,12 +12,6 @@ describe("rondas de propuestas (T19.2)", () => {
 
   it("con menos de 4 con permiso, las que haya", () => {
     expect(preseleccionar([s("a", 70), s("b", 95, false)])).toEqual(["a"]);
-  });
-
-  it("la frase empieza con el primer motivo, recortada", () => {
-    expect(frasePorDefecto(["  Busca algo serio  ", "Otro"])).toBe("Busca algo serio");
-    expect(frasePorDefecto(["x".repeat(300)])).toHaveLength(MAX_FRASE);
-    expect(frasePorDefecto([])).toBe("");
   });
 
   it("solo se envía con 4 distintas y frases cortas", () => {
