@@ -1,7 +1,8 @@
 import { Link, useOutletContext } from "react-router-dom";
 import { CalendarClock, ChevronRight, Loader2 } from "lucide-react";
 import FotoPerfil from "@/components/admin/FotoPerfil";
-import { useMisMatches, usePedirRenovacion } from "@/hooks/cliente/useMiArea";
+import { useMiRonda, useMisMatches, usePedirRenovacion } from "@/hooks/cliente/useMiArea";
+import { diasParaCaducar } from "@/lib/propuestas";
 import { avisarFinPlan, cuandoCita, ESTADO_MATCH_CLIENTE, fechaLarga, type ContextoArea, type MiAreaAbierta, type MiMatch } from "@/lib/areaCliente";
 import { botonDorado, rotulo, rotuloClaro } from "@/components/cliente/estilos";
 
@@ -29,6 +30,19 @@ const FinDelPlan = ({ area }: { area: MiAreaAbierta }) => {
   );
 };
 
+/** T19.3 · Aviso de propuesta abierta (aún sin responder). */
+const PropuestaNueva = ({ personas, caducaAt }: { personas: number; caducaAt: string }) => {
+  const dias = diasParaCaducar(caducaAt);
+  return (
+    <section className="rounded-2xl border border-gold bg-cream/60 p-4 space-y-2">
+      <span className={`${rotuloClaro} inline-block bg-cream px-3 py-1 rounded-full`}>Nueva</span>
+      <p className="font-display text-lg font-bold text-foreground">{personas} personas elegidas para ti</p>
+      <p className="font-display italic text-gold-texto">{dias === 1 ? "Queda 1 día para elegir" : `Quedan ${dias} días para elegir`}</p>
+      <Link to="/mi-area/propuestas" className={`${botonDorado} w-full`}>Ver propuesta</Link>
+    </section>
+  );
+};
+
 /** T18.2 · Su último match presentado, con la cita si la hay. */
 const UltimoMatch = ({ match }: { match: MiMatch }) => (
   <Link to="/mi-area/matches" className={`${tarjeta} flex items-center gap-3 hover:bg-muted/40 transition-colors`}>
@@ -44,10 +58,11 @@ const UltimoMatch = ({ match }: { match: MiMatch }) => (
   </Link>
 );
 
-/** T15.2 · Inicio del área: saludo, próxima sesión, sesiones que quedan, fin del plan y (T18.2) su último match. */
+/** T15.2 · Inicio del área: saludo, próxima sesión, sesiones que quedan, fin del plan, propuesta nueva (T19.3) y su último match (T18.2). */
 const InicioCliente = () => {
   const { area, userId } = useOutletContext<ContextoArea>();
   const ultimo = useMisMatches(userId).data?.[0];
+  const ronda = useMiRonda(userId).data;
   const cita = area.proxima_sesion;
 
   return (
@@ -64,6 +79,7 @@ const InicioCliente = () => {
       </section>
 
       {avisarFinPlan(area.plan_fin) && <FinDelPlan area={area} />}
+      {ronda?.estado === "abierta" && ronda.personas.length > 0 && <PropuestaNueva personas={ronda.personas.length} caducaAt={ronda.caduca_at} />}
 
       <div className="grid grid-cols-2 gap-3">
         <section className={tarjeta}>

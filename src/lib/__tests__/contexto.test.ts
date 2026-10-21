@@ -10,6 +10,10 @@ const resumen = (estado: string) => ({
   preferencias_detectadas: ["busca alguien tranquilo"],
 });
 
+const persona = (edad: number, zona: string) => ({
+  edad, genero: "Hombre", zona, ciudad: zona, tipo_relacion: "Matrimonio", hijos: "Quiero tener", valores_importantes: [], disc_perfil: null,
+});
+
 const base: DatosContexto = {
   perfil: {
     tipo_relacion: "Matrimonio", hijos: "Quiero tener", edad_min_busca: 30, edad_max_busca: 40,
@@ -37,12 +41,16 @@ const base: DatosContexto = {
     fecha: "2026-10-04T20:00:00+00:00", valoracion: 4, repetir: true, feedback: "Se rieron mucho",
     con: { edad: 36, genero: "Hombre", zona: "Madrid", ciudad: "Madrid", tipo_relacion: "Matrimonio", hijos: "Quiero tener", valores_importantes: [], disc_perfil: null },
   }],
+  rondas: [
+    { fecha: "2026-10-05T10:00:00+00:00", ninguno: false, motivo: null, elegido: persona(37, "Madrid"), descartados: [persona(41, "Toledo"), null] },
+    { fecha: "2026-10-12T10:00:00+00:00", ninguno: true, motivo: "Distancia — Prefiero mi barrio", elegido: null, descartados: [persona(39, "Segovia")] },
+  ],
 };
 
 describe("formatearContexto", () => {
   it("incluye todas las secciones con lo más reciente primero", () => {
     const texto = formatearContexto(base);
-    for (const titulo of ["Preguntas clave", "Cuestionario", "Personalidad (DISC)", "Preferencias aprendidas", "Resúmenes de sesión", "Notas de la psicóloga", "Feedback del cliente tras sus citas", "Decisiones sobre candidatos"]) {
+    for (const titulo of ["Preguntas clave", "Cuestionario", "Personalidad (DISC)", "Preferencias aprendidas", "Resúmenes de sesión", "Notas de la psicóloga", "Feedback del cliente tras sus citas", "Rondas de propuestas respondidas por el cliente", "Decisiones sobre candidatos"]) {
       expect(texto).toContain(`## ${titulo}`);
     }
     expect(texto).toContain("- Zona: Madrid");
@@ -50,11 +58,14 @@ describe("formatearContexto", () => {
     expect(texto).toContain("- Evita: fumadores");
     expect(texto.indexOf("Tranquila")).toBeLessThan(texto.indexOf("Nerviosa"));
     expect(texto).toContain("rechazada (Distancia): Hombre de 38 años, Sevilla, busca Matrimonio, hijos: Tengo, valores: Familia, DISC D · 71 %");
+    expect(texto).toContain("- 2026-10-05 · se ve más con Hombre de 37 años, Madrid, busca Matrimonio, hijos: Quiero tener · frente a: Hombre de 41 años, Toledo, busca Matrimonio, hijos: Quiero tener | perfil ya borrado");
+    expect(texto).toContain("- 2026-10-12 · no le encaja ninguno (Distancia — Prefiero mi barrio): Hombre de 39 años, Segovia");
+    expect(texto.indexOf("2026-10-12 · no le encaja")).toBeLessThan(texto.indexOf("2026-10-05 · se ve más"));
     expect(texto).toContain("- 2026-10-04 · con Hombre de 36 años, Madrid, busca Matrimonio, hijos: Quiero tener · valoración 4/5 · quiere volver a verle: sí: Se rieron mucho");
   });
 
   it("no envía datos de contacto ni secciones vacías", () => {
-    const texto = formatearContexto({ ...base, preferencias: null, resumenes: [], notas: [], decisiones: [], citas: [] });
+    const texto = formatearContexto({ ...base, preferencias: null, resumenes: [], notas: [], decisiones: [], citas: [], rondas: [] });
     expect(texto).not.toContain("Preferencias aprendidas");
     expect(texto).not.toContain("Notas de la psicóloga");
     expect(texto).not.toMatch(/email|teléfono/i);

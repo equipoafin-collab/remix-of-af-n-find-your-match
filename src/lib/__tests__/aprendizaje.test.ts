@@ -3,6 +3,7 @@ import { findMatchesFor } from "@/lib/profileMatching";
 import {
   calcularAjustes,
   chipsDelMotivo,
+  decisionesDeRondas,
   validarPreferencias,
   type Decision,
 } from "../../../supabase/functions/_shared/aprendizaje";
@@ -52,6 +53,32 @@ describe("calcularAjustes", () => {
     expect(findMatchesFor(ana, [cerca, lejos])[0].perfilB.id).toBe("lejos");
     const ajustes = calcularAjustes([rechazo("Distancia"), rechazo("Distancia"), rechazo("Distancia")]);
     expect(findMatchesFor(ana, [cerca, lejos], 20, { ajustes })[0].perfilB.id).toBe("cerca");
+  });
+});
+
+describe("decisionesDeRondas", () => {
+  const cerca = { ...lejano, geografia: 95 };
+  const desgloses = new Map<string, Decision["desglose"]>([["a", cerca], ["b", lejano], ["c", lejano], ["d", lejano]]);
+  const ronda = { candidatos: ["a", "b", "c", "d"], elegido_id: "a", ninguno: false, motivo: null };
+
+  it("la elegida cuenta como aceptada y las otras tres como rechazadas, con su desglose", () => {
+    const d = decisionesDeRondas([ronda], desgloses);
+    expect(d.map((x) => x.estado)).toEqual(["aceptada", "rechazada", "rechazada", "rechazada"]);
+    expect(d[0].desglose).toBe(cerca);
+    expect(d.every((x) => x.motivo === null)).toBe(true);
+  });
+
+  it("con ninguna, las cuatro rechazadas con su motivo; sin elegida ni ninguna, no cuenta", () => {
+    const d = decisionesDeRondas([
+      { ...ronda, elegido_id: null, ninguno: true, motivo: "Distancia — muy lejos" },
+      { ...ronda, elegido_id: null },
+    ], desgloses);
+    expect(d).toHaveLength(4);
+    expect(d.every((x) => x.estado === "rechazada" && chipsDelMotivo(x.motivo).includes("Distancia"))).toBe(true);
+  });
+
+  it("elegir siempre a la que está cerca sube el peso de geografía", () => {
+    expect(calcularAjustes(decisionesDeRondas([ronda, ronda], desgloses)).geografia).toBeGreaterThan(1);
   });
 });
 

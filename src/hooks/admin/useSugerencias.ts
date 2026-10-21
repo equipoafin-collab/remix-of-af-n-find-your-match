@@ -21,7 +21,7 @@ async function calcular(perfilId: string, forzar: boolean): Promise<ResultadoCal
   return data;
 }
 
-const PERSONA = "id, nombre_completo, edad, zona, ciudad, plan, foto_url";
+const PERSONA = "id, nombre_completo, edad, zona, ciudad, plan, foto_url, mostrar_en_propuestas";
 
 // Las guardadas se leen al instante; las caducadas no se muestran.
 export function useSugerencias(perfilId: string) {

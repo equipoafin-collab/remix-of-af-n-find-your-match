@@ -19,7 +19,7 @@ const sinDatos = Promise.resolve({ data: null, error: null });
 /**
  * T5.1 · Todo lo que la IA necesita saber del cliente, como texto acotado a ~maxTokens: preguntas clave,
  * cuestionario, DISC, preferencias aprendidas, 5 últimos resúmenes revisados, 10 últimas notas (no automáticas),
- * feedback del cliente en sus 10 últimas citas (T6.5) y 20 últimas decisiones. Incluye datos de salud: usar solo con el cliente service role tras exigirAdmin.
+ * feedback del cliente en sus 10 últimas citas (T6.5), sus 5 últimas rondas respondidas (T19.4) y 20 últimas decisiones. Incluye datos de salud: usar solo con el cliente service role tras exigirAdmin.
  * Con `alcance: "cuestionario"` se queda en lo que el cliente rellenó (preguntas clave, cuestionario y DISC):
  * es lo que usa el informe de compatibilidad (T6.3), que leen los clientes.
  */
@@ -29,7 +29,7 @@ export async function construirContextoCliente(
   { maxTokens, alcance = "completo" }: { maxTokens?: number; alcance?: "completo" | "cuestionario" } = {},
 ): Promise<string> {
   const completo = alcance === "completo";
-  const [perfil, aprendizaje, sesiones, notas, decisiones, citas] = await Promise.all([
+  const [perfil, aprendizaje, sesiones, notas, decisiones, citas, rondas] = await Promise.all([
     supabase.from("perfiles").select(COLUMNAS_CLIENTE).eq("id", perfilId).single(),
     completo ? supabase.from("perfil_aprendizaje").select("preferencias").eq("perfil_id", perfilId).maybeSingle() : sinDatos,
     completo
@@ -52,8 +52,23 @@ export async function construirContextoCliente(
         .or(`perfil_a.eq.${perfilId},perfil_b.eq.${perfilId}`).not("feedback_at", "is", null)
         .order("feedback_at", { ascending: false }).limit(10)
       : sinDatos,
+    completo
+      ? supabase.from("propuestas_rondas").select("respondida_at, candidatos, elegido_id, ninguno, motivo")
+        .eq("perfil_id", perfilId).eq("estado", "respondida").order("respondida_at", { ascending: false }).limit(5)
+      : sinDatos,
   ]);
-  for (const r of [perfil, aprendizaje, sesiones, notas, decisiones, citas]) if (r.error) throw r.error;
+  for (const r of [perfil, aprendizaje, sesiones, notas, decisiones, citas, rondas]) if (r.error) throw r.error;
+
+  // De las personas de sus rondas, el mismo resumen sin nombre que de los candidatos.
+  const filasRonda = (rondas.data ?? []) as unknown as {
+    respondida_at: string; candidatos: string[]; elegido_id: string | null; ninguno: boolean; motivo: string | null;
+  }[];
+  const enRondas = [...new Set(filasRonda.flatMap((r) => r.candidatos))];
+  const personas = enRondas.length
+    ? await supabase.from("perfiles").select(`id, ${COLUMNAS_CANDIDATO}`).in("id", enRondas)
+    : { data: [], error: null };
+  if (personas.error) throw personas.error;
+  const persona = new Map(((personas.data ?? []) as unknown as (CandidatoResumido & { id: string })[]).map((p) => [p.id, p]));
 
   const cliente = perfil.data as unknown as CuestionarioContexto & { disc_result_id: string | null };
   let disc = null;
@@ -108,5 +123,12 @@ export async function construirContextoCliente(
       fecha: x.decidido_at ?? "", estado: x.estado, motivo: x.motivo_decision, score: x.score, candidato: x.candidato,
     })),
     citas: citasDelCliente,
+    rondas: filasRonda.filter((r) => r.ninguno || r.elegido_id).map((r) => ({
+      fecha: r.respondida_at,
+      elegido: r.elegido_id ? persona.get(r.elegido_id) ?? null : null,
+      descartados: r.candidatos.filter((id) => id !== r.elegido_id).map((id) => persona.get(id) ?? null),
+      ninguno: r.ninguno,
+      motivo: r.motivo,
+    })),
   }, maxTokens);
 }

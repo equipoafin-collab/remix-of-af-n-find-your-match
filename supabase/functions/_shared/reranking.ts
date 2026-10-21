@@ -4,7 +4,7 @@ import { soloReglas, type SugerenciaCalculada } from "./sugerencias.ts";
 
 // T5.2 · Re-ranking con IA del top por reglas.
 
-export const SYSTEM_RERANKING = `Eres la asistente de una psicóloga de Afín, un servicio de matchmaking profesional. Recibes el contexto de un cliente (preguntas clave, cuestionario, resúmenes de sus sesiones, notas de la psicóloga, preferencias aprendidas y decisiones anteriores sobre candidatos con su motivo) y una lista de candidatos que ya han pasado los filtros excluyentes, con su puntuación por reglas.
+export const SYSTEM_RERANKING = `Eres la asistente de una psicóloga de Afín, un servicio de matchmaking profesional. Recibes el contexto de un cliente (preguntas clave, cuestionario, resúmenes de sus sesiones, notas de la psicóloga, preferencias aprendidas, decisiones anteriores sobre candidatos con su motivo y las rondas de propuestas que ha respondido el propio cliente) y una lista de candidatos que ya han pasado los filtros excluyentes, con su puntuación por reglas.
 
 Para cada candidato, puntúa de 0 a 100 cómo de bien encaja con este cliente. Da más peso a lo que la psicóloga ha observado en sesiones y notas y a lo que ha aceptado o rechazado antes (y por qué) que a la puntuación por reglas.
 

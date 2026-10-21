@@ -1,12 +1,15 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders, json } from "../_shared/http.ts";
 import { exigirAdmin } from "../_shared/auth.ts";
-import { calcularAjustes, SYSTEM_APRENDIZAJE, validarPreferencias, type Decision, type Preferencias } from "../_shared/aprendizaje.ts";
+import {
+  calcularAjustes, decisionesDeRondas, SYSTEM_APRENDIZAJE, validarPreferencias, type Decision, type Preferencias, type RondaRespondida,
+} from "../_shared/aprendizaje.ts";
 import { construirContextoCliente } from "../_shared/contextoCliente.ts";
 import { pedirJSON } from "../_shared/ia.ts";
 
 // T5.3 · Aprende de las decisiones y sesiones de un cliente. La ficha la llama en segundo plano tras cada
-// aceptar/rechazar y tras guardar un resumen revisado. Si la IA falla, guarda igualmente los ajustes de pesos.
+// aceptar/rechazar, tras guardar un resumen revisado y al abrirse si el cliente respondió una ronda (T19.4).
+// Si la IA falla, guarda igualmente los ajustes de pesos.
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -19,17 +22,25 @@ serve(async (req) => {
     const { perfil_id } = await req.json();
     if (!perfil_id) return json({ error: "Falta perfil_id" }, 400);
 
-    const [decisiones, actual] = await Promise.all([
-      supabase.from("match_sugerencias").select("estado, desglose, motivo_decision")
-        .eq("perfil_id", perfil_id).in("estado", ["aceptada", "rechazada"]),
+    // Todas sus sugerencias: las decididas son decisiones, y de las demás sale el desglose de las personas de sus rondas.
+    const [sugerencias, rondas, actual] = await Promise.all([
+      supabase.from("match_sugerencias").select("candidato_id, estado, desglose, motivo_decision").eq("perfil_id", perfil_id),
+      supabase.from("propuestas_rondas").select("candidatos, elegido_id, ninguno, motivo").eq("perfil_id", perfil_id).eq("estado", "respondida"),
       supabase.from("perfil_aprendizaje").select("preferencias").eq("perfil_id", perfil_id).maybeSingle(),
     ]);
-    if (decisiones.error) throw decisiones.error;
+    if (sugerencias.error) throw sugerencias.error;
+    if (rondas.error) throw rondas.error;
     if (actual.error) throw actual.error;
 
-    // 1. Ajustes de pesos por regla (sección 3.2): desde 3 decisiones, ±30 % como mucho.
-    const filas = (decisiones.data ?? []) as unknown as { estado: string; desglose: Decision["desglose"]; motivo_decision: string | null }[];
-    const ajustes = calcularAjustes(filas.map((f) => ({ estado: f.estado, desglose: f.desglose, motivo: f.motivo_decision })));
+    // 1. Ajustes de pesos por regla (sección 3.2): desde 3 decisiones, ±30 % como mucho. Las rondas del cliente cuentan (T19.4).
+    const filas = (sugerencias.data ?? []) as unknown as {
+      candidato_id: string; estado: string; desglose: Decision["desglose"]; motivo_decision: string | null;
+    }[];
+    const ajustes = calcularAjustes([
+      ...filas.filter((f) => f.estado === "aceptada" || f.estado === "rechazada")
+        .map((f) => ({ estado: f.estado, desglose: f.desglose, motivo: f.motivo_decision })),
+      ...decisionesDeRondas((rondas.data ?? []) as unknown as RondaRespondida[], new Map(filas.map((f) => [f.candidato_id, f.desglose]))),
+    ]);
 
     // 2. Preferencias destiladas por la IA (parte de las actuales, que pueden llevar correcciones de la psicóloga).
     let preferencias = validarPreferencias((actual.data as unknown as { preferencias: unknown } | null)?.preferencias);

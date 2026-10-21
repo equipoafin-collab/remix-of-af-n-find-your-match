@@ -1,12 +1,14 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Sparkles, Loader2, AlertTriangle, RefreshCw, Check, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { Sparkles, Loader2, AlertTriangle, RefreshCw, Check, X, Heart } from "lucide-react";
 import FotoPerfil from "@/components/admin/FotoPerfil";
 import { PlanBadge } from "@/components/admin/Badges";
 import type { Perfil } from "@/types/admin";
 import { NOMBRES_DIMENSION } from "@/lib/profileMatching";
 import { MOTIVOS_RECHAZO as MOTIVOS } from "../../../../supabase/functions/_shared/aprendizaje";
 import AprendizajeCliente from "./AprendizajeCliente";
+import RondaPropuestas from "./RondaPropuestas";
+import { useAprenderDeRondas, useRondas } from "@/hooks/admin/usePropuestas";
 import {
   useCalculoAutomatico,
   useDecidirSugerencia,
@@ -29,8 +31,16 @@ const fecha = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("e
 const colorScore = (score: number) =>
   score >= 80 ? "text-emerald-600 border-emerald-200 bg-emerald-50" : score >= 60 ? "text-amber-700 border-amber-200 bg-amber-50" : "text-rose-700 border-rose-200 bg-rose-50";
 
-export const TarjetaSugerencia = ({ s, perfilId }: { s: Sugerencia; perfilId: string }) => {
+/** `elegidaEl`: fecha en que el cliente dijo que se ve más con esta persona (T19.4); `destacada`: se llega desde su alerta. */
+export const TarjetaSugerencia = ({ s, perfilId, elegidaEl, destacada = false }: {
+  s: Sugerencia; perfilId: string; elegidaEl?: string; destacada?: boolean;
+}) => {
   const decidir = useDecidirSugerencia();
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    // Abajo y no al centro: arriba la tapa la cabecera fija de la ficha.
+    if (destacada) ref.current?.scrollIntoView({ block: "end", behavior: "smooth" });
+  }, [destacada]);
   const [rechazando, setRechazando] = useState(false);
   const [motivos, setMotivos] = useState<string[]>([]);
   const [texto, setTexto] = useState("");
@@ -42,7 +52,7 @@ export const TarjetaSugerencia = ({ s, perfilId }: { s: Sugerencia; perfilId: st
     decidir.mutate({ id: s.id, perfilId, estado: "rechazada", motivo: [motivos.join(", "), texto.trim()].filter(Boolean).join(" — ") || null });
 
   return (
-    <div className="bg-background border border-border rounded-xl p-4 space-y-3">
+    <div ref={ref} className={`bg-background border border-border rounded-xl p-4 space-y-3 ${destacada ? "ring-2 ring-gold" : ""}`}>
       <div className="flex items-center gap-3">
         <FotoPerfil path={c?.foto_url} nombre={c?.nombre_completo ?? "?"} className="w-12 h-12 rounded-full text-sm" />
         <div className="flex-1 min-w-0">
@@ -60,6 +70,12 @@ export const TarjetaSugerencia = ({ s, perfilId }: { s: Sugerencia; perfilId: st
           </p>
         </div>
       </div>
+
+      {elegidaEl && (
+        <p className="font-body text-xs font-medium text-gold-texto inline-flex items-center gap-1.5">
+          <Heart className="w-3.5 h-3.5" /> El cliente se ve más con esta persona (ronda del {fecha(elegidaEl)})
+        </p>
+      )}
 
       {(s.motivos.length > 0 || s.riesgos.length > 0) && (
         <div className="flex flex-wrap gap-1.5">
@@ -155,6 +171,16 @@ const SugerenciasTab = ({ perfil }: { perfil: Perfil }) => {
   const [filtro, setFiltro] = useState<(typeof FILTROS)[number]["estado"]>("pendiente");
   const calculando = calculo.isFetching || recalcular.isPending;
   const visibles = sugerencias.filter((s) => s.estado === filtro);
+  // T19.4: a quién eligió el cliente en sus rondas (la más reciente manda) y la sugerencia a la que lleva su alerta.
+  const { data: rondas = [] } = useRondas(perfil.id);
+  useAprenderDeRondas(perfil.id);
+  const elegidas = new Map(rondas.filter((r) => r.elegido_id && r.respondida_at).reverse().map((r) => [r.elegido_id, r.respondida_at]));
+  const destacada = useSearchParams()[0].get("sugerencia");
+  const estadoDestacada = sugerencias.find((s) => s.id === destacada)?.estado;
+  useEffect(() => {
+    const f = FILTROS.find((x) => x.estado === estadoDestacada);
+    if (f) setFiltro(f.estado);
+  }, [estadoDestacada]);
 
   return (
     <section className="bg-card border border-border rounded-2xl p-6 space-y-4">
@@ -162,7 +188,8 @@ const SugerenciasTab = ({ perfil }: { perfil: Perfil }) => {
         <h2 className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-gold" /> Candidatos sugeridos
         </h2>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <RondaPropuestas perfilId={perfil.id} sugerencias={sugerencias} />
           {calculando && (
             <span className="font-body text-xs text-muted-foreground inline-flex items-center gap-1.5">
               <Loader2 className="w-3.5 h-3.5 animate-spin" /> Actualizando…
@@ -208,7 +235,13 @@ const SugerenciasTab = ({ perfil }: { perfil: Perfil }) => {
       ) : (
         <div className="grid md:grid-cols-2 gap-3">
           {visibles.map((s) => (
-            <TarjetaSugerencia key={s.id} s={s} perfilId={perfil.id} />
+            <TarjetaSugerencia
+              key={s.id}
+              s={s}
+              perfilId={perfil.id}
+              elegidaEl={elegidas.get(s.candidato_id) ?? undefined}
+              destacada={s.id === destacada}
+            />
           ))}
         </div>
       )}

@@ -70,6 +70,7 @@ export type Database = {
           perfil_id: string | null
           resuelta_at: string | null
           severidad: Database["public"]["Enums"]["alerta_severidad"]
+          sugerencia_id: string | null
           tipo: Database["public"]["Enums"]["alerta_tipo"]
         }
         Insert: {
@@ -82,6 +83,7 @@ export type Database = {
           perfil_id?: string | null
           resuelta_at?: string | null
           severidad?: Database["public"]["Enums"]["alerta_severidad"]
+          sugerencia_id?: string | null
           tipo?: Database["public"]["Enums"]["alerta_tipo"]
         }
         Update: {
@@ -94,6 +96,7 @@ export type Database = {
           perfil_id?: string | null
           resuelta_at?: string | null
           severidad?: Database["public"]["Enums"]["alerta_severidad"]
+          sugerencia_id?: string | null
           tipo?: Database["public"]["Enums"]["alerta_tipo"]
         }
         Relationships: [
@@ -116,6 +119,13 @@ export type Database = {
             columns: ["perfil_id"]
             isOneToOne: false
             referencedRelation: "v_clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alertas_sugerencia_id_fkey"
+            columns: ["sugerencia_id"]
+            isOneToOne: false
+            referencedRelation: "match_sugerencias"
             referencedColumns: ["id"]
           },
         ]
@@ -733,6 +743,8 @@ export type Database = {
           importa_politica: boolean | null
           importa_religion: boolean | null
           importa_vestir: boolean | null
+          mostrar_en_propuestas: boolean
+          mostrar_en_propuestas_at: string | null
           necesidad_independencia: number
           nivel_social: number
           nombre_completo: string
@@ -795,6 +807,8 @@ export type Database = {
           importa_politica?: boolean | null
           importa_religion?: boolean | null
           importa_vestir?: boolean | null
+          mostrar_en_propuestas?: boolean
+          mostrar_en_propuestas_at?: string | null
           necesidad_independencia: number
           nivel_social: number
           nombre_completo: string
@@ -857,6 +871,8 @@ export type Database = {
           importa_politica?: boolean | null
           importa_religion?: boolean | null
           importa_vestir?: boolean | null
+          mostrar_en_propuestas?: boolean
+          mostrar_en_propuestas_at?: string | null
           necesidad_independencia?: number
           nivel_social?: number
           nombre_completo?: string
@@ -889,6 +905,66 @@ export type Database = {
             columns: ["disc_result_id"]
             isOneToOne: false
             referencedRelation: "disc_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      propuestas_rondas: {
+        Row: {
+          caduca_at: string
+          candidatos: string[]
+          created_by: string | null
+          elegido_id: string | null
+          enviada_at: string
+          estado: string
+          frases: Json
+          id: string
+          motivo: string | null
+          ninguno: boolean
+          perfil_id: string
+          respondida_at: string | null
+        }
+        Insert: {
+          caduca_at?: string
+          candidatos: string[]
+          created_by?: string | null
+          elegido_id?: string | null
+          enviada_at?: string
+          estado?: string
+          frases?: Json
+          id?: string
+          motivo?: string | null
+          ninguno?: boolean
+          perfil_id: string
+          respondida_at?: string | null
+        }
+        Update: {
+          caduca_at?: string
+          candidatos?: string[]
+          created_by?: string | null
+          elegido_id?: string | null
+          enviada_at?: string
+          estado?: string
+          frases?: Json
+          id?: string
+          motivo?: string | null
+          ninguno?: boolean
+          perfil_id?: string
+          respondida_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "propuestas_rondas_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "propuestas_rondas_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "v_clientes"
             referencedColumns: ["id"]
           },
         ]
@@ -1106,6 +1182,8 @@ export type Database = {
           importa_politica: boolean | null
           importa_religion: boolean | null
           importa_vestir: boolean | null
+          mostrar_en_propuestas: boolean | null
+          mostrar_en_propuestas_at: string | null
           matches_abiertos: number | null
           necesidad_independencia: number | null
           nivel_social: number | null
@@ -1195,6 +1273,7 @@ export type Database = {
       mi_area: { Args: never; Returns: Json }
       mi_perfil: { Args: never; Returns: Json }
       mi_perfil_id: { Args: never; Returns: string }
+      mi_ronda: { Args: never; Returns: Json }
       mis_citas: { Args: never; Returns: Json }
       mis_matches: { Args: never; Returns: Json }
       pedir_a_psicologa: { Args: { _tipo: string }; Returns: boolean }
@@ -1215,6 +1294,10 @@ export type Database = {
       }
       registrar_lecturas: {
         Args: { _accion: string; _perfil_ids: string[] }
+        Returns: undefined
+      }
+      responder_ronda: {
+        Args: { _elegido: string; _motivo: string; _ronda_id: string }
         Returns: undefined
       }
       suprimir_cliente: { Args: { _perfil_id: string }; Returns: Json }

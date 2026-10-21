@@ -4,6 +4,7 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { Cita, MiArea, MiMatch, TipoSolicitud } from "@/lib/areaCliente";
 import type { MiPerfil, Preferencias } from "@/lib/cuestionario";
+import type { MiRonda } from "@/lib/propuestas";
 import { extensionFoto } from "../../../supabase/functions/_shared/acceso";
 import { llamarFuncion } from "./accesoCliente";
 
@@ -137,5 +138,30 @@ export function useDejarFeedback() {
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["mis-matches"] }),
+  });
+}
+
+/** T19.3 · Su ronda de propuestas: la abierta con las personas, o a quién eligió en la última. */
+export function useMiRonda(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["mi-ronda", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("mi_ronda");
+      if (error) throw error;
+      return data as unknown as MiRonda | null;
+    },
+    enabled: !!userId,
+  });
+}
+
+/** T19.3 · Responde la ronda: una persona, o ninguna (elegido null) con el motivo. */
+export function useResponderRonda() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (r: { rondaId: string; elegido: string | null; motivo: string }) => {
+      const { error } = await supabase.rpc("responder_ronda", { _ronda_id: r.rondaId, _elegido: r.elegido, _motivo: r.motivo });
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["mi-ronda"] }),
   });
 }

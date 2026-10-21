@@ -52,6 +52,8 @@ export interface DatosContexto {
   decisiones: { fecha: string; estado: string; motivo: string | null; score: number; candidato: CandidatoResumido | null }[];
   /** Lo que el propio cliente contó tras cada cita (T6.5). */
   citas: { fecha: string; con: CandidatoResumido | null; valoracion: number | null; repetir: boolean | null; feedback: string }[];
+  /** Rondas de propuestas que respondió el propio cliente (T19.4): con quién se ve más, o ninguna y por qué. */
+  rondas: { fecha: string; elegido: CandidatoResumido | null; descartados: (CandidatoResumido | null)[]; ninguno: boolean; motivo: string | null }[];
 }
 
 const CARACTERES_POR_TOKEN = 4; // aproximación para español
@@ -126,6 +128,14 @@ function renderizar(d: DatosContexto) {
       ),
     ),
     seccion(
+      "Rondas de propuestas respondidas por el cliente (más reciente primero)",
+      d.rondas.map((r) =>
+        r.ninguno
+          ? `- ${dia(r.fecha)} · no le encaja ninguno${r.motivo ? ` (${recortar(r.motivo, MAX_TEXTO_LIBRE)})` : ""}: ${r.descartados.map(candidato).join(" | ")}`
+          : `- ${dia(r.fecha)} · se ve más con ${candidato(r.elegido)} · frente a: ${r.descartados.map(candidato).join(" | ")}`,
+      ),
+    ),
+    seccion(
       "Decisiones sobre candidatos (más reciente primero)",
       d.decisiones.map((x) => `- ${dia(x.fecha)} · ${x.estado}${x.motivo ? ` (${x.motivo})` : ""}: ${candidato(x.candidato)} · ${x.score} %`),
     ),
@@ -136,7 +146,7 @@ const porFechaDesc = <T extends { fecha: string }>(xs: T[]) => [...xs].sort((a, 
 
 /**
  * Texto estructurado con lo que la IA necesita saber del cliente (T5.1). Si pasa de `maxTokens`, quita
- * resúmenes, notas, feedback de citas y decisiones empezando por el más antiguo; el cuestionario se queda siempre.
+ * resúmenes, notas, feedback de citas, rondas y decisiones empezando por el más antiguo; el cuestionario se queda siempre.
  */
 export function formatearContexto(d: DatosContexto, maxTokens = 6000): string {
   const datos = {
@@ -145,10 +155,11 @@ export function formatearContexto(d: DatosContexto, maxTokens = 6000): string {
     notas: porFechaDesc(d.notas),
     decisiones: porFechaDesc(d.decisiones),
     citas: porFechaDesc(d.citas),
+    rondas: porFechaDesc(d.rondas),
   };
   let texto = renderizar(datos);
   while (texto.length / CARACTERES_POR_TOKEN > maxTokens) {
-    const listas = [datos.resumenes, datos.notas, datos.decisiones, datos.citas].filter((xs) => xs.length);
+    const listas = [datos.resumenes, datos.notas, datos.decisiones, datos.citas, datos.rondas].filter((xs) => xs.length);
     if (!listas.length) break;
     // El último de cada lista es su más antiguo: se quita el más antiguo de todos.
     const masAntigua = listas.reduce((a, b) => (a[a.length - 1].fecha <= b[b.length - 1].fecha ? a : b));
