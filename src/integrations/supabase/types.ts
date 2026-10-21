@@ -954,6 +954,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "propuestas_rondas_elegido_id_fkey"
+            columns: ["elegido_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "propuestas_rondas_elegido_id_fkey"
+            columns: ["elegido_id"]
+            isOneToOne: false
+            referencedRelation: "v_clientes"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "propuestas_rondas_perfil_id_fkey"
             columns: ["perfil_id"]
             isOneToOne: false
@@ -1182,9 +1196,9 @@ export type Database = {
           importa_politica: boolean | null
           importa_religion: boolean | null
           importa_vestir: boolean | null
+          matches_abiertos: number | null
           mostrar_en_propuestas: boolean | null
           mostrar_en_propuestas_at: string | null
-          matches_abiertos: number | null
           necesidad_independencia: number | null
           nivel_social: number | null
           nombre_completo: string | null
@@ -1299,6 +1313,81 @@ export type Database = {
       responder_ronda: {
         Args: { _elegido: string; _motivo: string; _ronda_id: string }
         Returns: undefined
+      }
+      ronda_visible: {
+        Args: {
+          _ronda: Database["public"]["Tables"]["propuestas_rondas"]["Row"]
+        }
+        Returns: {
+          acepta_otras_zonas: boolean
+          alcohol: string | null
+          ambicion_profesional: number
+          aprendizaje_ultima_relacion: string
+          busca_genero: string | null
+          ciudad: string
+          conflicto: string[] | null
+          consentimiento_at: string | null
+          consentimiento_version: string | null
+          created_at: string
+          desea_casarse: string | null
+          deseo_familia: number
+          disc_perfil: string | null
+          disc_respuestas: Json | null
+          disc_result_id: string | null
+          edad: number
+          edad_max_busca: number | null
+          edad_min_busca: number | null
+          email: string | null
+          estado_cambiado_at: string
+          estado_cliente: Database["public"]["Enums"]["estado_cliente"]
+          estatura: number | null
+          estilo_vestir: string | null
+          estilo_vestir_pareja: string | null
+          estilo_vida_activo: number
+          fin_de_semana: string | null
+          foto_url: string | null
+          genero: string | null
+          hijos: string
+          hobbies: string | null
+          id: string
+          ideologia: string | null
+          importa_politica: boolean | null
+          importa_religion: boolean | null
+          importa_vestir: boolean | null
+          mostrar_en_propuestas: boolean
+          mostrar_en_propuestas_at: string | null
+          necesidad_independencia: number
+          nivel_social: number
+          nombre_completo: string
+          peso: number | null
+          plan: Database["public"]["Enums"]["plan_tipo"] | null
+          plan_fin: string | null
+          plan_inicio: string | null
+          politica_pareja: string | null
+          relacion_sana: string
+          religion: string | null
+          religion_pareja: string | null
+          revisado: boolean
+          sentirse_querido: string[] | null
+          sesiones_contratadas: number
+          tabaco: string
+          tatuajes_pareja: string | null
+          telefono: string | null
+          tiene_tatuajes: boolean | null
+          tipo_relacion: string
+          ultimo_seguimiento_at: string | null
+          user_id: string | null
+          valores_importantes: string[]
+          vida_en_10_anios: string
+          video_presentacion_path: string | null
+          zona: string | null
+        }[]
+        SetofOptions: {
+          from: "propuestas_rondas"
+          to: "perfiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       suprimir_cliente: { Args: { _perfil_id: string }; Returns: Json }
       tiene_area: { Args: never; Returns: boolean }
