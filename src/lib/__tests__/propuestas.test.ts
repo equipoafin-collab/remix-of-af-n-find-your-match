@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { DIAS_RONDA, errorRonda, frasePorDefecto, MAX_FRASE, PERSONAS_POR_RONDA, preseleccionar } from "../propuestas";
+import { DIAS_RONDA, diasParaCaducar, errorRonda, frasePorDefecto, MAX_FRASE, MOTIVOS_NINGUNA, motivoNinguna, PERSONAS_POR_RONDA, preseleccionar } from "../propuestas";
 
 const s = (id: string, score: number, permiso = true) => ({ candidato_id: id, score, motivos: [`Motivo de ${id}`], candidato: { mostrar_en_propuestas: permiso } });
 
@@ -32,5 +32,28 @@ describe("rondas de propuestas (T19.2)", () => {
     expect(sql).toContain(`cardinality(candidatos) = ${PERSONAS_POR_RONDA}`);
     expect(sql).toContain(`length(f.value #>> '{}') > ${MAX_FRASE}`);
     expect(sql).toContain(`now() + interval '${DIAS_RONDA} days'`);
+  });
+});
+
+describe("responder la ronda (T19.3)", () => {
+  it("el motivo de 'ninguna' va en el formato de T5.3", async () => {
+    const { chipsDelMotivo } = await import("../../../supabase/functions/_shared/aprendizaje");
+    const motivo = motivoNinguna(["Distancia", "Edad"], "  Prefiero alguien de mi zona ");
+    expect(motivo).toBe("Distancia, Edad — Prefiero alguien de mi zona");
+    expect(chipsDelMotivo(motivo)).toEqual(["Distancia", "Edad"]);
+    expect(motivoNinguna([], "Solo texto")).toBe("Solo texto");
+    expect(motivoNinguna(["Valores"], "")).toBe("Valores");
+  });
+
+  it("los chips del cliente son los de T5.3 salvo la intuición profesional", async () => {
+    const { MOTIVOS_RECHAZO } = await import("../../../supabase/functions/_shared/aprendizaje");
+    expect(MOTIVOS_NINGUNA.filter((m) => m !== "Otro")).toEqual(Object.keys(MOTIVOS_RECHAZO).filter((m) => m !== "Intuición profesional"));
+  });
+
+  it("días para caducar, redondeando hacia arriba y nunca negativos", () => {
+    const ahora = new Date("2026-10-21T10:00:00Z");
+    expect(diasParaCaducar("2026-10-28T10:00:00Z", ahora)).toBe(7);
+    expect(diasParaCaducar("2026-10-21T12:00:00Z", ahora)).toBe(1);
+    expect(diasParaCaducar("2026-10-20T10:00:00Z", ahora)).toBe(0);
   });
 });

@@ -1263,6 +1263,7 @@ export type Database = {
       mi_area: { Args: never; Returns: Json }
       mi_perfil: { Args: never; Returns: Json }
       mi_perfil_id: { Args: never; Returns: string }
+      mi_ronda: { Args: never; Returns: Json }
       mis_citas: { Args: never; Returns: Json }
       mis_matches: { Args: never; Returns: Json }
       pedir_a_psicologa: { Args: { _tipo: string }; Returns: boolean }
@@ -1283,6 +1284,10 @@ export type Database = {
       }
       registrar_lecturas: {
         Args: { _accion: string; _perfil_ids: string[] }
+        Returns: undefined
+      }
+      responder_ronda: {
+        Args: { _elegido: string; _motivo: string; _ronda_id: string }
         Returns: undefined
       }
       suprimir_cliente: { Args: { _perfil_id: string }; Returns: Json }

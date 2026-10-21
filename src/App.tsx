@@ -30,10 +30,10 @@ const AccesoCliente = lazy(() => import("./pages/AccesoCliente"));
 const LoginCliente = lazy(() => import("./pages/cliente/LoginCliente"));
 const ClienteLayout = lazy(() => import("./components/cliente/ClienteLayout"));
 const InicioCliente = lazy(() => import("./pages/cliente/InicioCliente"));
-const Proximamente = lazy(() => import("./pages/cliente/Proximamente"));
 const PerfilCliente = lazy(() => import("./pages/cliente/PerfilCliente"));
 const CalendarioCliente = lazy(() => import("./pages/cliente/CalendarioCliente"));
 const MatchesCliente = lazy(() => import("./pages/cliente/MatchesCliente"));
+const PropuestasCliente = lazy(() => import("./pages/cliente/PropuestasCliente"));
 
 const queryClient = new QueryClient();
 
@@ -60,7 +60,7 @@ const App = () => (
               <Route index element={<InicioCliente />} />
               <Route path="calendario" element={<CalendarioCliente />} />
               <Route path="matches" element={<MatchesCliente />} />
-              <Route path="propuestas" element={<Proximamente titulo="Tus propuestas" />} />
+              <Route path="propuestas" element={<PropuestasCliente />} />
               <Route path="perfil" element={<PerfilCliente />} />
             </Route>
             <Route path="/admin/login" element={<AdminLogin />} />
