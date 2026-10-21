@@ -8,7 +8,7 @@ import { NOMBRES_DIMENSION } from "@/lib/profileMatching";
 import { MOTIVOS_RECHAZO as MOTIVOS } from "../../../../supabase/functions/_shared/aprendizaje";
 import AprendizajeCliente from "./AprendizajeCliente";
 import RondaPropuestas from "./RondaPropuestas";
-import { useAprenderDeRondas, useRondas } from "@/hooks/admin/usePropuestas";
+import { useRondas } from "@/hooks/admin/usePropuestas";
 import {
   useCalculoAutomatico,
   useDecidirSugerencia,
@@ -173,7 +173,6 @@ const SugerenciasTab = ({ perfil }: { perfil: Perfil }) => {
   const visibles = sugerencias.filter((s) => s.estado === filtro);
   // T19.4: a quién eligió el cliente en sus rondas (la más reciente manda) y la sugerencia a la que lleva su alerta.
   const { data: rondas = [] } = useRondas(perfil.id);
-  useAprenderDeRondas(perfil.id);
   const elegidas = new Map(rondas.filter((r) => r.elegido_id && r.respondida_at).reverse().map((r) => [r.elegido_id, r.respondida_at]));
   const destacada = useSearchParams()[0].get("sugerencia");
   const estadoDestacada = sugerencias.find((s) => s.id === destacada)?.estado;

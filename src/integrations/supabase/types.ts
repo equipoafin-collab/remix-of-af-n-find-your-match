@@ -438,8 +438,10 @@ export type Database = {
           estado: Database["public"]["Enums"]["match_estado"]
           fecha_cita: string | null
           feedback_a: string | null
+          feedback_a_cliente: boolean
           feedback_at: string | null
           feedback_b: string | null
+          feedback_b_cliente: boolean
           id: string
           informe: Json | null
           informe_enviado_at: string | null
@@ -459,8 +461,10 @@ export type Database = {
           estado?: Database["public"]["Enums"]["match_estado"]
           fecha_cita?: string | null
           feedback_a?: string | null
+          feedback_a_cliente?: boolean
           feedback_at?: string | null
           feedback_b?: string | null
+          feedback_b_cliente?: boolean
           id?: string
           informe?: Json | null
           informe_enviado_at?: string | null
@@ -480,8 +484,10 @@ export type Database = {
           estado?: Database["public"]["Enums"]["match_estado"]
           fecha_cita?: string | null
           feedback_a?: string | null
+          feedback_a_cliente?: boolean
           feedback_at?: string | null
           feedback_b?: string | null
+          feedback_b_cliente?: boolean
           id?: string
           informe?: Json | null
           informe_enviado_at?: string | null

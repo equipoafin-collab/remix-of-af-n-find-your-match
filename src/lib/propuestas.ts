@@ -19,9 +19,6 @@ export const puedeProponerse = (s: Candidata) => !!s.candidato?.mostrar_en_propu
 export const preseleccionar = (sugerencias: Candidata[]) =>
   [...sugerencias].filter(puedeProponerse).sort((a, b) => b.score - a.score).slice(0, PERSONAS_POR_RONDA).map((s) => s.candidato_id);
 
-/** La frase "por qué te lo proponemos" empieza con su primer motivo (la psicóloga la revisa: la leerá el cliente). */
-export const frasePorDefecto = (motivos: string[]) => (motivos[0] ?? "").trim().slice(0, MAX_FRASE);
-
 /** El problema de la ronda, o null si se puede enviar. */
 export function errorRonda(elegidos: string[], frases: Record<string, string>) {
   if (new Set(elegidos).size !== PERSONAS_POR_RONDA) return `Elige ${PERSONAS_POR_RONDA} personas distintas.`;
