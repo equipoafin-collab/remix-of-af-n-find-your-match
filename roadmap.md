@@ -1,0 +1,1 @@
+- [x] Informe DISC en PDF con estilo cósmico y elegante

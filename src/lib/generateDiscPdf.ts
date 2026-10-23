@@ -31,18 +31,19 @@ interface PdfParams {
 type RGB = [number, number, number];
 
 // Paleta editorial: marfil, tinta y oro viejo; los colores DISC, apagados.
-const GOLD: RGB = [176, 141, 74];
-const GOLD_SOFT: RGB = [226, 210, 175];
-const INK: RGB = [33, 30, 28];
-const MUTED: RGB = [118, 110, 102];
-const IVORY: RGB = [251, 248, 242];
-const LINE: RGB = [228, 220, 205];
+// Estilo cósmico: noche profunda, estrellas y oro.
+const GOLD: RGB = [222, 190, 120];
+const GOLD_SOFT: RGB = [140, 118, 80];
+const INK: RGB = [240, 236, 228];
+const MUTED: RGB = [168, 166, 190];
+const IVORY: RGB = [12, 13, 34];
+const LINE: RGB = [52, 54, 92];
 
 const DISC_COLORS: Record<DiscType, RGB> = {
-  D: [168, 72, 62],
-  I: [190, 145, 60],
-  S: [86, 128, 98],
-  C: [72, 98, 140],
+  D: [236, 120, 132],
+  I: [240, 196, 110],
+  S: [120, 214, 178],
+  C: [130, 168, 255],
 };
 
 const DISC_LABELS: Record<DiscType, string> = { D: "Dominante", I: "Influyente", S: "Estable", C: "Concienzudo" };
@@ -61,9 +62,29 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   let y = 0;
   let seccion = 0;
 
+  // Estrellas con semilla fija para que cada página sea distinta pero estable.
+  let semilla = 7;
+  const azar = () => ((semilla = (semilla * 9301 + 49297) % 233280) / 233280);
+  const nebulosa = (x: number, yy: number, r: number, c: RGB) => {
+    for (let k = 6; k >= 1; k--) {
+      doc.setGState(doc.GState({ opacity: 0.035 }));
+      doc.setFillColor(...c);
+      doc.circle(x, yy, (r * k) / 6, "F");
+    }
+    doc.setGState(doc.GState({ opacity: 1 }));
+  };
   const fondo = () => {
     doc.setFillColor(...IVORY);
     doc.rect(0, 0, W, H, "F");
+    nebulosa(W * 0.85, H * 0.12, 70, [110, 80, 200]);
+    nebulosa(W * 0.1, H * 0.8, 80, [40, 90, 170]);
+    for (let k = 0; k < 140; k++) {
+      const op = 0.25 + azar() * 0.75;
+      doc.setGState(doc.GState({ opacity: op }));
+      doc.setFillColor(...(azar() > 0.85 ? GOLD : ([255, 255, 255] as RGB)));
+      doc.circle(azar() * W, azar() * H, azar() > 0.93 ? 0.55 : 0.22, "F");
+    }
+    doc.setGState(doc.GState({ opacity: 1 }));
   };
   const nuevaPagina = () => {
     doc.addPage();
@@ -166,6 +187,14 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
 
   // Estilo principal en la portada
   const priCol = DISC_COLORS[primary];
+  nebulosa(W / 2, 165, 45, priCol);
+  doc.setDrawColor(...GOLD_SOFT);
+  doc.setLineWidth(0.15);
+  doc.ellipse(W / 2, 165, 38, 11);
+  doc.ellipse(W / 2, 165, 28, 28);
+  doc.setFillColor(...GOLD);
+  doc.circle(W / 2 + 38, 165, 1.1, "F");
+  doc.circle(W / 2 - 20, 145.5, 0.8, "F");
   doc.setDrawColor(...priCol);
   doc.setLineWidth(0.8);
   doc.circle(W / 2, 165, 18);
@@ -319,7 +348,7 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
     { nombre: "Premium", precio: "250€", x: M + cw + 10, destacado: true, items: ["2 sesiones mensuales", "Presentaciones prioritarias", "Verificación de antecedentes"] },
   ];
   planes.forEach((p) => {
-    doc.setFillColor(255, 255, 255);
+    doc.setFillColor(22, 24, 56);
     doc.setDrawColor(...(p.destacado ? GOLD : LINE));
     doc.setLineWidth(p.destacado ? 0.6 : 0.3);
     doc.rect(p.x, y, cw, ch, "FD");

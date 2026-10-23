@@ -1,6 +1,7 @@
 import { useState } from "react";
+import DiscResultados from "@/components/DiscResultados";
 import { useOutletContext } from "react-router-dom";
-import { Camera, ChevronDown, Download, Loader2, Pencil } from "lucide-react";
+import { Camera, ChevronDown, Loader2, Pencil } from "lucide-react";
 import { calculateDisc } from "@/components/DiscSurvey";
 import FotoPerfil from "@/components/admin/FotoPerfil";
 import { rotuloClaro } from "@/components/cliente/estilos";
@@ -40,22 +41,17 @@ const Plan = ({ area }: { area: MiAreaAbierta }) => {
 const Disc = ({ perfil }: { perfil: MiPerfil }) => {
   if (!perfil.disc_respuestas || !Object.keys(perfil.disc_respuestas).length) return null;
   const { primary, secondary, percents } = resumenDisc(calculateDisc(perfil.disc_respuestas).scores);
-  const pri = DISC_META[primary];
   return (
     <section className={`${tarjeta} p-5 space-y-3`}>
       <p className={rotuloClaro}>Tu perfil DISC</p>
-      <p className="font-display text-2xl font-bold text-foreground">
-        {pri.emoji} <em className="italic font-normal">{pri.title}</em>
-      </p>
-      <p className="font-body text-sm text-muted-foreground">{pri.description} Tu segundo estilo: {DISC_META[secondary].title.toLowerCase()}.</p>
-      <button
-        onClick={() =>
-          generateDiscPdf({ userName: perfil.nombre_completo, primary, secondary, percents, pri, sec: DISC_META[secondary] })
+      <DiscResultados
+        primary={primary}
+        secondary={secondary}
+        percents={percents}
+        onDescargar={() =>
+          generateDiscPdf({ userName: perfil.nombre_completo, primary, secondary, percents, pri: DISC_META[primary], sec: DISC_META[secondary] })
         }
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border font-body text-sm text-foreground hover:bg-muted"
-      >
-        <Download className="w-4 h-4" /> Descargar mi informe DISC
-      </button>
+      />
     </section>
   );
 };
