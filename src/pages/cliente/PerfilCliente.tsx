@@ -1,4 +1,5 @@
 import { useState } from "react";
+import DiscResultados from "@/components/DiscResultados";
 import { useOutletContext } from "react-router-dom";
 import { Camera, ChevronDown, Loader2, Pencil } from "lucide-react";
 import { calculateDisc } from "@/components/DiscSurvey";
