@@ -48,6 +48,7 @@ const Disc = ({ perfil }: { perfil: MiPerfil }) => {
         primary={primary}
         secondary={secondary}
         percents={percents}
+        nombre={perfil.nombre_completo}
         onDescargar={() =>
           generateDiscPdf({ userName: perfil.nombre_completo, primary, secondary, percents, pri: DISC_META[primary], sec: DISC_META[secondary] })
         }
