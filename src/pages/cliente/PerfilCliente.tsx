@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { Camera, ChevronDown, Download, Loader2, Pencil } from "lucide-react";
+import { Camera, ChevronDown, Loader2, Pencil } from "lucide-react";
 import { calculateDisc } from "@/components/DiscSurvey";
 import FotoPerfil from "@/components/admin/FotoPerfil";
 import { rotuloClaro } from "@/components/cliente/estilos";

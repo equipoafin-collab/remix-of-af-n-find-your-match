@@ -118,7 +118,7 @@ const DiscResultados = ({ primary, secondary, percents, onDescargar }: Props) =>
             </button>
           ))}
         </div>
-        <div key={pestana} className="pt-4 animate-fade-in font-body text-sm text-foreground space-y-2">
+        <div key={pestana} className="pt-4 animate-in fade-in duration-300 font-body text-sm text-foreground space-y-2">
           {pestana === "fortalezas" && (
             <div className="grid sm:grid-cols-2 gap-4">
               <ul className="space-y-1.5">
