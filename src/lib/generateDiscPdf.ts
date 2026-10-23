@@ -1,4 +1,5 @@
 import jsPDF from "jspdf";
+import { aWinAnsi } from "@/lib/informePdf";
 
 type DiscType = "D" | "I" | "S" | "C";
 
@@ -27,497 +28,341 @@ interface PdfParams {
   sec: DiscMeta;
 }
 
-// Brand colors
-const GOLD: [number, number, number] = [191, 155, 80];
-const DARK: [number, number, number] = [28, 25, 23];
-const CREAM: [number, number, number] = [250, 247, 240];
-const MUTED: [number, number, number] = [120, 113, 108];
+type RGB = [number, number, number];
 
-const DISC_COLORS: Record<DiscType, [number, number, number]> = {
-  D: [220, 60, 60],
-  I: [217, 165, 32],
-  S: [46, 160, 100],
-  C: [60, 105, 200],
+// Paleta editorial: marfil, tinta y oro viejo; los colores DISC, apagados.
+const GOLD: RGB = [176, 141, 74];
+const GOLD_SOFT: RGB = [226, 210, 175];
+const INK: RGB = [33, 30, 28];
+const MUTED: RGB = [118, 110, 102];
+const IVORY: RGB = [251, 248, 242];
+const LINE: RGB = [228, 220, 205];
+
+const DISC_COLORS: Record<DiscType, RGB> = {
+  D: [168, 72, 62],
+  I: [190, 145, 60],
+  S: [86, 128, 98],
+  C: [72, 98, 140],
 };
 
-const DISC_LABELS: Record<DiscType, string> = {
-  D: "Dominante",
-  I: "Influyente",
-  S: "Estable",
-  C: "Concienzudo",
-};
+const DISC_LABELS: Record<DiscType, string> = { D: "Dominante", I: "Influyente", S: "Estable", C: "Concienzudo" };
 
-function checkPage(doc: jsPDF, y: number, needed = 30): number {
-  if (y + needed > 275) {
-    doc.addPage();
-    return 25;
-  }
-  return y;
-}
+const M = 22; // margen lateral
+const TOP = 28;
+const BOTTOM = 270;
 
-function drawSectionHeader(doc: jsPDF, title: string, y: number, pageW: number): number {
-  y = checkPage(doc, y, 20);
-  // Gold accent bar
-  doc.setFillColor(...GOLD);
-  doc.roundedRect(15, y - 1, 4, 10, 2, 2, "F");
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...DARK);
-  doc.text(title, 24, y + 7);
-  // Subtle line
-  doc.setDrawColor(230, 225, 215);
-  doc.setLineWidth(0.3);
-  doc.line(24, y + 11, pageW - 15, y + 11);
-  return y + 17;
-}
-
-function drawParagraph(doc: jsPDF, text: string, x: number, y: number, maxW: number, fontSize = 10): number {
-  doc.setFontSize(fontSize);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(...DARK);
-  const lines = doc.splitTextToSize(text, maxW);
-  lines.forEach((line: string) => {
-    y = checkPage(doc, y);
-    doc.text(line, x, y);
-    y += fontSize * 0.45 + 1.5;
-  });
-  return y + 2;
-}
-
-function drawBulletList(doc: jsPDF, items: string[], x: number, y: number, maxW: number, bulletColor: [number, number, number] = GOLD): number {
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(...DARK);
-  items.forEach((item) => {
-    y = checkPage(doc, y);
-    doc.setFillColor(...bulletColor);
-    doc.circle(x + 2, y - 1.2, 1.5, "F");
-    const lines = doc.splitTextToSize(item, maxW - 10);
-    lines.forEach((line: string, li: number) => {
-      y = checkPage(doc, y);
-      doc.text(line, x + 7, y);
-      y += 5;
-    });
-    y += 1;
-  });
-  return y + 2;
-}
+const t = (s: string) => aWinAnsi(s);
 
 export function generateDiscPdf({ userName, primary, secondary, percents, pri, sec }: PdfParams) {
   const doc = new jsPDF();
-  const pageW = doc.internal.pageSize.getWidth();
-  const pageH = doc.internal.pageSize.getHeight();
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const textW = W - M * 2;
   let y = 0;
+  let seccion = 0;
 
-  // ═══════════════════════════════════════
-  // PAGE 1 — COVER
-  // ═══════════════════════════════════════
+  const fondo = () => {
+    doc.setFillColor(...IVORY);
+    doc.rect(0, 0, W, H, "F");
+  };
+  const nuevaPagina = () => {
+    doc.addPage();
+    fondo();
+    y = TOP;
+  };
+  const espacio = (n: number) => {
+    if (y + n > BOTTOM) nuevaPagina();
+  };
 
-  // Dark header block
-  doc.setFillColor(...DARK);
-  doc.rect(0, 0, pageW, 75, "F");
+  const titulo = (texto: string) => {
+    espacio(30);
+    seccion++;
+    y += 4;
+    doc.setFont("times", "italic");
+    doc.setFontSize(11);
+    doc.setTextColor(...GOLD);
+    doc.text(String(seccion).padStart(2, "0"), M, y);
+    doc.setFont("times", "normal");
+    doc.setFontSize(17);
+    doc.setTextColor(...INK);
+    doc.text(t(texto), M + 11, y);
+    y += 4;
+    doc.setDrawColor(...GOLD_SOFT);
+    doc.setLineWidth(0.3);
+    doc.line(M, y, M + 28, y);
+    y += 9;
+  };
 
-  // Gold accent line
-  doc.setFillColor(...GOLD);
-  doc.rect(0, 73, pageW, 3, "F");
+  const parrafo = (texto: string, size = 10.5, color: RGB = INK, estilo: "normal" | "italic" = "normal") => {
+    doc.setFont(estilo === "italic" ? "times" : "helvetica", estilo);
+    doc.setFontSize(size);
+    doc.setTextColor(...color);
+    const lh = size * 0.5 + 0.8;
+    doc.splitTextToSize(t(texto), textW).forEach((l: string) => {
+      espacio(lh);
+      doc.text(l, M, y);
+      y += lh;
+    });
+    y += 4;
+  };
 
-  // Brand name
+  const lista = (items: string[], color: RGB = GOLD) => {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10.5);
+    items.forEach((item) => {
+      const lineas = doc.splitTextToSize(t(item), textW - 8);
+      espacio(lineas.length * 6 + 2);
+      doc.setDrawColor(...color);
+      doc.setLineWidth(0.6);
+      doc.line(M, y - 1.4, M + 3.5, y - 1.4);
+      doc.setTextColor(...INK);
+      lineas.forEach((l: string) => {
+        doc.text(l, M + 8, y);
+        y += 5.6;
+      });
+      y += 1.6;
+    });
+    y += 3;
+  };
+
+  const etiqueta = (texto: string, x: number, yy: number, color: RGB = MUTED) => {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...color);
+    doc.setCharSpace(1.2);
+    doc.text(t(texto.toUpperCase()), x, yy);
+    doc.setCharSpace(0);
+  };
+
+  // ── PORTADA ──────────────────────────────
+  fondo();
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(0.4);
+  doc.rect(12, 12, W - 24, H - 24);
+  doc.setLineWidth(0.15);
+  doc.rect(14, 14, W - 28, H - 28);
+
+  doc.setFont("times", "normal");
+  doc.setFontSize(13);
+  doc.setTextColor(...INK);
+  doc.setCharSpace(4);
+  doc.text("AFÍN", W / 2, 40, { align: "center" });
+  doc.setCharSpace(0);
+  etiqueta("Matchmaking profesional", W / 2 - 22, 47);
+
+  etiqueta("Informe de personalidad", W / 2 - 21, 92, GOLD);
+  doc.setFont("times", "normal");
+  doc.setFontSize(34);
+  doc.setTextColor(...INK);
+  doc.text("Perfil DISC", W / 2, 108, { align: "center" });
+  doc.setFont("times", "italic");
+  doc.setFontSize(18);
+  doc.setTextColor(...MUTED);
+  doc.text(t(userName), W / 2, 121, { align: "center" });
+
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(0.3);
+  doc.line(W / 2 - 15, 131, W / 2 + 15, 131);
+
+  // Estilo principal en la portada
+  const priCol = DISC_COLORS[primary];
+  doc.setDrawColor(...priCol);
+  doc.setLineWidth(0.8);
+  doc.circle(W / 2, 165, 18);
+  doc.setFont("times", "normal");
+  doc.setFontSize(30);
+  doc.setTextColor(...priCol);
+  doc.text(primary, W / 2, 169, { align: "center" });
+  doc.setFontSize(16);
+  doc.setTextColor(...INK);
+  doc.text(t(`${pri.title} · ${percents[primary]}%`), W / 2, 196, { align: "center" });
+  doc.setFont("times", "italic");
   doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(255, 255, 255);
-  doc.text("AFÍN", 15, 20);
+  doc.setTextColor(...MUTED);
+  doc.splitTextToSize(t(pri.frase), W - 80).forEach((l: string, i: number) => doc.text(l, W / 2, 210 + i * 6, { align: "center" }));
 
-  // Decorative dots
-  doc.setFontSize(10);
-  doc.setTextColor(...GOLD);
-  doc.text("◆  ◆  ◆", pageW / 2, 20, { align: "center" });
-
-  // Date
-  doc.setFontSize(9);
+  etiqueta(new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" }), M + 4, H - 26);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(200, 200, 200);
-  doc.text(
-    new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" }),
-    pageW - 15, 20, { align: "right" }
-  );
+  doc.setFontSize(7.5);
+  doc.setTextColor(...MUTED);
+  doc.text("Tu guía para el amor consciente", W - M - 4, H - 26, { align: "right" });
 
-  // Title
-  doc.setFontSize(28);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(255, 255, 255);
-  doc.text("Informe de Personalidad", pageW / 2, 42, { align: "center" });
-
-  // Subtitle
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(...GOLD);
-  doc.text(`Perfil DISC de ${userName}`, pageW / 2, 55, { align: "center" });
-
-  // Tagline
-  doc.setFontSize(9);
-  doc.setTextColor(180, 180, 180);
-  doc.text("Tu guía personalizada para el amor consciente", pageW / 2, 65, { align: "center" });
-
-  y = 90;
-
-  // ═══════════════════════════════════════
-  // PRIMARY PROFILE CARD
-  // ═══════════════════════════════════════
-  const priColor = DISC_COLORS[primary];
-
-  // Card background
-  doc.setFillColor(priColor[0], priColor[1], priColor[2]);
-  doc.roundedRect(15, y, pageW - 30, 35, 4, 4, "F");
-
-  // Overlay for readability
-  doc.setFillColor(0, 0, 0);
-  doc.setGState(doc.GState({ opacity: 0.25 }));
-  doc.roundedRect(15, y, pageW - 30, 35, 4, 4, "F");
-  doc.setGState(doc.GState({ opacity: 1 }));
-
-  doc.setFontSize(11);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(255, 255, 255);
-  doc.text("TU PERFIL PRINCIPAL", 25, y + 12);
-
-  doc.setFontSize(22);
-  doc.setFont("helvetica", "bold");
-  doc.text(`${pri.title}  —  ${percents[primary]}%`, 25, y + 26);
-
-  y += 45;
-
-  // Quote
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bolditalic");
-  doc.setTextColor(...GOLD);
-  doc.text(pri.frase, pageW / 2, y, { align: "center" });
+  // ── RESUMEN ──────────────────────────────
+  nuevaPagina();
+  titulo("Tu estilo principal");
+  doc.setFont("times", "normal");
+  doc.setFontSize(24);
+  doc.setTextColor(...priCol);
+  doc.text(t(pri.title), M, y + 2);
   y += 10;
+  parrafo(pri.description, 11);
 
-  // Description
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(...DARK);
-  const descLines = doc.splitTextToSize(pri.description, pageW - 40);
-  doc.text(descLines, 20, y);
-  y += descLines.length * 5 + 8;
-
-  // ═══════════════════════════════════════
-  // DISC DISTRIBUTION BARS
-  // ═══════════════════════════════════════
-  y = drawSectionHeader(doc, "Distribución DISC", y, pageW);
-
-  const barMaxW = pageW - 80;
+  titulo("Distribución DISC");
   (["D", "I", "S", "C"] as DiscType[]).forEach((type) => {
-    y = checkPage(doc, y, 12);
     const col = DISC_COLORS[type];
-    const pct = percents[type];
-    const isPrimary = type === primary;
-
-    // Label
-    doc.setFontSize(isPrimary ? 11 : 10);
-    doc.setFont("helvetica", isPrimary ? "bold" : "normal");
-    doc.setTextColor(...(isPrimary ? DARK : MUTED));
-    doc.text(`${type} — ${DISC_LABELS[type]}`, 20, y + 1);
-
-    // Bar background
-    doc.setFillColor(235, 232, 225);
-    doc.roundedRect(55, y - 4, barMaxW, 7, 3, 3, "F");
-
-    // Bar filled
-    const fillW = Math.max((pct / 100) * barMaxW, 5);
-    doc.setFillColor(...col);
-    doc.roundedRect(55, y - 4, fillW, 7, 3, 3, "F");
-
-    // Percentage
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...col);
-    doc.text(`${pct}%`, 55 + barMaxW + 4, y + 1);
-
-    y += 13;
+    const destacado = type === primary || type === secondary;
+    doc.setFont("times", destacado ? "bold" : "normal");
+    doc.setFontSize(13);
+    doc.setTextColor(...(destacado ? col : MUTED));
+    doc.text(type, M, y + 1);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(...(destacado ? INK : MUTED));
+    doc.text(DISC_LABELS[type], M + 8, y + 1);
+    const bx = M + 40;
+    const bw = textW - 54;
+    doc.setDrawColor(...LINE);
+    doc.setLineWidth(0.8);
+    doc.line(bx, y, bx + bw, y);
+    if (percents[type] > 0) {
+      doc.setDrawColor(...col);
+      doc.setLineWidth(2.2);
+      doc.line(bx, y, bx + (bw * percents[type]) / 100, y);
+    }
+    doc.setFont("times", "normal");
+    doc.setFontSize(11);
+    doc.setTextColor(...(destacado ? INK : MUTED));
+    doc.text(`${percents[type]}%`, W - M, y + 1, { align: "right" });
+    y += 11;
   });
   y += 4;
 
-  // ═══════════════════════════════════════
-  // SECONDARY PROFILE
-  // ═══════════════════════════════════════
-  y = checkPage(doc, y, 30);
-  const secColor = DISC_COLORS[secondary];
-  doc.setFillColor(secColor[0], secColor[1], secColor[2]);
-  doc.setGState(doc.GState({ opacity: 0.12 }));
-  doc.roundedRect(15, y, pageW - 30, 22, 3, 3, "F");
-  doc.setGState(doc.GState({ opacity: 1 }));
-
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...secColor);
-  doc.text(`PERFIL SECUNDARIO: ${sec.title.toUpperCase()} — ${percents[secondary]}%`, 22, y + 9);
-  doc.setFontSize(9);
+  // Secundario
+  espacio(28);
+  const secCol = DISC_COLORS[secondary];
+  doc.setDrawColor(...secCol);
+  doc.setLineWidth(0.6);
+  doc.line(M, y - 3, M, y + 15);
+  etiqueta(`Estilo secundario · ${percents[secondary]}%`, M + 5, y);
+  doc.setFont("times", "normal");
+  doc.setFontSize(14);
+  doc.setTextColor(...secCol);
+  doc.text(t(sec.title), M + 5, y + 7);
   doc.setFont("helvetica", "normal");
+  doc.setFontSize(9.5);
   doc.setTextColor(...MUTED);
-  const secDesc = doc.splitTextToSize(sec.description, pageW - 50);
-  doc.text(secDesc[0] || "", 22, y + 16);
-  y += 28;
+  doc.text(doc.splitTextToSize(t(sec.description), textW - 8)[0] ?? "", M + 5, y + 13);
+  y += 24;
 
-  // ═══════════════════════════════════════
-  // PAGE 2+ — DEEP DIVE
-  // ═══════════════════════════════════════
+  // ── ANÁLISIS ─────────────────────────────
+  titulo("Tus fortalezas");
+  lista(pri.fortalezas, DISC_COLORS.S);
+  titulo("Áreas de crecimiento");
+  lista(pri.mejoras, DISC_COLORS.I);
 
-  // FORTALEZAS
-  y = drawSectionHeader(doc, "✦  Tus fortalezas", y, pageW);
-  y = drawBulletList(doc, pri.fortalezas, 20, y, pageW - 35, [46, 160, 100]);
+  titulo(`${userName}, así eres en pareja`);
+  parrafo(pri.enPareja);
+  parrafo(
+    `Como perfil ${pri.title}, tu forma de amar se caracteriza por ${primary === "D" ? "la intensidad, la protección y las decisiones firmes" : primary === "I" ? "la calidez emocional, la espontaneidad y el entusiasmo" : primary === "S" ? "la constancia, la paciencia y una lealtad inquebrantable" : "la profundidad, la reflexión y el cuidado en cada detalle"}. Tu pareja ideal es alguien que aprecie estas cualidades y, al mismo tiempo, te ayude a equilibrar tu perfil secundario ${sec.title} (${percents[secondary]}%), que aporta ${secondary === "D" ? "determinación adicional" : secondary === "I" ? "chispa y conexión social" : secondary === "S" ? "estabilidad emocional" : "estructura y análisis"} a tu forma de relacionarte.`,
+    10.5, MUTED,
+  );
 
-  // ÁREAS DE MEJORA
-  y = drawSectionHeader(doc, "⚡  Áreas de mejora", y, pageW);
-  y = drawBulletList(doc, pri.mejoras, 20, y, pageW - 35, [217, 165, 32]);
+  titulo("Tu lenguaje del amor");
+  parrafo(pri.amor);
 
-  // EN PAREJA
-  y = drawSectionHeader(doc, `💛  ${userName}, así eres en pareja`, y, pageW);
-  y = drawParagraph(doc, pri.enPareja, 20, y, pageW - 35);
+  titulo("Necesidades afectivas");
+  lista(pri.necesidades);
+  parrafo("Cuando estas necesidades se satisfacen, te sientes seguro/a y en tu mejor versión emocional. Si alguna falta, puedes sentir frustración o distanciamiento. Comunicarlas de forma abierta es clave.", 9.5, MUTED);
 
-  // Expanded couple narrative
-  const coupleNarrative = `Como perfil ${pri.title}, tu forma de amar se caracteriza por ${primary === "D" ? "la intensidad, la protección y las decisiones firmes" : primary === "I" ? "la calidez emocional, la espontaneidad y el entusiasmo" : primary === "S" ? "la constancia, la paciencia y una lealtad inquebrantable" : "la profundidad, la reflexión y el cuidado en cada detalle"}. Tu pareja ideal es alguien que aprecie estas cualidades y, al mismo tiempo, te ayude a equilibrar tu perfil secundario ${sec.title} (${percents[secondary]}%), que aporta ${secondary === "D" ? "determinación adicional" : secondary === "I" ? "chispa y conexión social" : secondary === "S" ? "estabilidad emocional" : "estructura y análisis"} a tu forma de relacionarte.`;
-  y = drawParagraph(doc, coupleNarrative, 20, y, pageW - 35);
+  titulo("Gestión de conflictos");
+  parrafo(pri.conflicto);
+  espacio(14);
+  etiqueta("Influencia del estilo secundario", M, y);
+  y += 6;
+  parrafo(sec.conflicto, 10, MUTED);
 
-  // LENGUAJE DEL AMOR
-  y = drawSectionHeader(doc, "❤️  Tu lenguaje del amor", y, pageW);
-  y = drawParagraph(doc, pri.amor, 20, y, pageW - 35);
+  titulo("Compatibilidad ideal");
+  parrafo(pri.compatibility);
+  titulo("Comunicación en pareja");
+  parrafo(pri.comunicacion);
+  titulo("Planes que os acercan");
+  parrafo(pri.actividades);
 
-  // NECESIDADES AFECTIVAS
-  y = drawSectionHeader(doc, "🌟  Necesidades afectivas", y, pageW);
-  y = drawBulletList(doc, pri.necesidades, 20, y, pageW - 35);
-
-  // Additional context
-  const needsContext = `Cuando estas necesidades se satisfacen, te sientes seguro/a y en tu mejor versión emocional. Si alguna de ellas falta, puedes experimentar frustración, distanciamiento o el deseo de protegerte cerrándote emocionalmente. Comunicar estas necesidades de forma abierta es clave.`;
-  y = drawParagraph(doc, needsContext, 20, y, pageW - 35, 9);
-
-  // GESTIÓN DE CONFLICTOS
-  y = drawSectionHeader(doc, "🔥  Gestión de conflictos", y, pageW);
-  y = drawParagraph(doc, pri.conflicto, 20, y, pageW - 35);
-
-  // Secondary conflict influence
-  y = checkPage(doc, y, 15);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...MUTED);
-  doc.text("Influencia del perfil secundario:", 20, y);
-  y += 5;
-  y = drawParagraph(doc, sec.conflicto, 20, y, pageW - 35, 9);
-
-  // COMPATIBILIDAD
-  y = drawSectionHeader(doc, "🤝  Compatibilidad ideal", y, pageW);
-  y = drawParagraph(doc, pri.compatibility, 20, y, pageW - 35);
-
-  // COMUNICACIÓN
-  y = drawSectionHeader(doc, "💬  Comunicación en pareja", y, pageW);
-  y = drawParagraph(doc, pri.comunicacion, 20, y, pageW - 35);
-
-  // ACTIVIDADES
-  y = drawSectionHeader(doc, "🎯  Actividades sugeridas", y, pageW);
-  y = drawParagraph(doc, pri.actividades, 20, y, pageW - 35);
-
-  // ═══════════════════════════════════════
-  // PRACTICAL TIPS
-  // ═══════════════════════════════════════
-  y = drawSectionHeader(doc, "📋  Consejos prácticos para tu relación", y, pageW);
-  const tips = [
-    "Establece acuerdos claros y revisadlos juntos periódicamente para mantener la confianza.",
+  titulo("Consejos prácticos");
+  lista([
+    "Estableced acuerdos claros y revisadlos juntos de vez en cuando para mantener la confianza.",
     "Dedica tiempo de calidad semanal sin distracciones para reforzar vuestra conexión.",
     "Practica la escucha activa: antes de responder en un conflicto, repite lo que has entendido.",
     "Celebra los avances pequeños: las relaciones sanas se construyen con gestos cotidianos.",
     "Identifica y comunica tus necesidades sin esperar que tu pareja las adivine.",
     "Respeta los ritmos emocionales del otro: no todos procesan al mismo tiempo.",
-  ];
-  y = drawBulletList(doc, tips, 20, y, pageW - 35, GOLD);
+  ]);
 
-  // ═══════════════════════════════════════
-  // CLOSING MESSAGE
-  // ═══════════════════════════════════════
-  y = checkPage(doc, y, 45);
-  // Gold card
-  doc.setFillColor(GOLD[0], GOLD[1], GOLD[2]);
-  doc.setGState(doc.GState({ opacity: 0.1 }));
-  doc.roundedRect(15, y, pageW - 30, 35, 4, 4, "F");
-  doc.setGState(doc.GState({ opacity: 1 }));
-
-  doc.setFillColor(...GOLD);
-  doc.roundedRect(15, y, 4, 35, 2, 2, "F");
-
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...DARK);
-  doc.text(`${userName}, tu perfil es una guía para amar mejor 💛`, 25, y + 14);
-
-  doc.setFontSize(9);
+  // Cierre
+  espacio(48);
+  y += 6;
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(0.3);
+  doc.line(W / 2 - 15, y, W / 2 + 15, y);
+  y += 12;
+  doc.setFont("times", "italic");
+  doc.setFontSize(15);
+  doc.setTextColor(...INK);
+  doc.text(t(`${userName}, tu perfil es una guía para amar mejor.`), W / 2, y, { align: "center" });
+  y += 9;
   doc.setFont("helvetica", "normal");
+  doc.setFontSize(9.5);
   doc.setTextColor(...MUTED);
-  doc.text("Este informe es el punto de partida. En tu sesión con nuestro especialista", 25, y + 22);
-  doc.text("profundizaremos en cada aspecto y diseñaremos un camino personalizado para ti.", 25, y + 28);
-  y += 42;
+  doc.splitTextToSize(t("Este informe es el punto de partida. En tu sesión con nuestra especialista profundizaremos en cada aspecto y diseñaremos un camino personalizado para ti."), textW - 30)
+    .forEach((l: string) => { doc.text(l, W / 2, y, { align: "center" }); y += 5; });
 
-  // ═══════════════════════════════════════
-  // PLANES — ESENCIAL & PREMIUM
-  // ═══════════════════════════════════════
-  y = checkPage(doc, y, 120);
-  if (y > 25) { doc.addPage(); y = 25; }
-
-  // Section title
-  doc.setFillColor(...GOLD);
-  doc.roundedRect(15, y - 1, 4, 10, 2, 2, "F");
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...DARK);
-  doc.text("Nuestros planes", 24, y + 7);
-  y += 17;
-
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(...MUTED);
-  const introP1 = doc.splitTextToSize(
-    `${userName}, ahora que conoces tu perfil, el siguiente paso es trabajar con uno de nuestros especialistas en`,
-    pageW - 40
-  );
-  doc.text(introP1, 20, y);
-  y += introP1.length * 5;
-
-  // Bold highlight
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...DARK);
-  doc.text("SESIONES PERSONALES", 20, y);
-  const boldW = doc.getTextWidth("SESIONES PERSONALES ");
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(...MUTED);
-  doc.text("para conocer a la persona ideal para ti.", 20 + boldW, y);
+  // ── PLANES ───────────────────────────────
+  nuevaPagina();
+  titulo("Nuestros planes");
+  parrafo(`${userName}, ahora que conoces tu perfil, el siguiente paso es trabajar con nuestra especialista en sesiones personales para conocer a la persona ideal para ti.`, 10.5, MUTED);
   y += 6;
 
-  const introP2 = doc.splitTextToSize("Elige el plan que mejor se adapte a ti:", pageW - 40);
-  doc.text(introP2, 20, y);
-  y += introP2.length * 5 + 8;
-
-  // --- Plan Esencial ---
-  const planCardH = 62;
-  const cardW = (pageW - 45) / 2;
-
-  // Esencial card
-  doc.setFillColor(245, 242, 235);
-  doc.roundedRect(15, y, cardW, planCardH, 4, 4, "F");
-  doc.setDrawColor(220, 215, 205);
-  doc.setLineWidth(0.5);
-  doc.roundedRect(15, y, cardW, planCardH, 4, 4, "S");
-
-  doc.setFontSize(13);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...DARK);
-  doc.text("Esencial", 15 + cardW / 2, y + 12, { align: "center" });
-
-  doc.setFontSize(22);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...GOLD);
-  doc.text("160€", 15 + cardW / 2, y + 24, { align: "center" });
-
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(...MUTED);
-  doc.text("/mes", 15 + cardW / 2 + 18, y + 24);
-
-  const esencialFeatures = [
-    "1 sesión mensual de 60 min",
-    "Presentaciones compatibles",
-    "Feedback personal tras la cita",
+  const cw = (textW - 10) / 2;
+  const ch = 78;
+  const planes = [
+    { nombre: "Esencial", precio: "160€", x: M, destacado: false, items: ["1 sesión mensual de 60 min", "Presentaciones compatibles", "Feedback personal tras la cita"] },
+    { nombre: "Premium", precio: "250€", x: M + cw + 10, destacado: true, items: ["2 sesiones mensuales", "Presentaciones prioritarias", "Verificación de antecedentes"] },
   ];
-  let fy = y + 33;
-  esencialFeatures.forEach((f) => {
-    doc.setFillColor(...GOLD);
-    doc.circle(22, fy - 1, 1.2, "F");
-    doc.setFontSize(8);
+  planes.forEach((p) => {
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(...(p.destacado ? GOLD : LINE));
+    doc.setLineWidth(p.destacado ? 0.6 : 0.3);
+    doc.rect(p.x, y, cw, ch, "FD");
+    const cx = p.x + cw / 2;
+    if (p.destacado) etiqueta("Recomendado", cx - 9, y + 10, GOLD);
+    doc.setFont("times", "normal");
+    doc.setFontSize(17);
+    doc.setTextColor(...INK);
+    doc.text(p.nombre, cx, y + 22, { align: "center" });
+    doc.setFontSize(28);
+    doc.setTextColor(...GOLD);
+    doc.text(t(p.precio), cx, y + 38, { align: "center" });
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(...DARK);
-    doc.text(f, 26, fy);
-    fy += 8;
-  });
-
-  // Premium card
-  const px = 15 + cardW + 15;
-  doc.setFillColor(...DARK);
-  doc.roundedRect(px, y, cardW, planCardH, 4, 4, "F");
-  // Gold border
-  doc.setDrawColor(...GOLD);
-  doc.setLineWidth(1);
-  doc.roundedRect(px, y, cardW, planCardH, 4, 4, "S");
-
-  doc.setFontSize(13);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(255, 255, 255);
-  doc.text("Premium", px + cardW / 2, y + 12, { align: "center" });
-
-  doc.setFontSize(22);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...GOLD);
-  doc.text("250€", px + cardW / 2, y + 24, { align: "center" });
-
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(180, 180, 180);
-  doc.text("/mes", px + cardW / 2 + 18, y + 24);
-
-  const premiumFeatures = [
-    "2 sesiones mensuales",
-    "Presentaciones prioritarias",
-    "Verificación de antecedentes",
-  ];
-  fy = y + 33;
-  premiumFeatures.forEach((f) => {
-    doc.setFillColor(...GOLD);
-    doc.circle(px + 7, fy - 1, 1.2, "F");
     doc.setFontSize(8);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(220, 220, 220);
-    doc.text(f, px + 11, fy);
-    fy += 8;
-  });
-
-  // Recommended badge on Premium
-  doc.setFillColor(...GOLD);
-  doc.roundedRect(px + cardW / 2 - 20, y - 5, 40, 10, 5, 5, "F");
-  doc.setFontSize(7);
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...DARK);
-  doc.text("RECOMENDADO", px + cardW / 2, y, { align: "center" });
-
-  y += planCardH + 10;
-
-  // CTA text
-  y = checkPage(doc, y, 20);
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(...MUTED);
-  const ctaText = doc.splitTextToSize(
-    "Reserva tu primera sesión gratuita de 15 minutos y descubre cómo nuestros especialistas pueden ayudarte a encontrar a tu persona.",
-    pageW - 40
-  );
-  doc.text(ctaText, 20, y);
-  y += ctaText.length * 5 + 4;
-
-  // ═══════════════════════════════════════
-  // FOOTER (all pages)
-  // ═══════════════════════════════════════
-  const totalPages = doc.getNumberOfPages();
-  for (let i = 1; i <= totalPages; i++) {
-    doc.setPage(i);
-    // Footer line
-    doc.setDrawColor(...GOLD);
-    doc.setLineWidth(0.5);
-    doc.line(15, pageH - 15, pageW - 15, pageH - 15);
-    // Footer text
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "normal");
     doc.setTextColor(...MUTED);
-    doc.text("Generado por Afín", 15, pageH - 9);
-    doc.text(`Página ${i} de ${totalPages}`, pageW - 15, pageH - 9, { align: "right" });
-    // Confidential
+    doc.text("al mes", cx, y + 44, { align: "center" });
+    doc.setDrawColor(...LINE);
+    doc.setLineWidth(0.3);
+    doc.line(p.x + 10, y + 50, p.x + cw - 10, y + 50);
+    doc.setFontSize(9);
+    doc.setTextColor(...INK);
+    p.items.forEach((it, i) => doc.text(t(it), cx, y + 58 + i * 6.5, { align: "center" }));
+  });
+  y += ch + 14;
+  parrafo("Reserva tu primera sesión gratuita de 15 minutos y descubre cómo podemos ayudarte a encontrar a tu persona.", 10.5, MUTED, "italic");
+
+  // ── PIE (todas menos la portada) ─────────
+  const total = doc.getNumberOfPages();
+  for (let i = 2; i <= total; i++) {
+    doc.setPage(i);
+    doc.setDrawColor(...LINE);
+    doc.setLineWidth(0.3);
+    doc.line(M, H - 16, W - M, H - 16);
+    doc.setFont("times", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...MUTED);
+    doc.setCharSpace(2);
+    doc.text("AFÍN", M, H - 10);
+    doc.setCharSpace(0);
+    doc.setFont("helvetica", "normal");
     doc.setFontSize(7);
-    doc.setTextColor(190, 185, 175);
-    doc.text("CONFIDENCIAL — Este documento es personal e intransferible", pageW / 2, pageH - 9, { align: "center" });
+    doc.text("Confidencial · personal e intransferible", W / 2, H - 10, { align: "center" });
+    doc.text(`${i - 1} / ${total - 1}`, W - M, H - 10, { align: "right" });
   }
 
   doc.save(`informe-disc-${userName.toLowerCase().replace(/\s+/g, "-")}.pdf`);
