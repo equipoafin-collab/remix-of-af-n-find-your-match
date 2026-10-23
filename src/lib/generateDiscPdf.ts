@@ -157,12 +157,6 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
 
   // ── PORTADA ──────────────────────────────
   fondo();
-  doc.setDrawColor(...GOLD);
-  doc.setLineWidth(0.4);
-  doc.rect(12, 12, W - 24, H - 24);
-  doc.setLineWidth(0.15);
-  doc.rect(14, 14, W - 28, H - 28);
-
   doc.setFont("times", "normal");
   doc.setFontSize(13);
   doc.setTextColor(...INK);
