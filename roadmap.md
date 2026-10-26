@@ -1,1 +1,3 @@
 - [x] Informe DISC en PDF con estilo cósmico y elegante
+- [x] Resultado DISC del perfil más llamativo y narrativo
+- [x] Fondos en azul marino corporativo (vista y PDF), nada en negro

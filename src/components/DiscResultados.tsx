@@ -67,16 +67,16 @@ const DiscResultados = ({ primary, secondary, percents, nombre, onDescargar }: P
     <div className="space-y-6">
       <div
         className="relative overflow-hidden rounded-2xl p-6 sm:p-8 text-center animate-in fade-in zoom-in-95 duration-700"
-        style={{ background: `radial-gradient(circle at 30% 20%, ${COLOR[primary]}55, transparent 60%), radial-gradient(circle at 80% 90%, ${COLOR[secondary]}40, transparent 55%), hsl(var(--foreground))` }}
+        style={{ background: `radial-gradient(circle at 30% 20%, ${COLOR[primary]}55, transparent 60%), radial-gradient(circle at 80% 90%, ${COLOR[secondary]}40, transparent 55%), hsl(var(--primary))` }}
       >
-        <p className="font-body text-xs uppercase tracking-[0.3em] text-background/70">{nom ? `${nom}, tu estilo principal es` : "Tu estilo principal es"}</p>
-        <p className="font-display text-5xl sm:text-6xl mt-3 text-background">{pri.title}</p>
+        <p className="font-body text-xs uppercase tracking-[0.3em] text-primary-foreground/70">{nom ? `${nom}, tu estilo principal es` : "Tu estilo principal es"}</p>
+        <p className="font-display text-5xl sm:text-6xl mt-3 text-primary-foreground">{pri.title}</p>
         <p className="font-display text-7xl sm:text-8xl leading-none mt-2" style={{ color: COLOR[primary] }}>
           {listo ? percents[primary] : 0}<span className="text-4xl">%</span>
         </p>
-        <p className="font-display italic text-background/80 mt-4 max-w-md mx-auto">{pri.frase}</p>
-        <p className="font-body text-sm text-background/70 mt-3">
-          con un toque <strong className="text-background">{DISC_META[secondary].title.toLowerCase()}</strong> ({percents[secondary]}%)
+        <p className="font-display italic text-primary-foreground/80 mt-4 max-w-md mx-auto">{pri.frase}</p>
+        <p className="font-body text-sm text-primary-foreground/70 mt-3">
+          con un toque <strong className="text-primary-foreground">{DISC_META[secondary].title.toLowerCase()}</strong> ({percents[secondary]}%)
         </p>
       </div>
 
@@ -179,7 +179,7 @@ const DiscResultados = ({ primary, secondary, percents, nombre, onDescargar }: P
       <button
         type="button"
         onClick={onDescargar}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-foreground text-background font-body text-sm hover:opacity-90"
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground font-body text-sm hover:opacity-90"
       >
         <Download className="w-4 h-4" /> Descargar mi informe DISC completo
       </button>

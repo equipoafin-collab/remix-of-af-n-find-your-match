@@ -36,8 +36,8 @@ const GOLD: RGB = [222, 190, 120];
 const GOLD_SOFT: RGB = [140, 118, 80];
 const INK: RGB = [240, 236, 228];
 const MUTED: RGB = [168, 166, 190];
-const IVORY: RGB = [12, 13, 34];
-const LINE: RGB = [52, 54, 92];
+const IVORY: RGB = [18, 34, 72]; // azul marino corporativo
+const LINE: RGB = [62, 84, 130];
 
 const DISC_COLORS: Record<DiscType, RGB> = {
   D: [236, 120, 132],
@@ -196,13 +196,16 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   doc.setFontSize(30);
   doc.setTextColor(...priCol);
   doc.text(primary, W / 2, 169, { align: "center" });
-  doc.setFontSize(16);
+  doc.setFontSize(22);
   doc.setTextColor(...INK);
-  doc.text(t(`${pri.title} · ${percents[primary]}%`), W / 2, 196, { align: "center" });
+  doc.text(t(pri.title), W / 2, 199, { align: "center" });
+  doc.setFontSize(46);
+  doc.setTextColor(...priCol);
+  doc.text(`${percents[primary]}%`, W / 2, 218, { align: "center" });
   doc.setFont("times", "italic");
   doc.setFontSize(12);
   doc.setTextColor(...MUTED);
-  doc.splitTextToSize(t(pri.frase), W - 80).forEach((l: string, i: number) => doc.text(l, W / 2, 210 + i * 6, { align: "center" }));
+  doc.splitTextToSize(t(pri.frase), W - 80).forEach((l: string, i: number) => doc.text(l, W / 2, 231 + i * 6, { align: "center" }));
 
   etiqueta(new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" }), M + 4, H - 26);
   doc.setFont("helvetica", "normal");
@@ -342,7 +345,7 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
     { nombre: "Premium", precio: "250€", x: M + cw + 10, destacado: true, items: ["2 sesiones mensuales", "Presentaciones prioritarias", "Verificación de antecedentes"] },
   ];
   planes.forEach((p) => {
-    doc.setFillColor(22, 24, 56);
+    doc.setFillColor(28, 48, 96);
     doc.setDrawColor(...(p.destacado ? GOLD : LINE));
     doc.setLineWidth(p.destacado ? 0.6 : 0.3);
     doc.rect(p.x, y, cw, ch, "FD");
