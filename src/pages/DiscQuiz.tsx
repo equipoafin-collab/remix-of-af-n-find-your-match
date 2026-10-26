@@ -5,6 +5,7 @@ import { ArrowRight, ArrowLeft, Heart, Sparkles, Zap, Sun, Shield, Target, Check
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { generateDiscPdf } from "@/lib/generateDiscPdf";
+import { DISC_META } from "@/lib/disc";
 import { VERSION_CONSENTIMIENTO } from "@/lib/rgpd";
 import { useToast } from "@/hooks/use-toast";
 
@@ -65,142 +66,8 @@ const QUESTIONS: QuizQuestion[] = [
   },
 ];
 
-const DISC_DESCRIPTIONS: Record<DiscType, {
-  title: string;
-  emoji: string;
-  description: string;
-  compatibility: string;
-  comunicacion: string;
-  actividades: string;
-  fortalezas: string[];
-  mejoras: string[];
-  enPareja: string;
-  necesidades: string[];
-  frase: string;
-  conflicto: string;
-  querer: string;
-}> = {
-  D: {
-    title: "Dominante",
-    emoji: "⚡",
-    description: "Directo, decidido, le gusta el liderazgo y la acción. Te atraen relaciones dinámicas y claras donde ambos tengan objetivos definidos.",
-    compatibility: "Combinas mejor con perfiles S (estabilidad) e I (entusiasmo). Alguien que equilibre tu impulso con calma o diversión.",
-    comunicacion: "Sé claro y directo, evita rodeos. Valora que tu pareja sea honesta y resolutiva.",
-    actividades: "Deportes de aventura, viajes espontáneos, retos en pareja, proyectos ambiciosos juntos.",
-    fortalezas: [
-      "Toma decisiones con rapidez y confianza",
-      "Lidera con determinación y energía",
-      "Afronta los problemas de frente sin rodeos",
-      "Orientado/a a resultados y objetivos claros",
-    ],
-    mejoras: [
-      "Puede parecer impaciente o autoritario/a",
-      "Le cuesta ceder el control o delegar",
-      "Tiende a minimizar las emociones ajenas",
-      "Puede priorizar ganar sobre conectar",
-    ],
-    enPareja: "Aporta dirección, iniciativa y energía a la relación. Necesita una pareja que valore su determinación y le ayude a conectar emocionalmente. Cuando se siente seguro/a, es profundamente leal y protector/a.",
-    necesidades: [
-      "Autonomía y espacio para decidir",
-      "Una pareja directa que no dé rodeos",
-      "Retos y metas compartidas",
-      "Respeto por su tiempo y eficiencia",
-    ],
-    frase: "\"Dame libertad para actuar y te daré el mundo.\"",
-    conflicto: "En conflicto, tiendes a confrontar directamente. Tu reto es aprender a escuchar antes de reaccionar y a reconocer que ceder no es perder.",
-    querer: "Quieres a base de hechos: resuelves, proteges y creas experiencias intensas para quien te importa.",
-  },
-  I: {
-    title: "Influyente",
-    emoji: "✨",
-    description: "Sociable, entusiasta y motivador. Necesitas conexión emocional, diversión y sentirte admirado/a en la relación.",
-    compatibility: "Encajas bien con perfiles C (estructura) y S (constancia). Alguien que te dé raíces sin apagar tu chispa.",
-    comunicacion: "Expresa emociones abiertamente. Valora la escucha activa y los gestos de afecto espontáneos.",
-    actividades: "Eventos sociales, viajes con amigos, cenas románticas, actividades creativas en pareja.",
-    fortalezas: [
-      "Genera entusiasmo y optimismo contagioso",
-      "Conecta fácilmente con las personas a nivel emocional",
-      "Resuelve conflictos con empatía y creatividad",
-      "Hace que cualquier momento sea especial y memorable",
-    ],
-    mejoras: [
-      "Puede evitar conversaciones difíciles o serias",
-      "Tiende a ser impulsivo/a en decisiones importantes",
-      "Le cuesta mantener rutinas y compromisos a largo plazo",
-      "Puede buscar validación externa en exceso",
-    ],
-    enPareja: "Aporta alegría, espontaneidad y conexión social a la relación. Es la persona que ilumina la habitación y hace que todo sea más divertido. Necesita sentirse admirado/a y escuchado/a.",
-    necesidades: [
-      "Expresión emocional abierta y frecuente",
-      "Vida social activa compartida",
-      "Reconocimiento y admiración",
-      "Espacio para la creatividad y la espontaneidad",
-    ],
-    frase: "\"Hazme reír y te entregaré el corazón.\"",
-    conflicto: "En conflicto, tiendes a buscar la armonía rápidamente, a veces a costa de no abordar el problema de fondo. Tu reto es mantener conversaciones difíciles sin huir.",
-    querer: "Quieres con palabras y sorpresas: lo dices, lo celebras y mantienes la chispa viva.",
-  },
-  S: {
-    title: "Estable",
-    emoji: "🌿",
-    description: "Paciente, estable y confiable. Valoras la seguridad emocional, la rutina compartida y la lealtad por encima de todo.",
-    compatibility: "Combinas con perfiles D (decisión) e I (energía). Alguien que te saque de la zona de confort con cariño es ideal.",
-    comunicacion: "Necesitas tiempo para procesar. Valora la paciencia y los espacios seguros para hablar.",
-    actividades: "Tardes tranquilas, cocinar juntos, paseos por la naturaleza, series y películas en casa.",
-    fortalezas: [
-      "Ofrece apoyo constante y lealtad inquebrantable",
-      "Escucha activamente sin juzgar",
-      "Crea un entorno de seguridad y confianza",
-      "Es paciente y comprensivo/a en los momentos difíciles",
-    ],
-    mejoras: [
-      "Puede evitar los cambios necesarios por comodidad",
-      "Le cuesta expresar sus propias necesidades",
-      "Tiende a acumular frustración sin comunicarla",
-      "Puede ser demasiado complaciente perdiendo su identidad",
-    ],
-    enPareja: "Aporta calma, estabilidad y un compromiso profundo. Es la roca emocional de la relación. Cuando se siente seguro/a, se entrega completamente y crea un hogar emocional sólido.",
-    necesidades: [
-      "Seguridad emocional y previsibilidad",
-      "Tiempo para adaptarse a los cambios",
-      "Una pareja que respete su ritmo",
-      "Rutinas compartidas y momentos de calidad",
-    ],
-    frase: "\"Dame seguridad y te daré toda mi lealtad.\"",
-    conflicto: "En conflicto, tiendes a evitar la confrontación y a ceder para mantener la paz. Tu reto es aprender a poner límites y expresar tus necesidades sin sentir culpa.",
-    querer: "Quieres con presencia: tiempo sin prisa, cuidados cotidianos y estar ahí cuando hace falta.",
-  },
-  C: {
-    title: "Concienzudo",
-    emoji: "💎",
-    description: "Analítico, detallista y cuidadoso. Buscas coherencia, compromiso real y una relación bien construida.",
-    compatibility: "Tu precisión se complementa con perfiles I (espontaneidad) y S (paciencia). Alguien que valore tu profundidad.",
-    comunicacion: "Prefiere conversaciones con sentido. Valora la lógica, los datos y la coherencia en las decisiones.",
-    actividades: "Museos, lectura compartida, planificación de viajes detallados, debates intelectuales.",
-    fortalezas: [
-      "Planifica con cuidado y previsión",
-      "Valora la calidad y la coherencia en todo",
-      "Aporta estructura, orden y fiabilidad",
-      "Es profundamente reflexivo/a y considerado/a",
-    ],
-    mejoras: [
-      "Puede ser excesivamente crítico/a consigo mismo y con otros",
-      "Le cuesta ser espontáneo/a o improvisar",
-      "Tiende a sobreanalizar las situaciones y las emociones",
-      "Puede parecer frío/a cuando en realidad está procesando",
-    ],
-    enPareja: "Aporta seguridad, planificación y atención al detalle. Es la persona que piensa en todo y cuida cada aspecto de la relación. Necesita una pareja que valore su rigor y le ayude a soltar el control.",
-    necesidades: [
-      "Previsibilidad y coherencia en la relación",
-      "Espacio para procesar las emociones a su ritmo",
-      "Conversaciones profundas y con sentido",
-      "Respeto por sus estándares y valores",
-    ],
-    frase: "\"Demuéstrame coherencia y te entregaré mi confianza.\"",
-    conflicto: "En conflicto, tiendes a retirarte y analizar antes de hablar. Tu reto es aprender a comunicar lo que sientes en el momento, sin esperar a tener la respuesta perfecta.",
-    querer: "Quieres con coherencia: detalles pensados, promesas que se cumplen y planes bien cuidados.",
-  },
-};
+// Mismos textos que el perfil del área del cliente (lib/disc), para que el tono no cambie entre pantallas.
+const DISC_DESCRIPTIONS = DISC_META;
 
 const DISC_COLORS: Record<DiscType, { bg: string; text: string; accent: string; ring: string; gradient: string }> = {
   D: { bg: "bg-red-50", text: "text-red-700", accent: "bg-red-500", ring: "ring-red-400", gradient: "from-red-500 to-red-600" },

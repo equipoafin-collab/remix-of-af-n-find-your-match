@@ -24,7 +24,7 @@ export const DISC_META: Record<DiscType, { title: string; emoji: string; descrip
     querer: "Quieres con palabras y sorpresas: lo dices, lo celebras y no dejas que se apague la chispa.",
     necesidades: ["Que te digan lo que sientes", "Vida social activa", "Reconocimiento", "Espacio para tu creatividad"],
     conflicto: "Buscas arreglarlo rápido, a veces sin hablar de lo de verdad.",
-    frase: "\"Hazme reír y te lo doy todo.\"",
+    frase: "\"Ríete conmigo y me quedo.\"",
     compatibility: "Encajas bien con perfiles C (estructura) y S (constancia).",
     comunicacion: "Cuenta lo que sientes y deja que te escuchen.", actividades: "Eventos sociales, viajes con amigos, cenas románticas." },
   S: { title: "Estable", emoji: "🌿", bg: "bg-emerald-50", text: "text-emerald-700", gradient: "from-emerald-500 to-emerald-600", ring: "ring-emerald-400",
