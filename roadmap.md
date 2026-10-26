@@ -1,5 +1,5 @@
 - [x] Informe DISC en PDF con estilo cósmico y elegante
 - [x] Resultado DISC del perfil más llamativo y narrativo
 - [x] Fondos en azul marino corporativo (vista y PDF), nada en negro
-- [ ] Frases del DISC más cercanas y de calle (sin tono filosófico)
-- [ ] Frase del Influyente: más cercana y personal (no "hazme reír y te lo doy todo")
+- [x] Frases del DISC más cercanas y de calle (sin tono filosófico)
+- [x] Frase del Influyente: más cercana y personal (no "hazme reír y te lo doy todo")
