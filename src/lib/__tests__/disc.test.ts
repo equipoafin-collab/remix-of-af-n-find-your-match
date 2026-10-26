@@ -27,4 +27,14 @@ describe("resumenDisc", () => {
     expect(Object.keys(DISC_META).sort()).toEqual(["C", "D", "I", "S"]);
     expect(DISC_META.I.title).toBe("Influyente");
   });
+
+  it("cada tipo explica cómo quiere, con el verbo querer", () => {
+    (["D", "I", "S", "C"] as const).forEach((t) => {
+      expect(DISC_META[t].querer).toMatch(/quieres/i);
+    });
+    const textos = Object.values(DISC_META).flatMap((m) => [
+      m.description, m.enPareja, m.querer, m.conflicto, ...m.fortalezas, ...m.mejoras, ...m.necesidades,
+    ]);
+    expect(textos.some((s) => /\bamar\b|\bamor\b|\bama\b|\bamando\b|\bamado\b/i.test(s))).toBe(false);
+  });
 });

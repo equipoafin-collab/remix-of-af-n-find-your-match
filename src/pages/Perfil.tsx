@@ -412,7 +412,7 @@ const Perfil = () => {
 
                   <div className="space-y-3">
                     <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground leading-tight">
-                      Tu <span className="text-gradient-gold italic font-normal">DNI del amor</span>
+                      Tu <span className="text-gradient-gold italic font-normal">DNI del querer</span>
                     </h1>
                     <p className="font-body text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">
                       No es un formulario cualquiera. Es el primer paso para encontrar a tu persona.
@@ -769,7 +769,7 @@ const Perfil = () => {
                 `12. Área de mejora 2: ${pri.mejoras[1]}`,
                 `13. Área de mejora 3: ${pri.mejoras[2]}`,
                 `14. Cómo eres en pareja: ${pri.enPareja}`,
-                `15. Lenguaje del amor: ${pri.amor}`,
+                `15. Cómo quieres: ${pri.querer}`,
                 `16. Necesidad afectiva 1: ${pri.necesidades[0]}`,
                 `17. Necesidad afectiva 2: ${pri.necesidades[1]}`,
                 `18. Necesidad afectiva 3: ${pri.necesidades[2]}`,
@@ -784,7 +784,7 @@ const Perfil = () => {
                 `27. Dedica tiempo de calidad semanal para reforzar conexión`,
                 `28. Practica escucha activa antes de responder en conflicto`,
                 `29. Celebra avances pequeños para mantener motivación`,
-                `30. Mensaje final: ${userName}, tu perfil es una guía para amar mejor 💛`,
+                `30. Mensaje final: ${userName}, tu perfil es una guía para querer mejor 💛`,
               ];
 
               return (
@@ -878,8 +878,8 @@ const Perfil = () => {
                       </div>
 
                       <div className="rounded-xl bg-gradient-to-br from-gold/10 to-warm/10 border border-gold/20 p-4 space-y-1.5">
-                        <h4 className="font-body text-xs font-bold text-foreground">💛 Lenguaje del amor</h4>
-                        <p className="font-body text-xs text-muted-foreground leading-relaxed">{pri.amor}</p>
+                        <h4 className="font-body text-xs font-bold text-foreground">💛 Tu forma de querer</h4>
+                        <p className="font-body text-xs text-muted-foreground leading-relaxed">{pri.querer}</p>
                         <div className="flex flex-wrap gap-1.5 pt-1">
                           {pri.necesidades.map((n, i) => (
                             <span key={i} className="font-body text-[11px] text-muted-foreground bg-background/60 rounded-lg px-2 py-1 border border-gold/10">
