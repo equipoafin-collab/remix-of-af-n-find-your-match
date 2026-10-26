@@ -59,6 +59,8 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
   const textW = W - M * 2;
+  // El nombre se muestra siempre con la inicial en mayúscula.
+  const nombre = userName.charAt(0).toUpperCase() + userName.slice(1);
   let y = 0;
   let seccion = 0;
 
@@ -173,7 +175,7 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   doc.setFont("times", "italic");
   doc.setFontSize(18);
   doc.setTextColor(...MUTED);
-  doc.text(t(userName), W / 2, 121, { align: "center" });
+  doc.text(t(nombre), W / 2, 121, { align: "center" });
 
   doc.setDrawColor(...GOLD);
   doc.setLineWidth(0.3);
@@ -276,7 +278,7 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   titulo("Áreas de crecimiento");
   lista(pri.mejoras, DISC_COLORS.I);
 
-  titulo(`${userName}, así eres en pareja`);
+  titulo(`${nombre}, así eres en pareja`);
   parrafo(pri.enPareja);
   parrafo(
     `Así quieres tú: ${primary === "D" ? "con intensidad, protegiendo y decidiendo rápido" : primary === "I" ? "con calidez, sorpresas y muchas ganas" : primary === "S" ? "con constancia, paciencia y una lealtad que no falla" : "a fondo, pensando cada detalle"}. Te va bien alguien que lo valore y, a la vez, te ayude a compensar tu perfil secundario ${sec.title} (${percents[secondary]}%), que te da ${secondary === "D" ? "un punto más de decisión" : secondary === "I" ? "chispa y ganas de estar con gente" : secondary === "S" ? "calma emocional" : "orden y cabeza"}.`,
@@ -324,7 +326,7 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   doc.setFont("times", "italic");
   doc.setFontSize(15);
   doc.setTextColor(...INK);
-  doc.text(t(`${userName}, tu perfil es una guía para querer mejor.`), W / 2, y, { align: "center" });
+  doc.text(t(`${nombre}, tu perfil es una guía para querer mejor.`), W / 2, y, { align: "center" });
   y += 9;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
@@ -335,7 +337,7 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   // ── PLANES ───────────────────────────────
   nuevaPagina();
   titulo("Nuestros planes");
-  parrafo(`${userName}, ahora que conoces tu perfil, el siguiente paso es trabajar con nuestra especialista en sesiones personales para conocer a la persona ideal para ti.`, 10.5, MUTED);
+  parrafo(`${nombre}, ahora que conoces tu perfil, el siguiente paso es trabajar con nuestra especialista en sesiones personales para conocer a la persona ideal para ti.`, 10.5, MUTED);
   y += 6;
 
   const cw = (textW - 10) / 2;
