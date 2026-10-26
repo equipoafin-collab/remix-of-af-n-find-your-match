@@ -279,16 +279,16 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   titulo(`${userName}, así eres en pareja`);
   parrafo(pri.enPareja);
   parrafo(
-    `Como perfil ${pri.title}, tu forma de querer se caracteriza por ${primary === "D" ? "la intensidad, la protección y las decisiones firmes" : primary === "I" ? "la calidez emocional, la espontaneidad y el entusiasmo" : primary === "S" ? "la constancia, la paciencia y una lealtad inquebrantable" : "la profundidad, la reflexión y el cuidado en cada detalle"}. Tu pareja ideal es alguien que aprecie estas cualidades y, al mismo tiempo, te ayude a equilibrar tu perfil secundario ${sec.title} (${percents[secondary]}%), que aporta ${secondary === "D" ? "determinación adicional" : secondary === "I" ? "chispa y conexión social" : secondary === "S" ? "estabilidad emocional" : "estructura y análisis"} a tu forma de relacionarte.`,
+    `Así quieres tú: ${primary === "D" ? "con intensidad, protegiendo y decidiendo rápido" : primary === "I" ? "con calidez, sorpresas y muchas ganas" : primary === "S" ? "con constancia, paciencia y una lealtad que no falla" : "a fondo, pensando cada detalle"}. Te va bien alguien que lo valore y, a la vez, te ayude a compensar tu perfil secundario ${sec.title} (${percents[secondary]}%), que te da ${secondary === "D" ? "un punto más de decisión" : secondary === "I" ? "chispa y ganas de estar con gente" : secondary === "S" ? "calma emocional" : "orden y cabeza"}.`,
     10.5, MUTED,
   );
 
   titulo("Tu forma de querer");
   parrafo(pri.querer);
 
-  titulo("Necesidades afectivas");
+  titulo("Lo que necesitas");
   lista(pri.necesidades);
-  parrafo("Cuando estas necesidades se satisfacen, te sientes seguro/a y en tu mejor versión emocional. Si alguna falta, puedes sentir frustración o distanciamiento. Comunicarlas de forma abierta es clave.", 9.5, MUTED);
+  parrafo("Cuando esto lo tienes, estás a gusto y das lo mejor de ti. Si te falta, te frustas o te alejas. Lo mejor es decirlo en voz alta, sin esperar a que lo adivinen.", 9.5, MUTED);
 
   titulo("Gestión de conflictos");
   parrafo(pri.conflicto);
@@ -306,12 +306,12 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
 
   titulo("Consejos prácticos");
   lista([
-    "Estableced acuerdos claros y revisadlos juntos de vez en cuando para mantener la confianza.",
-    "Dedica tiempo de calidad semanal sin distracciones para reforzar vuestra conexión.",
-    "Practica la escucha activa: antes de responder en un conflicto, repite lo que has entendido.",
-    "Celebra los avances pequeños: las relaciones sanas se construyen con gestos cotidianos.",
-    "Identifica y comunica tus necesidades sin esperar que tu pareja las adivine.",
-    "Respeta los ritmos emocionales del otro: no todos procesan al mismo tiempo.",
+    "Dejad los acuerdos claros y repasados de vez en cuando.",
+    "Una vez por semana, un rato juntos sin móviles.",
+    "Cuando discutas, repite primero lo que has entendido antes de contestar.",
+    "Celebra los avances pequeños: las relaciones se hacen con eso.",
+    "Di lo que necesitas, no esperes a que tu pareja lo adivine.",
+    "Cada uno lleva su ritmo: date tiempo sin exigir el del otro.",
   ]);
 
   // Cierre

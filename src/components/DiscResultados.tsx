@@ -21,23 +21,23 @@ interface Props {
   onDescargar: () => void;
 }
 
-/** Relato cercano por estilo: así te ves, lo que regalas y dónde puedes crecer. */
+/** Relato cercano por estilo: así te ves, lo que das y dónde puedes mejorar. */
 const RELATO: Record<DiscType, { brillo: string; crecer: string }> = {
   D: {
-    brillo: "Seguro que te reconoces en esto: cuando algo te importa, no esperas a que pase, vas a por ello. Decides rápido, te pones al frente cuando hace falta y los problemas no te asustan, los miras de frente. Esa energía es contagiosa y hace que la gente a tu alrededor se sienta segura contigo.",
-    crecer: "A veces esa misma fuerza puede sonar a prisa o a querer tenerlo todo bajo control. Si te permites bajar el ritmo y preguntar cómo se siente la otra persona antes de resolver, descubrirás una conexión todavía más profunda.",
+    brillo: "Seguro que te reconoces: cuando algo te importa, no te quedas esperando. Decides rápido, te pones al frente y los problemas no te asustan. La gente que está contigo respira tranquila porque sabe que tú tiras del carro.",
+    crecer: "A veces esa misma fuerza parece prisa o ganas de controlarlo todo. Si de vez en cuando bajas el ritmo y preguntas cómo está la otra persona antes de darle una solución, se va a sentir mucho más cerca de ti.",
   },
   I: {
-    brillo: "Tú iluminas las habitaciones en las que entras. Te sale natural conectar con la gente, contagiar entusiasmo y hacer que cualquier plan se convierta en una buena historia. Cuando hay tensión, tu empatía y tu sentido del humor suavizan las cosas como pocas personas saben hacer.",
-    crecer: "Puede que a veces te cueste aterrizar los planes o que te duela más de lo que muestras cuando no te sientes vista o visto. Darte permiso para pedir lo que necesitas, y sostener la constancia en lo cotidiano, hará que tus relaciones crezcan con raíces firmes.",
+    brillo: "Tú haces que las cosas sean más divertidas. Te sale fácil hablar con cualquiera, contar una historia y reírte. Y cuando alguien está tenso, tú lo sueltas con un comentario o un plan.",
+    crecer: "A veces te cuesta terminar lo que empiezas, y cuando nadie te dice lo bien que lo haces, lo notas más de lo que enseñas. Pedir lo que necesitas también cuenta, y llevar pequeñas rutinas te evita agotarte.",
   },
   S: {
-    brillo: "Eres ese refugio al que la gente quiere volver. Escuchas de verdad, cuidas los detalles y das una calma que se nota. Tu lealtad no es de palabra: se demuestra día a día, con paciencia y con una presencia en la que se puede confiar.",
-    crecer: "Por cuidar tanto la armonía, a veces callas lo que te molesta o te cuesta abrirte a los cambios. Tu voz importa tanto como la de los demás: decir lo que sientes también es una forma de cuidar la relación.",
+    brillo: "Contigo la gente se calma. Escuchas de verdad, no juzgas y se te dan bien los detalles pequeños. Tu lealtad no va de frases: se nota cada día.",
+    crecer: "Como no quieres discutir, a veces te callas lo que te molesta hasta que se acumula. Decirlo a tiempo evita rencores y hace que te tengan más en cuenta.",
   },
   C: {
-    brillo: "Te tomas las cosas en serio, y eso es un regalo. Piensas antes de actuar, cuidas la calidad de todo lo que haces y tu forma de querer es fiel y reflexiva. Cuando das tu palabra, la cumples, y eso genera una confianza enorme.",
-    crecer: "Tu exigencia a veces se vuelve contra ti, o hace que te cueste mostrar lo que sientes hasta estar del todo seguro o segura. Permitirte un poco de imperfección y espontaneidad abrirá espacio a momentos muy bonitos.",
+    brillo: "Haces las cosas bien pensadas. No prometes lo que no puedes cumplir y te fijas en detalles que los demás pasan por alto. Eso da mucha confianza a quien está contigo.",
+    crecer: "A veces te pides demasiado y no enseñas lo que sientes hasta estar muy seguro o segura. Atreverte con algo improvisado, o decir lo que sientes aunque no salga perfecto, te va a sentar muy bien.",
   },
 };
 
@@ -169,7 +169,7 @@ const DiscResultados = ({ primary, secondary, percents, nombre, onDescargar }: P
           {pestana === "querer" && (
             <div className="space-y-3 leading-relaxed">
               <p>{pri.querer}</p>
-              <p>Para sentirte en casa con alguien, {nom || "tú"} necesitas {listaNec}. No es pedir demasiado: es saber lo que te hace bien.</p>
+              <p>Y para estar a gusto con alguien, {nom || "tú"} necesitas {listaNec}. Nada raro: sabes lo que te va bien.</p>
             </div>
           )}
           {pestana === "conflicto" && (<><p>{pri.conflicto}</p><p className="text-muted-foreground">{pri.comunicacion}</p></>)}
