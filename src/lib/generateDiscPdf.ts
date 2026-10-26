@@ -36,8 +36,8 @@ const GOLD: RGB = [222, 190, 120];
 const GOLD_SOFT: RGB = [140, 118, 80];
 const INK: RGB = [240, 236, 228];
 const MUTED: RGB = [168, 166, 190];
-const IVORY: RGB = [12, 13, 34];
-const LINE: RGB = [52, 54, 92];
+const IVORY: RGB = [18, 34, 72]; // azul marino corporativo
+const LINE: RGB = [62, 84, 130];
 
 const DISC_COLORS: Record<DiscType, RGB> = {
   D: [236, 120, 132],
@@ -342,7 +342,7 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
     { nombre: "Premium", precio: "250€", x: M + cw + 10, destacado: true, items: ["2 sesiones mensuales", "Presentaciones prioritarias", "Verificación de antecedentes"] },
   ];
   planes.forEach((p) => {
-    doc.setFillColor(22, 24, 56);
+    doc.setFillColor(28, 48, 96);
     doc.setDrawColor(...(p.destacado ? GOLD : LINE));
     doc.setLineWidth(p.destacado ? 0.6 : 0.3);
     doc.rect(p.x, y, cw, ch, "FD");
