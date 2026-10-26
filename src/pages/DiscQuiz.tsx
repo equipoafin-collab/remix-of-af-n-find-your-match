@@ -34,7 +34,7 @@ const QUESTIONS: QuizQuestion[] = [
     ],
   },
   {
-    question: "En el amor disfruto más:",
+    question: "Cuando quiero a alguien, disfruto más:",
     subtitle: "¿Qué te hace vibrar en una relación?",
     options: [
       { text: "Aventuras y decisiones rápidas", disc: "D", icon: <Target className="w-6 h-6" /> },
@@ -78,7 +78,7 @@ const DISC_DESCRIPTIONS: Record<DiscType, {
   necesidades: string[];
   frase: string;
   conflicto: string;
-  amor: string;
+  querer: string;
 }> = {
   D: {
     title: "Dominante",
@@ -108,7 +108,7 @@ const DISC_DESCRIPTIONS: Record<DiscType, {
     ],
     frase: "\"Dame libertad para actuar y te daré el mundo.\"",
     conflicto: "En conflicto, tiendes a confrontar directamente. Tu reto es aprender a escuchar antes de reaccionar y a reconocer que ceder no es perder.",
-    amor: "Tu lenguaje del amor está ligado a la acción: demuestras cariño haciendo cosas, resolviendo problemas y creando experiencias intensas juntos.",
+    querer: "Quieres a base de hechos: resuelves, proteges y creas experiencias intensas para quien te importa.",
   },
   I: {
     title: "Influyente",
@@ -138,7 +138,7 @@ const DISC_DESCRIPTIONS: Record<DiscType, {
     ],
     frase: "\"Hazme reír y te entregaré el corazón.\"",
     conflicto: "En conflicto, tiendes a buscar la armonía rápidamente, a veces a costa de no abordar el problema de fondo. Tu reto es mantener conversaciones difíciles sin huir.",
-    amor: "Tu lenguaje del amor es la conexión emocional: palabras de afirmación, gestos espontáneos, sorpresas y mucha comunicación afectiva.",
+    querer: "Quieres con palabras y sorpresas: lo dices, lo celebras y mantienes la chispa viva.",
   },
   S: {
     title: "Estable",
@@ -168,7 +168,7 @@ const DISC_DESCRIPTIONS: Record<DiscType, {
     ],
     frase: "\"Dame seguridad y te daré toda mi lealtad.\"",
     conflicto: "En conflicto, tiendes a evitar la confrontación y a ceder para mantener la paz. Tu reto es aprender a poner límites y expresar tus necesidades sin sentir culpa.",
-    amor: "Tu lenguaje del amor es el tiempo de calidad y los actos de servicio: estar presente, cuidar los detalles cotidianos y crear momentos de tranquilidad juntos.",
+    querer: "Quieres con presencia: tiempo sin prisa, cuidados cotidianos y estar ahí cuando hace falta.",
   },
   C: {
     title: "Concienzudo",
@@ -198,7 +198,7 @@ const DISC_DESCRIPTIONS: Record<DiscType, {
     ],
     frase: "\"Demuéstrame coherencia y te entregaré mi confianza.\"",
     conflicto: "En conflicto, tiendes a retirarte y analizar antes de hablar. Tu reto es aprender a comunicar lo que sientes en el momento, sin esperar a tener la respuesta perfecta.",
-    amor: "Tu lenguaje del amor es la coherencia y los detalles pensados: regalos significativos, planes bien organizados y demostraciones de compromiso real.",
+    querer: "Quieres con coherencia: detalles pensados, promesas que se cumplen y planes bien cuidados.",
   },
 };
 
@@ -301,7 +301,7 @@ const DiscQuiz = () => {
       weakness_1: primary.mejoras[0] || '',
       weakness_2: primary.mejoras[1] || '',
       weakness_3: primary.mejoras[2] || '',
-      love_language_1: primary.amor,
+      love_language_1: primary.querer,
       love_language_2: primary.necesidades[0] || '',
       love_language_3: primary.necesidades[1] || '',
       conflict_style_1: primary.conflicto,
@@ -396,7 +396,7 @@ const DiscQuiz = () => {
                   >
                     Descubre tu estilo
                     <br />
-                    <span className="text-gradient-disc italic font-normal">en el amor</span>
+                    <span className="text-gradient-disc italic font-normal">de querer</span>
                   </motion.h1>
 
                   <motion.p
@@ -660,7 +660,7 @@ const DiscQuiz = () => {
                 `12. Área de mejora 2: ${pri.mejoras[1] ?? ""}`,
                 `13. Área de mejora 3: ${pri.mejoras[2] ?? ""}`,
                 `14. Cómo eres en pareja: ${pri.enPareja}`,
-                `15. Lenguaje del amor: ${pri.amor}`,
+                `15. Cómo quieres: ${pri.querer}`,
                 `16. Necesidad afectiva 1: ${pri.necesidades[0] ?? ""}`,
                 `17. Necesidad afectiva 2: ${pri.necesidades[1] ?? ""}`,
                 `18. Necesidad afectiva 3: ${pri.necesidades[2] ?? ""}`,
@@ -675,7 +675,7 @@ const DiscQuiz = () => {
                 `27. Dedica tiempo de calidad semanal para reforzar conexión`,
                 `28. Practica escucha activa antes de responder en conflicto`,
                 `29. Celebra avances pequeños para mantener motivación`,
-                `30. Mensaje final: ${name}, tu perfil es una guía para amar mejor 💛`,
+                `30. Mensaje final: ${name}, tu perfil es una guía para querer mejor 💛`,
               ];
 
               return (
@@ -869,10 +869,10 @@ const DiscQuiz = () => {
                   className="rounded-2xl bg-gradient-to-br from-disc/10 to-disc-glow/10 border-2 border-disc/30 p-6 space-y-3"
                 >
                   <h3 className="font-display text-lg font-bold text-foreground flex items-center gap-2">
-                    💛 Tu lenguaje del amor
+                    💛 Tu forma de querer
                   </h3>
                   <p className="font-body text-sm text-muted-foreground leading-relaxed">
-                    {pri.amor}
+                    {pri.querer}
                   </p>
                   <div className="pt-2 space-y-2">
                     <p className="font-body text-xs font-bold text-foreground uppercase tracking-wider">Lo que necesitas:</p>
