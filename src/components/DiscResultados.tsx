@@ -9,7 +9,7 @@ const COLOR: Record<DiscType, string> = { D: "#a8483e", I: "#be913c", S: "#56806
 const PESTANAS = [
   { id: "fortalezas", label: "Fortalezas" },
   { id: "pareja", label: "En pareja" },
-  { id: "amor", label: "Amor" },
+  { id: "querer", label: "Cómo quieres" },
   { id: "conflicto", label: "Conflictos" },
 ] as const;
 
@@ -166,9 +166,9 @@ const DiscResultados = ({ primary, secondary, percents, nombre, onDescargar }: P
             </div>
           )}
           {pestana === "pareja" && (<><p>{pri.enPareja}</p><p className="text-muted-foreground">{pri.compatibility}</p></>)}
-          {pestana === "amor" && (
+          {pestana === "querer" && (
             <div className="space-y-3 leading-relaxed">
-              <p>{pri.amor}</p>
+              <p>{pri.querer}</p>
               <p>Para sentirte en casa con alguien, {nom || "tú"} necesitas {listaNec}. No es pedir demasiado: es saber lo que te hace bien.</p>
             </div>
           )}

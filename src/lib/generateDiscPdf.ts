@@ -10,7 +10,7 @@ interface DiscMeta {
   fortalezas: string[];
   mejoras: string[];
   enPareja: string;
-  amor: string;
+  querer: string;
   necesidades: string[];
   conflicto: string;
   frase: string;
@@ -211,7 +211,7 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(...MUTED);
-  doc.text("Tu guía para el amor consciente", W - M - 4, H - 26, { align: "right" });
+  doc.text("Tu guía para querer mejor", W - M - 4, H - 26, { align: "right" });
 
   // ── RESUMEN ──────────────────────────────
   nuevaPagina();
@@ -279,12 +279,12 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   titulo(`${userName}, así eres en pareja`);
   parrafo(pri.enPareja);
   parrafo(
-    `Como perfil ${pri.title}, tu forma de amar se caracteriza por ${primary === "D" ? "la intensidad, la protección y las decisiones firmes" : primary === "I" ? "la calidez emocional, la espontaneidad y el entusiasmo" : primary === "S" ? "la constancia, la paciencia y una lealtad inquebrantable" : "la profundidad, la reflexión y el cuidado en cada detalle"}. Tu pareja ideal es alguien que aprecie estas cualidades y, al mismo tiempo, te ayude a equilibrar tu perfil secundario ${sec.title} (${percents[secondary]}%), que aporta ${secondary === "D" ? "determinación adicional" : secondary === "I" ? "chispa y conexión social" : secondary === "S" ? "estabilidad emocional" : "estructura y análisis"} a tu forma de relacionarte.`,
+    `Como perfil ${pri.title}, tu forma de querer se caracteriza por ${primary === "D" ? "la intensidad, la protección y las decisiones firmes" : primary === "I" ? "la calidez emocional, la espontaneidad y el entusiasmo" : primary === "S" ? "la constancia, la paciencia y una lealtad inquebrantable" : "la profundidad, la reflexión y el cuidado en cada detalle"}. Tu pareja ideal es alguien que aprecie estas cualidades y, al mismo tiempo, te ayude a equilibrar tu perfil secundario ${sec.title} (${percents[secondary]}%), que aporta ${secondary === "D" ? "determinación adicional" : secondary === "I" ? "chispa y conexión social" : secondary === "S" ? "estabilidad emocional" : "estructura y análisis"} a tu forma de relacionarte.`,
     10.5, MUTED,
   );
 
-  titulo("Tu lenguaje del amor");
-  parrafo(pri.amor);
+  titulo("Tu forma de querer");
+  parrafo(pri.querer);
 
   titulo("Necesidades afectivas");
   lista(pri.necesidades);
@@ -324,7 +324,7 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   doc.setFont("times", "italic");
   doc.setFontSize(15);
   doc.setTextColor(...INK);
-  doc.text(t(`${userName}, tu perfil es una guía para amar mejor.`), W / 2, y, { align: "center" });
+  doc.text(t(`${userName}, tu perfil es una guía para querer mejor.`), W / 2, y, { align: "center" });
   y += 9;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
