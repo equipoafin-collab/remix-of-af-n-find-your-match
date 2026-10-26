@@ -18,7 +18,7 @@ export const DISC_META: Record<DiscType, { title: string; emoji: string; descrip
     comunicacion: "Dilo claro y sin rodeos.", actividades: "Deportes de aventura, viajes espontáneos, retos en pareja." },
   I: { title: "Influyente", emoji: "✨", bg: "bg-amber-50", text: "text-amber-700", gradient: "from-amber-400 to-amber-500", ring: "ring-amber-400",
     description: "Sociable y entusiasta: necesitas conexión, diversión y que te lo digan.",
-    fortalezas: ["Contagias las ganas sin proponértelo", "Hablás con cualquiera con facilidad", "Arreglas los roces con empatía"],
+    fortalezas: ["Contagias las ganas sin proponértelo", "Hablas con cualquiera con facilidad", "Arreglas los roces con empatía"],
     mejoras: ["A veces esquivas las conversaciones difíciles", "Te lanzas por impulso", "Te cuesta sostener las rutinas"],
     enPareja: "Aportas alegría, espontaneidad y ganas de estar con gente. Necesitas que te lo digan y te escuchen.",
     querer: "Quieres con palabras y sorpresas: lo dices, lo celebras y no dejas que se apague la chispa.",
