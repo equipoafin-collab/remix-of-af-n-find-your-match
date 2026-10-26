@@ -196,13 +196,16 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   doc.setFontSize(30);
   doc.setTextColor(...priCol);
   doc.text(primary, W / 2, 169, { align: "center" });
-  doc.setFontSize(16);
+  doc.setFontSize(22);
   doc.setTextColor(...INK);
-  doc.text(t(`${pri.title} · ${percents[primary]}%`), W / 2, 196, { align: "center" });
+  doc.text(t(pri.title), W / 2, 199, { align: "center" });
+  doc.setFontSize(46);
+  doc.setTextColor(...priCol);
+  doc.text(`${percents[primary]}%`, W / 2, 218, { align: "center" });
   doc.setFont("times", "italic");
   doc.setFontSize(12);
   doc.setTextColor(...MUTED);
-  doc.splitTextToSize(t(pri.frase), W - 80).forEach((l: string, i: number) => doc.text(l, W / 2, 210 + i * 6, { align: "center" }));
+  doc.splitTextToSize(t(pri.frase), W - 80).forEach((l: string, i: number) => doc.text(l, W / 2, 231 + i * 6, { align: "center" }));
 
   etiqueta(new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" }), M + 4, H - 26);
   doc.setFont("helvetica", "normal");
