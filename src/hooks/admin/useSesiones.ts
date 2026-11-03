@@ -2,16 +2,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { PostgrestError } from "@supabase/supabase-js";
 import type { TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
-import { registrarLectura } from "./useRgpd";
 
 export function useSesiones(perfilId: string) {
   return useQuery({
     queryKey: ["sesiones", perfilId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("sesiones").select("*").eq("perfil_id", perfilId).order("fecha_hora", { ascending: false });
+      // Notas de sesión y resúmenes son datos de salud: solo se leen con leer_sesiones, que lo deja en auditoría (T14.3).
+      const { data, error } = await supabase.rpc("leer_sesiones", { _perfil_id: perfilId });
       if (error) throw error;
-      registrarLectura("leer_sesiones", [perfilId]); // notas de sesión y resúmenes: datos de salud (T9.3)
       return data;
     },
   });

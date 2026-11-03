@@ -1252,6 +1252,11 @@ export type Database = {
     }
     Functions: {
       actualizar_mi_perfil: { Args: { _cambios: Json }; Returns: string[] }
+      anotar_lectura: {
+        Args: { _accion: string; _perfil_ids: string[] }
+        Returns: undefined
+      }
+      buscar_notas: { Args: { _texto: string }; Returns: Json }
       cambiar_estado_cliente: {
         Args: {
           _motivo?: string
@@ -1292,6 +1297,26 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      leer_notas: {
+        Args: { _perfil_id: string }
+        Returns: Database["public"]["Tables"]["notas_privadas"]["Row"][]
+        SetofOptions: {
+          from: "*"
+          to: "notas_privadas"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      leer_sesiones: {
+        Args: { _perfil_id: string }
+        Returns: Database["public"]["Tables"]["sesiones"]["Row"][]
+        SetofOptions: {
+          from: "*"
+          to: "sesiones"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       mi_area: { Args: never; Returns: Json }
       mi_perfil: { Args: never; Returns: Json }

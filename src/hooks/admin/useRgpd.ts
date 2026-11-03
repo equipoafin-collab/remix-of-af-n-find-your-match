@@ -4,15 +4,15 @@ import { construirExportacion, nombreExportacion } from "@/lib/rgpd";
 import { listarDocumentos } from "./useDocumentos";
 import type { Perfil } from "@/types/admin";
 
-type Lectura = "leer_notas" | "leer_sesiones" | "ver_video";
+type Lectura = "ver_video";
 const REPETIR_TRAS_MS = 30 * 60_000;
 const registradas = new Map<string, number>();
 
 /**
- * T9.3 · Deja en auditoria que se han leído las notas, las sesiones (con sus resúmenes) o el vídeo de estos clientes:
- * una vez cada 30 min por cliente y tipo, para no llenar el registro con cada recarga. No bloquea la lectura.
- * ponytail: lo registra el navegador, así que una lectura directa por la API no queda; para garantizarlo,
- * servir estos datos con funciones SECURITY DEFINER que registren.
+ * T9.3 · Deja en auditoria que se ha visto el vídeo de estos clientes: una vez cada 30 min por cliente, para no
+ * llenar el registro con cada recarga. No bloquea la lectura. Notas y sesiones ya las registra el servidor (T14.3).
+ * ponytail: el vídeo lo registra el navegador, así que una URL firmada pedida directamente a la API no queda; para
+ * garantizarlo, quitar el SELECT del bucket y firmar, listar, reemplazar y borrar vídeos desde una Edge Function.
  */
 export function registrarLectura(accion: Lectura, perfilIds: string[]) {
   const ahora = Date.now();
@@ -84,8 +84,8 @@ export function useExportarCliente() {
       const [p, pagos, sesiones, notas, aprendizaje, sugerencias, matches] = await Promise.all([
         supabase.from("perfiles").select("*").eq("id", id).single(),
         supabase.from("pagos").select("*").eq("perfil_id", id),
-        supabase.from("sesiones").select("*").eq("perfil_id", id).order("fecha_hora"),
-        supabase.from("notas_privadas").select("*").eq("perfil_id", id).order("created_at"),
+        supabase.rpc("leer_sesiones", { _perfil_id: id }), // T14.3: quedan en auditoría
+        supabase.rpc("leer_notas", { _perfil_id: id }),
         supabase.from("perfil_aprendizaje").select("*").eq("perfil_id", id).maybeSingle(),
         supabase.from("match_sugerencias").select("*").or(`perfil_id.eq.${id},candidato_id.eq.${id}`),
         supabase.from("matches").select("*").or(`perfil_a.eq.${id},perfil_b.eq.${id}`),
