@@ -1,5 +1,8 @@
 // T19.2 · Rondas de propuestas: la psicóloga elige 4 personas de las sugerencias de un cliente para que diga con quién
 // se ve más (T19.3). Las reglas las repite el trigger propuestas_rondas_validar.
+import { MAX_RASGO, type PerfilEjemplo } from "../../supabase/functions/_shared/ejemplos";
+
+export { DIMENSIONES_EJEMPLO, MAX_RASGO, type PerfilEjemplo } from "../../supabase/functions/_shared/ejemplos";
 
 export const PERSONAS_POR_RONDA = 4;
 export const MAX_FRASE = 160;
@@ -26,6 +29,14 @@ export function errorRonda(elegidos: string[], frases: Record<string, string>) {
   return null;
 }
 
+/** T19.5 · El problema de una ronda de ejemplo, o null si se puede enviar: cada perfil con su rasgo y frases cortas. */
+export function errorEjemplos(ejemplos: PerfilEjemplo[]) {
+  if (ejemplos.length !== PERSONAS_POR_RONDA) return `Hacen falta ${PERSONAS_POR_RONDA} perfiles.`;
+  if (ejemplos.some((e) => !e.rasgo.trim() || e.rasgo.trim().length > MAX_RASGO)) return `Cada perfil necesita su descripción, de hasta ${MAX_RASGO} caracteres.`;
+  if (ejemplos.some((e) => (e.frase ?? "").trim().length > MAX_FRASE)) return `Cada frase, de hasta ${MAX_FRASE} caracteres.`;
+  return null;
+}
+
 // T19.3 · Lo que ve el cliente en su área.
 
 /** Una persona de su ronda abierta: lo mismo que de un match (T18.2), más la frase. */
@@ -37,11 +48,13 @@ export interface PersonaPropuesta {
   aficiones: string | null;
   foto_url: string | null;
   frase: string | null;
+  /** Solo en los perfiles de ejemplo (T19.5): cómo es, en una frase. */
+  rasgo?: string | null;
 }
 
 export type MiRonda =
-  | { id: string; estado: "abierta"; caduca_at: string; personas: PersonaPropuesta[] }
-  | { id: string; estado: "respondida"; respondida_at: string; ninguno: boolean; elegido: string | null };
+  | { id: string; estado: "abierta"; caduca_at: string; de_ejemplo?: boolean; personas: PersonaPropuesta[] }
+  | { id: string; estado: "respondida"; respondida_at: string; de_ejemplo?: boolean; ninguno: boolean; elegido: string | null };
 
 /** Los chips de T5.3 para el cliente: "Intuición profesional" es de la psicóloga; él tiene "Otro". */
 export const MOTIVOS_NINGUNA = ["Edad", "Distancia", "Valores", "Físico", "Otro"];

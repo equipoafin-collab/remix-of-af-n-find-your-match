@@ -31,12 +31,12 @@ const FinDelPlan = ({ area }: { area: MiAreaAbierta }) => {
 };
 
 /** T19.3 · Aviso de propuesta abierta (aún sin responder). */
-const PropuestaNueva = ({ personas, caducaAt }: { personas: number; caducaAt: string }) => {
+const PropuestaNueva = ({ personas, caducaAt, deEjemplo }: { personas: number; caducaAt: string; deEjemplo: boolean }) => {
   const dias = diasParaCaducar(caducaAt);
   return (
     <section className="rounded-2xl border border-gold bg-cream/60 p-4 space-y-2">
       <span className={`${rotuloClaro} inline-block bg-cream px-3 py-1 rounded-full`}>Nueva</span>
-      <p className="font-display text-lg font-bold text-foreground">{personas} personas elegidas para ti</p>
+      <p className="font-display text-lg font-bold text-foreground">{deEjemplo ? `${personas} perfiles de ejemplo para conocerte mejor` : `${personas} personas elegidas para ti`}</p>
       <p className="font-display italic text-gold-texto">{dias === 1 ? "Queda 1 día para elegir" : `Quedan ${dias} días para elegir`}</p>
       <Link to="/mi-area/propuestas" className={`${botonDorado} w-full`}>Ver propuesta</Link>
     </section>
@@ -79,7 +79,7 @@ const InicioCliente = () => {
       </section>
 
       {avisarFinPlan(area.plan_fin) && <FinDelPlan area={area} />}
-      {ronda?.estado === "abierta" && ronda.personas.length > 0 && <PropuestaNueva personas={ronda.personas.length} caducaAt={ronda.caduca_at} />}
+      {ronda?.estado === "abierta" && ronda.personas.length > 0 && <PropuestaNueva personas={ronda.personas.length} caducaAt={ronda.caduca_at} deEjemplo={!!ronda.de_ejemplo} />}
 
       <div className="grid grid-cols-2 gap-3">
         <section className={tarjeta}>

@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { formatearContexto, type CandidatoResumido, type CuestionarioContexto } from "./contexto.ts";
 import { validarResumen, type ResumenSesion } from "./resumen.ts";
+import { describirEjemplo, type PerfilEjemplo } from "./ejemplos.ts";
 
 // Las de CuestionarioContexto (sin nombre, email ni teléfono) y el vínculo al test DISC.
 const COLUMNAS_CLIENTE = [
@@ -53,7 +54,7 @@ export async function construirContextoCliente(
         .order("feedback_at", { ascending: false }).limit(10)
       : sinDatos,
     completo
-      ? supabase.from("propuestas_rondas").select("respondida_at, candidatos, elegido_id, ninguno, motivo")
+      ? supabase.from("propuestas_rondas").select("respondida_at, candidatos, elegido_id, ninguno, motivo, ejemplos, elegido_ejemplo")
         .eq("perfil_id", perfilId).eq("estado", "respondida").order("respondida_at", { ascending: false }).limit(5)
       : sinDatos,
   ]);
@@ -62,6 +63,7 @@ export async function construirContextoCliente(
   // De las personas de sus rondas, el mismo resumen sin nombre que de los candidatos.
   const filasRonda = (rondas.data ?? []) as unknown as {
     respondida_at: string; candidatos: string[]; elegido_id: string | null; ninguno: boolean; motivo: string | null;
+    ejemplos: PerfilEjemplo[] | null; elegido_ejemplo: string | null;
   }[];
   const enRondas = [...new Set(filasRonda.flatMap((r) => r.candidatos))];
   const personas = enRondas.length
@@ -123,12 +125,18 @@ export async function construirContextoCliente(
       fecha: x.decidido_at ?? "", estado: x.estado, motivo: x.motivo_decision, score: x.score, candidato: x.candidato,
     })),
     citas: citasDelCliente,
-    rondas: filasRonda.filter((r) => r.ninguno || r.elegido_id).map((r) => ({
-      fecha: r.respondida_at,
-      elegido: r.elegido_id ? persona.get(r.elegido_id) ?? null : null,
-      descartados: r.candidatos.filter((id) => id !== r.elegido_id).map((id) => persona.get(id) ?? null),
-      ninguno: r.ninguno,
-      motivo: r.motivo,
-    })),
+    rondas: filasRonda.filter((r) => r.ninguno || r.elegido_id || r.elegido_ejemplo).map((r) => {
+      // T19.5: los perfiles de ejemplo van descritos (inventados, y qué cambia en cada uno).
+      const ejemplo = r.ejemplos?.find((e) => e.id === r.elegido_ejemplo);
+      return {
+        fecha: r.respondida_at,
+        elegido: ejemplo ? describirEjemplo(ejemplo) : r.elegido_id ? persona.get(r.elegido_id) ?? null : null,
+        descartados: r.ejemplos?.length
+          ? r.ejemplos.filter((e) => e !== ejemplo).map(describirEjemplo)
+          : r.candidatos.filter((id) => id !== r.elegido_id).map((id) => persona.get(id) ?? null),
+        ninguno: r.ninguno,
+        motivo: r.motivo,
+      };
+    }),
   }, maxTokens);
 }

@@ -920,6 +920,9 @@ export type Database = {
           caduca_at: string
           candidatos: string[]
           created_by: string | null
+          de_ejemplo: boolean
+          ejemplos: Json | null
+          elegido_ejemplo: string | null
           elegido_id: string | null
           enviada_at: string
           estado: string
@@ -934,6 +937,9 @@ export type Database = {
           caduca_at?: string
           candidatos: string[]
           created_by?: string | null
+          de_ejemplo?: boolean
+          ejemplos?: Json | null
+          elegido_ejemplo?: string | null
           elegido_id?: string | null
           enviada_at?: string
           estado?: string
@@ -948,6 +954,9 @@ export type Database = {
           caduca_at?: string
           candidatos?: string[]
           created_by?: string | null
+          de_ejemplo?: boolean
+          ejemplos?: Json | null
+          elegido_ejemplo?: string | null
           elegido_id?: string | null
           enviada_at?: string
           estado?: string

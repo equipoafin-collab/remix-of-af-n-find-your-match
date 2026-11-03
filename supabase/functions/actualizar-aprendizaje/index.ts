@@ -25,7 +25,7 @@ serve(async (req) => {
     // Todas sus sugerencias: las decididas son decisiones, y de las demás sale el desglose de las personas de sus rondas.
     const [sugerencias, rondas, actual] = await Promise.all([
       supabase.from("match_sugerencias").select("candidato_id, estado, desglose, motivo_decision").eq("perfil_id", perfil_id),
-      supabase.from("propuestas_rondas").select("candidatos, elegido_id, ninguno, motivo").eq("perfil_id", perfil_id).eq("estado", "respondida"),
+      supabase.from("propuestas_rondas").select("candidatos, elegido_id, ninguno, motivo, ejemplos, elegido_ejemplo").eq("perfil_id", perfil_id).eq("estado", "respondida"),
       supabase.from("perfil_aprendizaje").select("preferencias").eq("perfil_id", perfil_id).maybeSingle(),
     ]);
     if (sugerencias.error) throw sugerencias.error;
