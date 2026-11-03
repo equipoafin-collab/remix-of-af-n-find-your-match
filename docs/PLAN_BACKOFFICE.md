@@ -670,9 +670,10 @@ Decisión (15/10/2026): la psicóloga genera desde la ficha un enlace de pago de
 
 ### FASE 14 — Calidad técnica
 
-- [ ] **T14.1 · `deno check` de las Edge Functions en el CI**
+- [x] **T14.1 · `deno check` de las Edge Functions en el CI**
   - Añadir a `.github/workflows/ci.yml` el mismo control de tipos que hace Lovable al desplegar.
   - Aceptación: una PR con un error de tipos en una función falla en el CI.
+  > Nota de implementación (03/11/2026): en `.github/workflows/ci.yml`, tras `typecheck`, `denoland/setup-deno@v2` con Deno `v2.9.6` (la versión con la que se reprodujeron en local los arreglos de Lovable) y `deno check --no-lock supabase/functions/*/index.ts`, que revisa las 13 funciones y todo lo de `_shared` que importan; `--no-lock` evita el `deno.lock` en la raíz. Hoy pasan todas. Comprobado en local con un error metido a propósito en `cal-webhook` (`TS2322`, salida 1), que `npm run typecheck` no ve porque `tsconfig.app.json` no incluye las funciones.
 
 - [ ] **T14.2 · Pruebas de los flujos clave**
   - Playwright contra un Supabase local en Docker (migraciones + `seed.sql`), nunca contra la base de datos real: cuestionario → ficha → sugerencia aceptada → match → cita → feedback, y el pago de T11 con Stripe en modo de pruebas.
@@ -953,3 +954,4 @@ Fases 15-19, área del cliente (añadidas el 20/10/2026): **F15 Acceso** → **T
 | 03/11/2026 | T17.2 | Cerrada: "Reservar sesión" del área del cliente abre "Cita en Afín" en cal.com con su nombre y su email. |
 | 03/11/2026 | T9.4 (sin cerrar) | Edge Function `cal-webhook` (firma comprobada) y `registrar_reserva_cal`: cada reserva de la "Cita en Afín" crea, mueve o cancela su sesión; sin perfil con ese email, alerta. Falta aplicar la migración, el secreto y dar de alta el webhook en cal.com. |
 | 03/11/2026 | T9.4 | Cerrada: webhook de cal.com en marcha. Probado en producción con un perfil de prueba que reservar, reprogramar y cancelar crean, mueven y cancelan su sesión sola. |
+| 03/11/2026 | T14.1 | El CI pasa `deno check` a todas las Edge Functions (Deno 2.9.6): un error de tipos en una función ya hace fallar la PR antes de que Lovable lo despliegue. |

@@ -21,6 +21,11 @@ jobs:
           bun-version: 1.3.14
       - run: bun install --frozen-lockfile
       - run: npm run typecheck
+      # T14.1 · El mismo control de tipos que hace Lovable al desplegar las Edge Functions (Deno, no el tsconfig de la app).
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.6
+      - run: deno check --no-lock supabase/functions/*/index.ts
       - run: npm run lint
       - run: npm test
       - run: npm run build
