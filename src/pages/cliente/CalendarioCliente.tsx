@@ -5,7 +5,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { botonDorado, rotuloClaro } from "@/components/cliente/estilos";
 import { useMiPerfil, useMisCitas } from "@/hooks/cliente/useMiArea";
 import { fechaLarga, separarCitas, type Cita, type ContextoArea, type MiAreaAbierta } from "@/lib/areaCliente";
-import { CALENDLY_SESIONES, enlaceReserva, sesionesPorReservar } from "@/lib/enlaces";
+import { enlaceReserva, RESERVA_SESIONES, sesionesPorReservar } from "@/lib/enlaces";
 import { descargarIcs } from "@/lib/ics";
 
 const tarjeta = "bg-card border border-border rounded-2xl";
@@ -57,9 +57,9 @@ const TarjetaCita = ({ cita, proxima }: { cita: Cita; proxima: boolean }) => {
   );
 };
 
-/** T17.2 · Reservar en Calendly con su nombre y email puestos: solo con el enlace configurado y sesiones por reservar. */
+/** T17.2 · Reservar en cal.com con su nombre y email puestos: solo si le quedan sesiones por reservar. */
 const ReservarSesion = ({ area, programadas, userId }: { area: MiAreaAbierta; programadas: number; userId: string }) => {
-  const quedan = CALENDLY_SESIONES ? sesionesPorReservar(area.sesiones_pendientes, programadas) : 0;
+  const quedan = sesionesPorReservar(area.sesiones_pendientes, programadas);
   const perfil = useMiPerfil(quedan ? userId : undefined);
   if (!quedan) return null;
   return (
@@ -68,7 +68,7 @@ const ReservarSesion = ({ area, programadas, userId }: { area: MiAreaAbierta; pr
         {quedan === 1 ? "Te queda 1 sesión por reservar." : `Te quedan ${quedan} sesiones por reservar.`} Elige día y hora en el calendario de tu psicóloga; la verás aquí cuando te la confirme.
       </p>
       <a
-        href={enlaceReserva(CALENDLY_SESIONES, perfil.data?.nombre_completo ?? area.nombre, perfil.data?.email ?? null)}
+        href={enlaceReserva(RESERVA_SESIONES, perfil.data?.nombre_completo ?? area.nombre, perfil.data?.email ?? null)}
         target="_blank"
         rel="noopener noreferrer"
         className={`${botonDorado} w-full`}

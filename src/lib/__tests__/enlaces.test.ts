@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { enlaceReserva, sesionesPorReservar } from "../enlaces";
+import { enlaceReserva, RESERVA_SESIONES, sesionesPorReservar } from "../enlaces";
 
 describe("enlaceReserva", () => {
   it("rellena nombre y email, codificados", () => {
-    const url = new URL(enlaceReserva("https://calendly.com/equipo-afin/seguimiento", " Lucía Martín ", "lucia+afin@x.es"));
-    expect(url.origin + url.pathname).toBe("https://calendly.com/equipo-afin/seguimiento");
+    const url = new URL(enlaceReserva(RESERVA_SESIONES, " Lucía Martín ", "lucia+afin@x.es"));
+    expect(url.origin + url.pathname).toBe("https://cal.com/equipo-afin/sesion");
     expect(url.searchParams.get("name")).toBe("Lucía Martín");
     expect(url.searchParams.get("email")).toBe("lucia+afin@x.es");
   });
 
   it("sin email, solo el nombre; respeta los parámetros que ya traiga", () => {
-    const url = new URL(enlaceReserva("https://calendly.com/x/y?hide_gdpr_banner=1", "Ana", null));
-    expect(url.searchParams.get("hide_gdpr_banner")).toBe("1");
+    const url = new URL(enlaceReserva("https://cal.com/x/y?embed=true", "Ana", null));
+    expect(url.searchParams.get("embed")).toBe("true");
     expect(url.searchParams.has("email")).toBe(false);
   });
 });

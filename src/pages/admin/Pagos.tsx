@@ -8,6 +8,7 @@ import { useActualizarPago, useCrearPago, useEliminarPago, usePagos } from "@/ho
 import { PlanBadge } from "@/components/admin/Badges";
 import BuscadorPerfil from "@/components/admin/BuscadorPerfil";
 import { ESTADO_PAGO, estadoVisible, urlStripe } from "@/lib/pagos";
+import { enlaceReserva, RESERVA_SESIONES } from "@/lib/enlaces";
 
 const formVacio = () => ({
   perfil: null as Perfil | null,
@@ -171,9 +172,9 @@ const Pagos = () => {
                           Stripe <ExternalLink className="w-3 h-3" />
                         </a>
                       )}
-                      {c.plan === "esencial" && (
-                        <a href="https://calendly.com/equipo-afin/30min" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-xs inline-flex items-center gap-1">
-                          Calendly <ExternalLink className="w-3 h-3" />
+                      {c.estado === "pagado" && (
+                        <a href={enlaceReserva(RESERVA_SESIONES, c.nombre_completo, c.email)} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-xs inline-flex items-center gap-1" title="Reservar una sesión en cal.com con su nombre y email">
+                          Reservar <ExternalLink className="w-3 h-3" />
                         </a>
                       )}
                       <button onClick={() => del(c.id)} className="text-rose-600 hover:text-rose-700" title="Eliminar">

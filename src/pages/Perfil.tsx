@@ -13,6 +13,7 @@ import PlanBookingDialog from "@/components/PlanBookingDialog";
 import { calculateDisc, type DiscResult } from "@/components/DiscSurvey";
 import { HIJOS, MAX_VALORES, PROVINCIAS, TIPO_RELACION, VALORES_IMPORTANTES } from "@/lib/preguntasClave";
 import { VERSION_CONSENTIMIENTO } from "@/lib/rgpd";
+import { enlaceReserva, RESERVA_DESCUBRIMIENTO } from "@/lib/enlaces";
 
 type DiscType = "D" | "I" | "S" | "C";
 
@@ -910,7 +911,7 @@ const Perfil = () => {
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <a
-                          href="https://calendly.com/equipo-afin/plan-esencial"
+                          href={enlaceReserva(RESERVA_DESCUBRIMIENTO, form.nombre_completo, form.email)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex flex-col items-center gap-1 px-4 py-4 rounded-xl border-2 border-gold bg-card hover:bg-gold/5 transition-all font-body"
@@ -920,7 +921,7 @@ const Perfil = () => {
                           <span className="text-[10px] text-muted-foreground">1 sesión · citas</span>
                         </a>
                         <a
-                          href="https://calendly.com/equipo-afin/plan-esencial"
+                          href={enlaceReserva(RESERVA_DESCUBRIMIENTO, form.nombre_completo, form.email)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex flex-col items-center gap-1 px-4 py-4 rounded-xl border-2 border-primary bg-primary text-primary-foreground hover:opacity-90 transition-all font-body"

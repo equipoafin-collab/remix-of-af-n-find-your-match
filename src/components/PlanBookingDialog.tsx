@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Check, ExternalLink, CreditCard } from "lucide-react";
+import { RESERVA_DESCUBRIMIENTO } from "@/lib/enlaces";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +14,6 @@ interface PlanInfo {
   price: string;
   period: string;
   features: string[];
-  calendlyUrl: string;
 }
 
 const PLANS: Record<"esencial" | "premium", PlanInfo> = {
@@ -26,7 +26,6 @@ const PLANS: Record<"esencial" | "premium", PlanInfo> = {
       "Presentaciones a candidatos compatibles contigo en restaurantes de tu ciudad",
       "Feedback personal tras la cita, incluyendo la perspectiva de la otra parte",
     ],
-    calendlyUrl: "https://calendly.com/equipo-afin/30min",
   },
   premium: {
     name: "Premium",
@@ -39,7 +38,6 @@ const PLANS: Record<"esencial" | "premium", PlanInfo> = {
       "Feedback detallado y recomendaciones personalizadas tras cada cita",
       "Formulario de compatibilidad con cada persona que te vamos a presentar",
     ],
-    calendlyUrl: "https://calendly.com/equipo-afin/30min",
   },
 };
 
@@ -57,7 +55,7 @@ const PlanBookingDialog = ({ plan, open, onOpenChange }: Props) => {
 
   const handleBook = () => {
     // TODO: integrate Stripe payment here before redirecting
-    window.open(info.calendlyUrl, "_blank");
+    window.open(RESERVA_DESCUBRIMIENTO, "_blank");
   };
 
   return (
