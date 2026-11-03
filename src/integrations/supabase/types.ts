@@ -1013,6 +1013,7 @@ export type Database = {
           id: string
           notas_brutas: string | null
           perfil_id: string
+          reserva_uid: string | null
           resumen_estado: Database["public"]["Enums"]["resumen_estado"]
           resumen_ia: Json | null
           resumen_revisado_at: string | null
@@ -1027,6 +1028,7 @@ export type Database = {
           id?: string
           notas_brutas?: string | null
           perfil_id: string
+          reserva_uid?: string | null
           resumen_estado?: Database["public"]["Enums"]["resumen_estado"]
           resumen_ia?: Json | null
           resumen_revisado_at?: string | null
@@ -1041,6 +1043,7 @@ export type Database = {
           id?: string
           notas_brutas?: string | null
           perfil_id?: string
+          reserva_uid?: string | null
           resumen_estado?: Database["public"]["Enums"]["resumen_estado"]
           resumen_ia?: Json | null
           resumen_revisado_at?: string | null
@@ -1315,6 +1318,18 @@ export type Database = {
       registrar_lecturas: {
         Args: { _accion: string; _perfil_ids: string[] }
         Returns: undefined
+      }
+      registrar_reserva_cal: {
+        Args: {
+          _accion: string
+          _duracion: number
+          _email: string
+          _inicio: string
+          _nombre: string
+          _uid: string
+          _uid_anterior: string
+        }
+        Returns: Json
       }
       responder_ronda: {
         Args: { _elegido: string; _motivo: string; _ronda_id: string }

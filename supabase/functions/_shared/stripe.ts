@@ -57,10 +57,10 @@ export const pagoCobradoReciente = (sesion: { status?: string; payment_status?: 
   typeof sesion.created === "number" &&
   ahora - sesion.created <= DIAS_VUELTA_PAGO * 86_400;
 
-const hex = (bytes: ArrayBuffer) => [...new Uint8Array(bytes)].map((b) => b.toString(16).padStart(2, "0")).join("");
+export const hex = (bytes: ArrayBuffer) => [...new Uint8Array(bytes)].map((b) => b.toString(16).padStart(2, "0")).join("");
 
 // Comparación en tiempo constante: no deja adivinar la firma por lo que tarda en fallar.
-const iguales = (a: string, b: string) =>
+export const iguales = (a: string, b: string) =>
   a.length === b.length && [...a].reduce((dif, c, i) => dif | (c.charCodeAt(0) ^ b.charCodeAt(i)), 0) === 0;
 
 /**
