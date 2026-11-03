@@ -36,7 +36,10 @@ export interface PerfilEjemplo {
   frase?: string;
 }
 
-/** Lo que busca el cliente, sin nombre ni contacto, ni religión, política o salud. */
+/**
+ * Lo que busca el cliente, sin nombre ni contacto. Sus respuestas sobre religión y política no van, pero lo aprendido
+ * (preferencias, T5.3) puede mencionarlas: la IA ya lo recibe para el matching con su consentimiento (T9.3).
+ */
 export interface DatosEjemplos {
   genero: string | null;
   busca_genero: string | null;
