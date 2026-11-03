@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Check } from "lucide-react";
+import { RESERVA_DESCUBRIMIENTO } from "@/lib/enlaces";
 
 const plans = [
 {
@@ -89,7 +90,7 @@ const Pricing = () => {
               Sin compromiso
             </li>
           </ul>
-          <a href="https://calendly.com/equipo-afin/30min" target="_blank" rel="noopener noreferrer" className="inline-block px-8 py-3.5 rounded-full bg-gold text-accent-foreground font-medium text-sm hover:opacity-90 transition-opacity shadow-lg">
+          <a href={RESERVA_DESCUBRIMIENTO} target="_blank" rel="noopener noreferrer" className="inline-block px-8 py-3.5 rounded-full bg-gold text-accent-foreground font-medium text-sm hover:opacity-90 transition-opacity shadow-lg">
             Reservar sesión gratis
           </a>
         </motion.div>

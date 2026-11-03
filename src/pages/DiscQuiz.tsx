@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { generateDiscPdf } from "@/lib/generateDiscPdf";
 import { DISC_META } from "@/lib/disc";
 import { VERSION_CONSENTIMIENTO } from "@/lib/rgpd";
+import { enlaceReserva, RESERVA_DESCUBRIMIENTO } from "@/lib/enlaces";
 import { useToast } from "@/hooks/use-toast";
 
 type DiscType = "D" | "I" | "S" | "C";
@@ -822,7 +823,7 @@ const DiscQuiz = () => {
                 </motion.div>
 
 
-                {/* ═══ CALENDLY — SESIÓN GRATUITA ═══ */}
+                {/* ═══ CAL.COM — SESIÓN GRATUITA ═══ */}
                 <motion.div
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -840,7 +841,7 @@ const DiscQuiz = () => {
                   </div>
                   <div className="rounded-xl overflow-hidden border border-border">
                     <iframe
-                      src="https://calendly.com/equipo-afin/30min"
+                      src={enlaceReserva(RESERVA_DESCUBRIMIENTO, name, email)}
                       width="100%"
                       height="650"
                       frameBorder="0"
