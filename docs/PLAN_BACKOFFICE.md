@@ -629,6 +629,20 @@ Decisión (15/10/2026): la psicóloga genera desde la ficha un enlace de pago de
   - Aceptación: un primer pago real pequeño, que se registra y se reembolsa correctamente.
   > Avance (20/10/2026): endpoint "CRM Afín - pagos de planes" dado de alta en el entorno de prueba (`we_1UScTnJb15IRisQSacN3296v`, carga completa, los 5 eventos). Pago de prueba de punta a punta desde la ficha de "Prueba Claude T4.2" (Esencial, 1 mes, 160 €, tarjeta 4242): vuelta a `/pago/ok`, aviso entregado con 200 y `activado: true`, pago `pagado`, plan Esencial del 20/10 al 20/11/2026 con 1 sesión, nota automática y auditoría; el reenvío manual del mismo aviso respondió `activado: false` sin tocar nada. Después, el mismo día: pago rechazado con la tarjeta 4000 0000 0000 0002 (Stripe no cobra, el cliente puede reintentar y el pago sigue pendiente); enlace caducado a mano desde el Shell de Stripe (`stripe checkout sessions expire`) → "Enlace caducado"; y reembolso completo desde el panel → "Reembolsado" y aviso abierto para revisar el plan, que se conserva. **Solo falta el paso a modo real**, que espera a la cuenta verificada de Vero y a T10.4.
 
+- [ ] **T11.6 · Datos de prueba fuera antes del lanzamiento (no código)** · Depende de T11.5 y de haber terminado las pruebas
+  - Inventario del 03/11/2026: todo lo que hay en producción es de prueba.
+    - Perfiles «vicente» (vicentesg37@gmail.com, cliente de prueba con área), «Prueba Claude T4.2» (prueba-t42@example.com) y «vicente sanchez gil» (vicente+90@gmail.com).
+    - De ellos cuelgan sesiones, notas, sugerencias, un match, tareas, alertas, la ronda de ejemplo de T19.5, tests DISC, lo aprendido por la IA y la cuenta del área de «vicente».
+    - 3 pagos de prueba (uno manual de 50 € y dos de Stripe en modo de pruebas) y unas 100 filas de `auditoria`.
+    - Antes de borrar, repetir el inventario: puede haber más.
+  - Pasos:
+    1. En la ficha de cada perfil de prueba, Documentos → "Borrar definitivamente" (T9.3). Borra el perfil, todo lo que cuelga de él, sus ficheros de Storage y la cuenta del área. No hacerlo por SQL: dejaría los ficheros.
+    2. En Pagos, borrar los pagos de prueba: la supresión los conserva sin vínculo por obligación contable, pero no son reales. El pago real de T11.5 sí se conserva aunque se reembolse.
+    3. En Alertas, resolver o borrar las que queden sin cliente (por ejemplo, reservas de cal.com sin perfil).
+    4. Opcional: vaciar `auditoria` desde el SQL editor de Lovable (las administradoras no pueden borrar sus filas desde la app).
+    5. Fuera de la base de datos no hace falta nada: Stripe en modo de pruebas no se mezcla con el real, y en cal.com las reservas de prueba ya están canceladas (la cita de ejemplo de 15 min, oculta, se puede borrar).
+  - Aceptación: en Perfiles, Pagos, Alertas y Tareas no queda nada de prueba, y en Storage no quedan ficheros de los perfiles borrados.
+
 ### FASE 12 — Emails a los clientes
 
 - [ ] **T12.0 · Dominio propio y envío de emails (no código)**
@@ -961,3 +975,4 @@ Fases 15-19, área del cliente (añadidas el 20/10/2026): **F15 Acceso** → **T
 | 03/11/2026 | T14.3 | Notas privadas, notas de sesión y resúmenes solo se leen con funciones del servidor que lo dejan en auditoría; las cuentas ya no pueden leer esas columnas directamente. Los vídeos siguen registrándose desde el navegador. |
 | 03/11/2026 | T19.5 (sin cerrar) | Rondas con perfiles de ejemplo inventados por la IA (`ronda-ejemplo`), uno por dimensión: el cliente sabe que no son personas reales, nunca se mezclan con ellas y cuentan para el aprendizaje. Falta probar la generación tras desplegar. |
 | 03/11/2026 | T19.5 | Cerrada tras probarla en producción: ronda de ejemplo generada, respondida por el cliente, avisada a la psicóloga y aprendida (estilo de vida 0,77, valores 1,21). |
+| 03/11/2026 | — | Plan: T11.6, limpieza de los datos de prueba de producción antes del lanzamiento, con el inventario de hoy. |
