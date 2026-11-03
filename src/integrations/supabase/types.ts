@@ -1309,7 +1309,15 @@ export type Database = {
       }
       leer_notas: {
         Args: { _perfil_id: string }
-        Returns: Database["public"]["Tables"]["notas_privadas"]["Row"][]
+        Returns: {
+          automatica: boolean
+          contenido: string
+          created_at: string
+          created_by: string | null
+          id: string
+          perfil_id: string
+          sesion_id: string | null
+        }[]
         SetofOptions: {
           from: "*"
           to: "notas_privadas"
@@ -1319,7 +1327,21 @@ export type Database = {
       }
       leer_sesiones: {
         Args: { _perfil_id: string }
-        Returns: Database["public"]["Tables"]["sesiones"]["Row"][]
+        Returns: {
+          created_at: string
+          duracion_min: number
+          estado: Database["public"]["Enums"]["sesion_estado"]
+          fecha_hora: string
+          id: string
+          notas_brutas: string | null
+          perfil_id: string
+          reserva_uid: string | null
+          resumen_estado: Database["public"]["Enums"]["resumen_estado"]
+          resumen_ia: Json | null
+          resumen_revisado_at: string | null
+          tipo: Database["public"]["Enums"]["sesion_tipo"]
+          video_path: string | null
+        }[]
         SetofOptions: {
           from: "*"
           to: "sesiones"
