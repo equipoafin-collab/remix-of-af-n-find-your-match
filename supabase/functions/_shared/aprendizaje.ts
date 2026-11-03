@@ -1,5 +1,6 @@
 // Sin dependencias de Deno: lo usan actualizar-aprendizaje y la ficha (motivos de rechazo), y Vitest lo prueba.
 import { WEIGHTS, type Dimension, type Pesos } from "./profileMatching.ts";
+import { desgloseEjemplo, type DimensionEjemplo } from "./ejemplos.ts";
 
 // T5.3 · Aprender de las decisiones de la psicóloga, sin entrenar modelos (sección 3.2 del plan).
 
@@ -30,6 +31,9 @@ export interface RondaRespondida {
   elegido_id: string | null;
   ninguno: boolean;
   motivo: string | null;
+  /** T19.5 · Ronda con perfiles de ejemplo: cuenta igual, con el desglose de lo que cambia en cada uno. */
+  ejemplos?: { id?: string; dimension: DimensionEjemplo }[] | null;
+  elegido_ejemplo?: string | null;
 }
 
 /**
@@ -37,12 +41,18 @@ export interface RondaRespondida {
  * rechazadas (con su motivo si no le encajó ninguna). Sin elegida ni "ninguna" (la elegida se borró), no cuenta.
  */
 export const decisionesDeRondas = (rondas: RondaRespondida[], desgloses: Map<string, Decision["desglose"]>): Decision[] =>
-  rondas.filter((r) => r.ninguno || r.elegido_id).flatMap((r) =>
-    r.candidatos.map((id) => ({
-      estado: id === r.elegido_id ? "aceptada" : "rechazada",
-      desglose: desgloses.get(id) ?? null,
-      motivo: r.ninguno ? r.motivo : null,
-    }))
+  rondas.filter((r) => r.ninguno || r.elegido_id || r.elegido_ejemplo).flatMap((r) =>
+    r.ejemplos?.length
+      ? r.ejemplos.map((e) => ({
+        estado: e.id === r.elegido_ejemplo ? "aceptada" : "rechazada",
+        desglose: desgloseEjemplo(e.dimension),
+        motivo: r.ninguno ? r.motivo : null,
+      }))
+      : r.candidatos.map((id) => ({
+        estado: id === r.elegido_id ? "aceptada" : "rechazada",
+        desglose: desgloses.get(id) ?? null,
+        motivo: r.ninguno ? r.motivo : null,
+      }))
   );
 
 const media = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
@@ -87,6 +97,7 @@ Resume qué valora y qué evita este cliente en una pareja, sobre todo a partir 
 
 REGLAS:
 - Escribe en español, en puntos breves y concretos ("Prefiere a alguien de Madrid o alrededores", no "valora la cercanía").
+- Algunas rondas son de perfiles de ejemplo, inventados para conocerle: cada uno encaja con lo que busca salvo en una cosa. Lo que elige dice qué le importa menos; lo que descarta, qué le importa más.
 - Si hay "Preferencias aprendidas", parte de ellas: pueden incluir correcciones de la psicóloga. Consérvalas salvo que los datos nuevos las contradigan.
 - No copies las respuestas del cuestionario: aporta lo que se deduce de sesiones, notas y decisiones.
 - Usa solo los datos recibidos. No inventes ni diagnostiques. Si no hay nada que aprender, deja las listas vacías.

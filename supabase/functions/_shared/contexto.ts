@@ -53,7 +53,7 @@ export interface DatosContexto {
   /** Lo que el propio cliente contó tras cada cita (T6.5). */
   citas: { fecha: string; con: CandidatoResumido | null; valoracion: number | null; repetir: boolean | null; feedback: string }[];
   /** Rondas de propuestas que respondió el propio cliente (T19.4): con quién se ve más, o ninguna y por qué. */
-  rondas: { fecha: string; elegido: CandidatoResumido | null; descartados: (CandidatoResumido | null)[]; ninguno: boolean; motivo: string | null }[];
+  rondas: { fecha: string; elegido: CandidatoResumido | string | null; descartados: (CandidatoResumido | string | null)[]; ninguno: boolean; motivo: string | null }[];
 }
 
 const CARACTERES_POR_TOKEN = 4; // aproximación para español
@@ -91,8 +91,10 @@ function cuestionario(p: CuestionarioContexto) {
   ]);
 }
 
-const candidato = (c: CandidatoResumido | null) =>
-  c
+// Un texto es un perfil de ejemplo ya descrito (T19.5).
+const candidato = (c: CandidatoResumido | string | null) =>
+  typeof c === "string" ? c
+  : c
     ? `${c.genero ?? "persona"} de ${c.edad} años, ${c.zona ?? c.ciudad}, busca ${c.tipo_relacion}, hijos: ${c.hijos}` +
       `${c.valores_importantes.length ? `, valores: ${c.valores_importantes.join(", ")}` : ""}${c.disc_perfil ? `, DISC ${c.disc_perfil}` : ""}`
     : "perfil ya borrado";

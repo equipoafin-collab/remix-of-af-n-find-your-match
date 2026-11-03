@@ -25,6 +25,7 @@ const Tarjeta = ({ p, elegida, elegir }: { p: PersonaPropuesta; elegida: boolean
     </div>
     <p className="font-display text-lg font-bold text-primary-foreground leading-tight">{p.nombre}, {p.edad}</p>
     {p.zona && <p className="font-body text-xs text-primary-foreground/60">{p.zona}</p>}
+    {p.rasgo && <p className="font-body text-xs text-primary-foreground line-clamp-3">{p.rasgo}</p>}
     {p.aficiones && <p className="font-body text-xs text-primary-foreground/80 line-clamp-2">{p.aficiones}</p>}
     {p.frase && <p className="font-display italic text-sm text-gold leading-snug">{p.frase}</p>}
   </button>
@@ -39,12 +40,13 @@ const RondaAbierta = ({ ronda }: { ronda: Extract<MiRonda, { estado: "abierta" }
   const [confirmar, setConfirmar] = useState(false);
   const dias = diasParaCaducar(ronda.caduca_at);
   const motivo = motivoNinguna(chips, texto);
+  const ejemplo = !!ronda.de_ejemplo; // T19.5: perfiles inventados, y el cliente lo sabe
 
   const enviar = () =>
     responder.mutate(
       { rondaId: ronda.id, elegido: ninguna ? null : elegida?.id ?? null, motivo: ninguna ? motivo : "" },
       {
-        onSuccess: () => toast({ title: "Enviado", description: "Tu psicóloga lo revisará y te contará." }),
+        onSuccess: () => toast({ title: "Enviado", description: ejemplo ? "Tu psicóloga lo tendrá en cuenta." : "Tu psicóloga lo revisará y te contará." }),
         onError: (e) => toast({ title: "No se pudo enviar", description: e.message, variant: "destructive" }),
       },
     );
@@ -53,11 +55,18 @@ const RondaAbierta = ({ ronda }: { ronda: Extract<MiRonda, { estado: "abierta" }
     <section className="bg-primary rounded-3xl px-4 py-6 space-y-4 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-56 h-56 rounded-full bg-gold/10 -translate-y-1/2 translate-x-1/3" />
       <div className="relative space-y-2">
-        <p className={rotulo}>Propuesta de tu psicóloga</p>
+        <p className={rotulo}>{ejemplo ? "Perfiles de ejemplo" : "Propuesta de tu psicóloga"}</p>
         <h1 className="font-display text-3xl font-bold text-primary-foreground leading-tight">¿Con quién te <em className="italic font-normal">ves más</em>?</h1>
         <p className="font-body text-sm text-primary-foreground/70">
-          {ronda.personas.length} {ronda.personas.length === 1 ? "persona elegida" : "personas elegidas"} para ti · {dias === 1 ? "queda 1 día" : `quedan ${dias} días`}
+          {ejemplo
+            ? `${ronda.personas.length} perfiles de ejemplo`
+            : `${ronda.personas.length} ${ronda.personas.length === 1 ? "persona elegida" : "personas elegidas"} para ti`} · {dias === 1 ? "queda 1 día" : `quedan ${dias} días`}
         </p>
+        {ejemplo && (
+          <p className="font-body text-sm text-primary-foreground rounded-2xl bg-primary-foreground/10 px-3 py-2">
+            No son personas reales: tu psicóloga los ha preparado para entender mejor qué buscas.
+          </p>
+        )}
       </div>
 
       {ronda.personas.length ? (
@@ -116,7 +125,9 @@ const RondaAbierta = ({ ronda }: { ronda: Extract<MiRonda, { estado: "abierta" }
         >
           {ninguna ? "Volver a las propuestas" : "Ninguna me encaja"}
         </button>
-        <p className="font-body text-xs text-primary-foreground/60 text-center">Tu psicóloga lo revisará y te contará. Ellos no sabrán nada.</p>
+        <p className="font-body text-xs text-primary-foreground/60 text-center">
+          {ejemplo ? "Son perfiles de ejemplo: nos ayudan a conocerte y nadie más lo verá." : "Tu psicóloga lo revisará y te contará. Ellos no sabrán nada."}
+        </p>
       </div>
 
       <AlertDialog open={confirmar} onOpenChange={setConfirmar}>
@@ -124,7 +135,9 @@ const RondaAbierta = ({ ronda }: { ronda: Extract<MiRonda, { estado: "abierta" }
           <AlertDialogHeader>
             <AlertDialogTitle className="font-display">{ninguna ? "¿Ninguna te encaja?" : `¿Te ves más con ${elegida?.nombre}?`}</AlertDialogTitle>
             <AlertDialogDescription className="font-body">
-              Solo se puede responder una vez. Tu psicóloga lo revisará y te contará; no se crea ninguna cita todavía.
+              {ejemplo
+                ? "Solo se puede responder una vez. Le servirá a tu psicóloga para conocerte mejor."
+                : "Solo se puede responder una vez. Tu psicóloga lo revisará y te contará; no se crea ninguna cita todavía."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -158,10 +171,14 @@ const PropuestasCliente = () => {
         {r?.estado === "respondida" ? (
           <>
             <p className="font-display text-lg font-bold text-foreground">
-              {r.ninguno ? "Nos has dicho que ninguna te encajaba" : <>Te ves más con <em className="italic font-normal">{r.elegido ?? "esa persona"}</em></>}
+              {r.ninguno
+                ? "Nos has dicho que ninguna te encajaba"
+                : <>Te ves más con {r.de_ejemplo ? "el perfil de " : ""}<em className="italic font-normal">{r.elegido ?? "esa persona"}</em></>}
             </p>
             <p className="font-body text-sm text-muted-foreground">
-              {r.ninguno ? "Tu psicóloga lo tendrá en cuenta para la próxima propuesta." : "Tu psicóloga lo revisará y te contará."}
+              {r.de_ejemplo
+                ? "Eran perfiles de ejemplo: tu psicóloga lo tendrá en cuenta para tus próximas propuestas."
+                : r.ninguno ? "Tu psicóloga lo tendrá en cuenta para la próxima propuesta." : "Tu psicóloga lo revisará y te contará."}
             </p>
           </>
         ) : (
