@@ -4,7 +4,7 @@
 
 export type DiscType = "D" | "I" | "S" | "C";
 
-export const DISC_META: Record<DiscType, { title: string; emoji: string; description: string; bg: string; text: string; gradient: string; ring: string; fortalezas: string[]; mejoras: string[]; enPareja: string; querer: string; necesidades: string[]; conflicto: string; frase: string; compatibility: string; comunicacion: string; actividades: string }> = {
+export const DISC_META: Record<DiscType, { title: string; emoji: string; description: string; bg: string; text: string; gradient: string; ring: string; fortalezas: string[]; mejoras: string[]; enPareja: string; querer: string; necesidades: string[]; conflicto: string; compatibility: string; comunicacion: string; actividades: string }> = {
   D: { title: "Dominante", emoji: "⚡", bg: "bg-red-50", text: "text-red-700", gradient: "from-red-500 to-red-600", ring: "ring-red-400",
     description: "Vas al grano, decides rápido y te gusta llevar la iniciativa.",
     fortalezas: ["Decides con rapidez y confianza", "Tiras del carro con energía", "Afrontas los problemas de frente"],

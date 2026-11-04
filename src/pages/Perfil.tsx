@@ -808,7 +808,6 @@ const Perfil = () => {
                         <h2 className="font-display text-xl font-bold">{pri.title} <span className="text-base font-normal opacity-70">({percents[primary]}%)</span></h2>
                       </div>
                     </div>
-                    <p className="font-display text-base italic font-medium opacity-80">{pri.frase}</p>
                     {/* Inline distribution */}
                     <div className="flex gap-2 mt-3 justify-center">
                       {(["D", "I", "S", "C"] as DiscType[]).map((type) => {

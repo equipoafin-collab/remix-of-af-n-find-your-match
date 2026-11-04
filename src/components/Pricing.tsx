@@ -6,25 +6,22 @@ import { RESERVA_DESCUBRIMIENTO } from "@/lib/enlaces";
 const plans = [
 {
   name: "Esencial",
-  price: "160",
+  price: "99",
   period: "/mes",
   features: [
   "1 sesión mensual de 60 minutos — Proceso de autoconocimiento guiado por psicólogos especializados en relaciones",
-  "Presentaciones a candidatos compatibles contigo en restaurantes de tu ciudad",
-  
-  "Feedback personal tras la cita, incluyendo la perspectiva de la otra parte"],
+  "Presentaciones a candidatos compatibles contigo en restaurantes de tu ciudad"],
 
   highlighted: true,
   cta: "Elegir Esencial"
 },
 {
   name: "Premium",
-  price: "250",
+  price: "169",
   period: "/mes",
   features: [
   "2 sesiones mensuales — Proceso de autoconocimiento guiado por psicólogos especializados en relaciones",
   "Presentaciones prioritarias frente a candidatos con perfil similar",
-  "✦ Verificación completa de antecedentes penales — exclusivo Premium",
   "Feedback detallado y recomendaciones personalizadas tras cada cita",
   "Formulario de compatibilidad con cada persona que te vamos a presentar"],
 
@@ -130,15 +127,6 @@ const Pricing = () => {
                   </li>
               )}
               </ul>
-
-              {!plan.highlighted && (
-                <button
-                  onClick={() => navigate("/perfil/documentos")}
-                  className="mb-4 text-xs font-body text-gold hover:text-gold/80 underline underline-offset-2 transition-colors text-left"
-                >
-                  Subir verificación de antecedentes →
-                </button>
-              )}
 
               <button
               onClick={() => navigate("/perfil")}
