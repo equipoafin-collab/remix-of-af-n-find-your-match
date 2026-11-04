@@ -24,7 +24,7 @@ export interface Configuracion {
 /** Mismos valores que inserta la migración T0.5; se usan si falta alguna fila. */
 export const CONFIGURACION_POR_DEFECTO: Configuracion = {
   sesiones_por_plan: { esencial: 1, premium: 2 },
-  precio_plan: { esencial: 160, premium: 250 },
+  precio_plan: { esencial: 99, premium: 169 },
   meses_plan: 3,
   umbral_pocas_sesiones: 1,
   dias_sin_seguimiento: 21,
