@@ -74,7 +74,6 @@ const DiscResultados = ({ primary, secondary, percents, nombre, onDescargar }: P
         <p className="font-display text-7xl sm:text-8xl leading-none mt-2" style={{ color: COLOR[primary] }}>
           {listo ? percents[primary] : 0}<span className="text-4xl">%</span>
         </p>
-        <p className="font-display italic text-primary-foreground/80 mt-4 max-w-md mx-auto">{pri.frase}</p>
         <p className="font-body text-sm text-primary-foreground/70 mt-3">
           con un toque <strong className="text-primary-foreground">{DISC_META[secondary].title.toLowerCase()}</strong> ({percents[secondary]}%)
         </p>
@@ -113,7 +112,6 @@ const DiscResultados = ({ primary, secondary, percents, nombre, onDescargar }: P
           <p className="font-display text-2xl text-foreground">
             Eres <em className="italic" style={{ color: COLOR[primary] }}>{pri.title}</em>
           </p>
-          <p className="font-display italic text-muted-foreground">{pri.frase}</p>
           <p className="font-body text-sm text-muted-foreground">
             {pri.description} Tu segundo estilo es <strong className="text-foreground">{DISC_META[secondary].title.toLowerCase()}</strong> ({percents[secondary]}%).
           </p>

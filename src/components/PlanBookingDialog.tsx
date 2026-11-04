@@ -19,22 +19,20 @@ interface PlanInfo {
 const PLANS: Record<"esencial" | "premium", PlanInfo> = {
   esencial: {
     name: "Esencial",
-    price: "160",
+    price: "99",
     period: "/mes",
     features: [
       "1 sesión mensual de 60 minutos con especialista",
       "Presentaciones a candidatos compatibles contigo en restaurantes de tu ciudad",
-      "Feedback personal tras la cita, incluyendo la perspectiva de la otra parte",
     ],
   },
   premium: {
     name: "Premium",
-    price: "250",
+    price: "169",
     period: "/mes",
     features: [
       "2 sesiones mensuales con especialistas",
       "Presentaciones prioritarias frente a candidatos con perfil similar",
-      "✦ Verificación completa de antecedentes penales — exclusivo Premium",
       "Feedback detallado y recomendaciones personalizadas tras cada cita",
       "Formulario de compatibilidad con cada persona que te vamos a presentar",
     ],

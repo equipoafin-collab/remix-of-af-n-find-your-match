@@ -4,7 +4,7 @@
 
 export type DiscType = "D" | "I" | "S" | "C";
 
-export const DISC_META: Record<DiscType, { title: string; emoji: string; description: string; bg: string; text: string; gradient: string; ring: string; fortalezas: string[]; mejoras: string[]; enPareja: string; querer: string; necesidades: string[]; conflicto: string; frase: string; compatibility: string; comunicacion: string; actividades: string }> = {
+export const DISC_META: Record<DiscType, { title: string; emoji: string; description: string; bg: string; text: string; gradient: string; ring: string; fortalezas: string[]; mejoras: string[]; enPareja: string; querer: string; necesidades: string[]; conflicto: string; compatibility: string; comunicacion: string; actividades: string }> = {
   D: { title: "Dominante", emoji: "⚡", bg: "bg-red-50", text: "text-red-700", gradient: "from-red-500 to-red-600", ring: "ring-red-400",
     description: "Vas al grano, decides rápido y te gusta llevar la iniciativa.",
     fortalezas: ["Decides con rapidez y confianza", "Tiras del carro con energía", "Afrontas los problemas de frente"],
@@ -13,7 +13,6 @@ export const DISC_META: Record<DiscType, { title: string; emoji: string; descrip
     querer: "Quieres haciendo cosas: resuelves, proteges y preparas planes con ganas.",
     necesidades: ["Autonomía y espacio para decidir", "Una pareja directa", "Retos y metas compartidas", "Respeto por tu tiempo"],
     conflicto: "Vas de frente y discutes sin rodeos. Te toca escuchar antes de contestar.",
-    frase: "\"Déjame actuar y no te fallaré.\"",
     compatibility: "Combinas mejor con perfiles S (estabilidad) e I (entusiasmo).",
     comunicacion: "Dilo claro y sin rodeos.", actividades: "Deportes de aventura, viajes espontáneos, retos en pareja." },
   I: { title: "Influyente", emoji: "✨", bg: "bg-amber-50", text: "text-amber-700", gradient: "from-amber-400 to-amber-500", ring: "ring-amber-400",
@@ -24,7 +23,6 @@ export const DISC_META: Record<DiscType, { title: string; emoji: string; descrip
     querer: "Quieres con palabras y sorpresas: lo dices, lo celebras y no dejas que se apague la chispa.",
     necesidades: ["Que te digan lo que sientes", "Vida social activa", "Reconocimiento", "Espacio para tu creatividad"],
     conflicto: "Buscas arreglarlo rápido, a veces sin hablar de lo de verdad.",
-    frase: "\"Ríete conmigo y me quedo.\"",
     compatibility: "Encajas bien con perfiles C (estructura) y S (constancia).",
     comunicacion: "Cuenta lo que sientes y deja que te escuchen.", actividades: "Eventos sociales, viajes con amigos, cenas románticas." },
   S: { title: "Estable", emoji: "🌿", bg: "bg-emerald-50", text: "text-emerald-700", gradient: "from-emerald-500 to-emerald-600", ring: "ring-emerald-400",
@@ -35,7 +33,6 @@ export const DISC_META: Record<DiscType, { title: string; emoji: string; descrip
     querer: "Quieres estando ahí: tiempo sin prisa, detalles de cada día y poder contar contigo.",
     necesidades: ["Tranquilidad y seguridad", "Tiempo para adaptarte", "Una pareja que respete tu ritmo", "Rutinas compartidas"],
     conflicto: "Evitas discutir y cedes para que no haya tensión.",
-    frase: "\"Dame tranquilidad y te doy mi lealtad.\"",
     compatibility: "Combinas con perfiles D (decisión) e I (energía).",
     comunicacion: "Necesitas tiempo para pensarlo; la paciencia te ayuda.", actividades: "Tardes tranquilas, cocinar juntos, paseos por la naturaleza." },
   C: { title: "Concienzudo", emoji: "💎", bg: "bg-blue-50", text: "text-blue-700", gradient: "from-blue-500 to-blue-600", ring: "ring-blue-400",
@@ -46,7 +43,6 @@ export const DISC_META: Record<DiscType, { title: string; emoji: string; descrip
     querer: "Quieres con hechos constantes: detalles pensados, promesas que se cumplen y planes bien organizados.",
     necesidades: ["Que las cosas sean previsibles", "Espacio para pensar lo que sientes", "Conversaciones profundas", "Respeto por tus formas"],
     conflicto: "Te callas, lo piensas y luego hablas.",
-    frase: "\"Sé coherente y te doy mi confianza.\"",
     compatibility: "Tu precisión se complementa con perfiles I (espontaneidad) y S (paciencia).",
     comunicacion: "Te van las conversaciones con sentido y con lógica.", actividades: "Museos, lectura compartida, planificación de viajes detallados." },
 };

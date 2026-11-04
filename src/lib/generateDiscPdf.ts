@@ -13,7 +13,6 @@ interface DiscMeta {
   querer: string;
   necesidades: string[];
   conflicto: string;
-  frase: string;
   compatibility: string;
   comunicacion: string;
   actividades: string;
@@ -204,10 +203,6 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   doc.setFontSize(46);
   doc.setTextColor(...priCol);
   doc.text(`${percents[primary]}%`, W / 2, 218, { align: "center" });
-  doc.setFont("times", "italic");
-  doc.setFontSize(12);
-  doc.setTextColor(...MUTED);
-  doc.splitTextToSize(t(pri.frase), W - 80).forEach((l: string, i: number) => doc.text(l, W / 2, 231 + i * 6, { align: "center" }));
 
   etiqueta(new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" }), M + 4, H - 26);
   doc.setFont("helvetica", "normal");
@@ -343,8 +338,8 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   const cw = (textW - 10) / 2;
   const ch = 78;
   const planes = [
-    { nombre: "Esencial", precio: "160€", x: M, destacado: false, items: ["1 sesión mensual de 60 min", "Presentaciones compatibles", "Feedback personal tras la cita"] },
-    { nombre: "Premium", precio: "250€", x: M + cw + 10, destacado: true, items: ["2 sesiones mensuales", "Presentaciones prioritarias", "Verificación de antecedentes"] },
+    { nombre: "Esencial", precio: "99€", x: M, destacado: false, items: ["1 sesión mensual de 60 min", "Presentaciones compatibles"] },
+    { nombre: "Premium", precio: "169€", x: M + cw + 10, destacado: true, items: ["2 sesiones mensuales", "Presentaciones prioritarias"] },
   ];
   planes.forEach((p) => {
     doc.setFillColor(28, 48, 96);

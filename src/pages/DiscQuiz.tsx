@@ -644,18 +644,6 @@ const DiscQuiz = () => {
                   })}
                 </motion.div>
 
-                {/* ═══ FRASE IDENTIFICATIVA ═══ */}
-                <motion.div
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className={`rounded-2xl ${priColors.bg} ${priColors.text} p-6 text-center border-l-4 border-current`}
-                >
-                  <p className="font-display text-lg md:text-xl italic font-medium leading-relaxed">
-                    {pri.frase}
-                  </p>
-                </motion.div>
-
                 {/* ═══ DESCRIPCIÓN PRINCIPAL ═══ */}
                 <motion.div
                   initial={{ opacity: 0, y: 15 }}
