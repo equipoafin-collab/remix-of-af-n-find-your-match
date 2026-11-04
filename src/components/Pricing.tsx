@@ -45,9 +45,28 @@ const Pricing = () => {
           <p className="text-gold font-body text-sm tracking-[0.2em] uppercase mb-4">
             Planes
           </p>
-          <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground">
-            Elige tu camino
+          <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground leading-tight mb-6">
+            ¿Y si por el precio de una sesión de psicología pudieras dar un paso{' '}
+            <span className="text-gold">mucho más grande</span> en tu vida sentimental?
           </h2>
+          <div className="space-y-4 max-w-2xl mx-auto font-body text-base md:text-lg text-muted-foreground leading-relaxed">
+            <p>
+              En Afín <strong className="text-foreground">no somos una aplicación de citas</strong>. Somos
+              psicólogos especializados en relaciones de pareja que te acompañamos en un proceso de
+              autoconocimiento y búsqueda de pareja.
+            </p>
+            <p>
+              Analizamos tu personalidad, tus valores, tus prioridades y lo que realmente necesitas para
+              encontrar a alguien compatible contigo.
+            </p>
+            <p>
+              Porque encontrar pareja no debería ser cuestión de suerte, sino de{' '}
+              <strong className="text-foreground">conocerte y saber elegir</strong>.
+            </p>
+          </div>
+          <p className="mt-6 font-display text-xl md:text-2xl text-gold font-semibold">
+            Tu próxima relación puede empezar aquí.
+          </p>
         </motion.div>
 
         {/* Free session block */}
