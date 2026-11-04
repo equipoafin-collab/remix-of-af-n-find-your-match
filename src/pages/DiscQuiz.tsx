@@ -187,6 +187,12 @@ const DiscQuiz = () => {
 
     setResult(res);
     setSaving(false);
+    // Descarga automática del informe nada más terminar.
+    try {
+      generateDiscPdf({ userName: name.trim(), primary: res.primary, secondary: res.secondary, percents: res.percents, pri: DISC_DESCRIPTIONS[res.primary], sec: DISC_DESCRIPTIONS[res.secondary] });
+    } catch (e) {
+      console.error("No se pudo generar el PDF automáticamente", e);
+    }
     goNext();
   };
 
