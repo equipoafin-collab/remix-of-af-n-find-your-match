@@ -916,7 +916,6 @@ const Perfil = () => {
                           className="flex flex-col items-center gap-1 px-4 py-4 rounded-xl border-2 border-gold bg-card hover:bg-gold/5 transition-all font-body"
                         >
                           <span className="text-[10px] uppercase tracking-[0.12em] text-gold font-semibold">Esencial</span>
-                          <span className="font-display text-xl font-bold text-foreground">€99<span className="text-xs font-normal text-muted-foreground">/mes</span></span>
                           <span className="text-[10px] text-muted-foreground">1 sesión · citas</span>
                         </a>
                         <a
@@ -926,7 +925,6 @@ const Perfil = () => {
                           className="flex flex-col items-center gap-1 px-4 py-4 rounded-xl border-2 border-primary bg-primary text-primary-foreground hover:opacity-90 transition-all font-body"
                         >
                           <span className="text-[10px] uppercase tracking-[0.12em] font-semibold flex items-center gap-1"><Crown className="w-3 h-3" /> Premium</span>
-                          <span className="font-display text-xl font-bold">€169<span className="text-xs font-normal opacity-60">/mes</span></span>
                           <span className="text-[10px] opacity-70">2 sesiones · prioridad</span>
                         </a>
                       </div>

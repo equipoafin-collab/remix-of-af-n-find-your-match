@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
+import { Button } from "@/components/ui/button";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -66,17 +67,18 @@ const HeroSection = () => {
           <p className="text-primary-foreground/70 text-sm font-body leading-relaxed text-center max-w-md">
             DISC es una metodología usada en RRHH y en Psicología que revela cómo te relacionas, comunicas y conectas con los demás para potenciar tus relaciones personales.
           </p>
-          <button
+          <p className="font-display text-xl text-primary-foreground">¿Quieres saber cuál es tu DISC?</p>
+          <Button
             onClick={() => navigate("/quiz")}
             className="group relative px-10 py-4 rounded-full bg-gold text-accent-foreground font-semibold text-base shadow-[0_8px_30px_-6px_hsl(var(--gold)/0.5)] hover:shadow-[0_12px_40px_-4px_hsl(var(--gold)/0.6)] hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 overflow-hidden"
           >
             <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700" />
             <span className="relative flex items-center gap-2">
               <Sparkles className="w-5 h-5" />
-              ¿Quieres saber cuál es tu DISC?
+              Pulsa aquí
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </span>
-          </button>
+          </Button>
         </motion.div>
 
       </div>
