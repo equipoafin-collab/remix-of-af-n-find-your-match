@@ -3,3 +3,6 @@
 - [x] Fondos en azul marino corporativo (vista y PDF), nada en negro
 - [x] Frases del DISC más cercanas y de calle (sin tono filosófico)
 - [x] Frase del Influyente: más cercana y personal (no "hazme reír y te lo doy todo")
+- [ ] Incorporar el texto de Afín en precios y en el informe DISC, sin precios en el PDF
+- [ ] Ampliar el informe DISC con narrativa cercana y personalizada
+- [ ] Cambiar el enlace del test DISC a «Pulsa aquí» y comprobar el resultado
