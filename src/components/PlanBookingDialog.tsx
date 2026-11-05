@@ -11,16 +11,12 @@ import {
 
 interface PlanInfo {
   name: string;
-  price: string;
-  period: string;
   features: string[];
 }
 
 const PLANS: Record<"esencial" | "premium", PlanInfo> = {
   esencial: {
     name: "Esencial",
-    price: "99",
-    period: "/mes",
     features: [
       "1 sesión mensual de 60 minutos con especialista",
       "Presentaciones a candidatos compatibles contigo en restaurantes de tu ciudad",
@@ -28,8 +24,6 @@ const PLANS: Record<"esencial" | "premium", PlanInfo> = {
   },
   premium: {
     name: "Premium",
-    price: "169",
-    period: "/mes",
     features: [
       "2 sesiones mensuales con especialistas",
       "Presentaciones prioritarias frente a candidatos con perfil similar",
@@ -69,12 +63,6 @@ const PlanBookingDialog = ({ plan, open, onOpenChange }: Props) => {
         </DialogHeader>
 
         <div className="space-y-5 pt-2">
-          {/* Price */}
-          <div className="flex items-baseline gap-1">
-            <span className="font-display text-4xl font-bold text-foreground">€{info.price}</span>
-            <span className="font-body text-sm text-muted-foreground">{info.period}</span>
-          </div>
-
           {/* Features */}
           <ul className="space-y-2.5">
             {info.features.map((f) => (
