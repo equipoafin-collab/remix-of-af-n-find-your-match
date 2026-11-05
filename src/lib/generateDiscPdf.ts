@@ -128,25 +128,6 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
     y += 4;
   };
 
-  const lista = (items: string[], color: RGB = GOLD) => {
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10.5);
-    items.forEach((item) => {
-      const lineas = doc.splitTextToSize(t(item), textW - 8);
-      espacio(lineas.length * 6 + 2);
-      doc.setDrawColor(...color);
-      doc.setLineWidth(0.6);
-      doc.line(M, y - 1.4, M + 3.5, y - 1.4);
-      doc.setTextColor(...INK);
-      lineas.forEach((l: string) => {
-        doc.text(l, M + 8, y);
-        y += 5.6;
-      });
-      y += 1.6;
-    });
-    y += 3;
-  };
-
   const etiqueta = (texto: string, x: number, yy: number, color: RGB = MUTED) => {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.5);
@@ -219,6 +200,8 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   doc.text(t(pri.title), M, y + 2);
   y += 10;
   parrafo(pri.description, 11);
+  parrafo(`${nombre}, este resultado recoge cómo has respondido hoy. No cuenta todo lo que eres ni determina con quién vas a encajar. Puede ayudarte a poner palabras a esas cosas que a veces notas cuando conoces a alguien: qué te da confianza, qué te cuesta decir y qué necesitas para estar a gusto.`, 10.5, MUTED);
+  parrafo("El porcentaje más alto señala el estilo que más aparece en tus respuestas, no cuánto vales como pareja. Todos tenemos algo de los cuatro estilos, y podemos actuar de forma distinta según la persona, el momento y la confianza que tengamos.", 10, MUTED);
 
   titulo("Distribución DISC");
   (["D", "I", "S", "C"] as DiscType[]).forEach((type) => {
@@ -266,12 +249,26 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   doc.setTextColor(...MUTED);
   doc.text(doc.splitTextToSize(t(sec.description), textW - 8)[0] ?? "", M + 5, y + 13);
   y += 24;
+  parrafo(`${nombre}, además de tu estilo ${pri.title.toLowerCase()}, aparece un lado ${sec.title.toLowerCase()} en tus respuestas. ${sec.enPareja} Quizá lo reconozcas más cuando ya tienes confianza con alguien. No necesitas encajar en una sola descripción: quédate con lo que te resulte familiar y comenta lo que no te representa.`, 10, MUTED);
 
   // ── ANÁLISIS ─────────────────────────────
   titulo("Tus fortalezas");
-  lista(pri.fortalezas, DISC_COLORS.S);
+  const fortalezas: Record<DiscType, string> = {
+    D: "Cuando algo te importa, te implicas y buscas cómo hacerlo posible. Si hay que organizar una cita o resolver un problema, no sueles quedarte esperando. En una relación, esa iniciativa puede dar mucha seguridad: la otra persona nota que puede contar contigo. Y cuando haces sitio a su opinión, tus ganas de avanzar se convierten en un proyecto de los dos.",
+    I: "Te suele salir acercarte, sacar conversación y compartir lo que te ilusiona. Puedes hacer que una primera cita se sienta menos tensa y que la otra persona se anime a hablar. En pareja, aportas ganas de hacer cosas juntos y de expresar el cariño. También sabes notar cuándo alguien necesita un gesto cercano, una llamada o que le preguntes cómo está de verdad.",
+    S: "Tu manera de cuidar se nota en el día a día: escuchar, acordarte de lo que le preocupa a la otra persona y estar cuando hace falta. No necesitas montar un gran plan para demostrar interés. En una relación, esa constancia ayuda a que haya confianza. Cuando tú también cuentas lo que necesitas, el cuidado deja de ir en una sola dirección y podéis apoyaros mutuamente.",
+    C: "Te fijas en los detalles y te importa que lo que alguien dice tenga sentido con lo que hace. Cuando te comprometes, procuras cumplir. Eso puede dar tranquilidad a tu pareja: sabe que te tomas la relación en serio. Un plan pensado con cuidado o recordar algo importante para la otra persona son formas muy tuyas de mostrar que te interesa.",
+  };
+  parrafo(`${nombre}, ${fortalezas[primary].charAt(0).toLowerCase()}${fortalezas[primary].slice(1)}`);
   titulo("Áreas de crecimiento");
-  lista(pri.mejoras, DISC_COLORS.I);
+  const mejoras: Record<DiscType, string> = {
+    D: "Cuando quieres resolver algo rápido, puedes ir por delante de la otra persona sin darte cuenta. Antes de decidir un plan por los dos, prueba a preguntarle qué le apetece. Y si te cuenta algo que le preocupa, escucha un poco antes de ofrecer una solución. A veces no necesita que lo arregles: necesita que entiendas cómo se siente.",
+    I: "Cuando hay buena conexión, es fácil dejarse llevar por las ganas. Date tiempo para comprobar cómo os tratáis también en los días normales, no solo cuando todo es nuevo. Si algo te molesta, intenta contarlo aunque te dé miedo estropear el buen ambiente. Hablarlo con calma suele acercaros más que hacer como si no pasara nada.",
+    S: "A veces puedes ceder para que todo esté tranquilo, aunque el plan no te apetezca o algo te haya dolido. Intenta decirlo cuando todavía es una molestia pequeña. Puedes empezar con algo sencillo: explicar qué pasó, cómo te sentiste y qué te gustaría hacer distinto. Tus preferencias también cuentan; no tienes que esperar a estar muy cansado de una situación para hablar.",
+    C: "Puedes darle muchas vueltas a un mensaje o esperar a tener todo claro antes de dar un paso. Si tienes una duda, preguntar suele ayudarte más que intentar adivinar. También puedes proponer una cita sencilla sin tener cada detalle cerrado. Conocer a alguien lleva tiempo, y no hace falta acertar en todo desde el primer día.",
+  };
+  parrafo(mejoras[primary]);
+  parrafo("No se trata de cambiar tu personalidad para gustar. Se trata de reconocer qué haces cuando estás nervioso, ilusionado o preocupado, y tener alguna alternativa que te ayude a relacionarte mejor.", 10, MUTED);
 
   titulo(`${nombre}, así eres en pareja`);
   parrafo(pri.enPareja);
@@ -282,10 +279,11 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
 
   titulo("Tu forma de querer");
   parrafo(pri.querer);
+  parrafo(`${nombre}, piensa en cómo sueles demostrar interés cuando alguien te gusta. Puede que para ti esté clarísimo y que la otra persona no lo interprete igual. Contarle cómo expresas el cariño y preguntarle qué le hace sentirse tenida en cuenta evita muchos malentendidos. No tenéis que hacerlo todo igual para entenderos.`, 10.5, MUTED);
 
   titulo("Lo que necesitas");
-  lista(pri.necesidades);
-  parrafo("Cuando esto lo tienes, estás a gusto y das lo mejor de ti. Si te falta, te frustas o te alejas. Lo mejor es decirlo en voz alta, sin esperar a que lo adivinen.", 9.5, MUTED);
+  parrafo(`En tus respuestas aparecen necesidades relacionadas con ${pri.necesidades.map((n) => n.charAt(0).toLowerCase() + n.slice(1)).join(", ")}. Fíjate en cuáles tienen más peso para ti: quizá disfrutes de muchos planes juntos, pero también necesites tiempo a solas; o quizá te importe más la constancia que hablar durante horas.`);
+  parrafo("Cuando algo te falta, puede que te frustres o te alejes sin explicarlo. Intenta poner un ejemplo concreto de lo que necesitas: tener tiempo para pensar después de una discusión, acordar cuándo os vais a ver o recibir una llamada en un día complicado. Así la otra persona puede entenderte sin tener que adivinar.", 10.5, MUTED);
 
   titulo("Gestión de conflictos");
   parrafo(pri.conflicto);
@@ -293,26 +291,22 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   etiqueta("Influencia del estilo secundario", M, y);
   y += 6;
   parrafo(sec.conflicto, 10, MUTED);
+  parrafo("Una discusión no tiene que resolverse en el momento. Si os estáis haciendo daño al hablar, podéis parar y acordar cuándo retomarlo. Al volver, céntrate en lo que pasó y en cómo te afectó, en lugar de repasar todos los errores anteriores. Escuchar no significa darle la razón en todo: significa intentar entender qué le preocupa.", 10.5, MUTED);
 
   titulo("Compatibilidad ideal");
   parrafo(pri.compatibility);
+  parrafo(`${nombre}, estos estilos son una orientación, no una lista de personas que debas buscar o descartar. La compatibilidad también depende de vuestros valores, de cómo queréis vivir y de si buscáis el mismo tipo de relación. Observa si puedes hablar con naturalidad, si se respetan tus límites y si lo que te cuenta esa persona se corresponde con lo que hace.`, 10.5, MUTED);
   titulo("Comunicación en pareja");
   parrafo(pri.comunicacion);
   titulo("Planes que os acercan");
   parrafo(pri.actividades);
 
   titulo("Consejos prácticos");
-  lista([
-    "Dejad los acuerdos claros y repasados de vez en cuando.",
-    "Una vez por semana, un rato juntos sin móviles.",
-    "Cuando discutas, repite primero lo que has entendido antes de contestar.",
-    "Celebra los avances pequeños: las relaciones se hacen con eso.",
-    "Di lo que necesitas, no esperes a que tu pareja lo adivine.",
-    "Cada uno lleva su ritmo: date tiempo sin exigir el del otro.",
-  ]);
+  parrafo("Si estás conociendo a alguien, no tienes que decidir enseguida si será tu pareja. Después de cada cita, pregúntate cómo te has sentido: si has podido ser tú, si te han escuchado y si te apetece volver a verle. La ilusión importa, pero también importa estar a gusto sin tener que esforzarte todo el rato por impresionar.");
+  parrafo("Si ya tienes pareja, buscad un rato sin móviles para contaros cómo estáis. Podéis empezar por algo que os haya gustado de esa semana y algo que necesitéis mejorar. Los acuerdos pequeños y concretos, como avisar si vais a llegar tarde o reservar tiempo juntos, son más fáciles de cumplir que prometer que todo va a cambiar.");
 
   // Cierre
-  espacio(48);
+  espacio(62);
   y += 6;
   doc.setDrawColor(...GOLD);
   doc.setLineWidth(0.3);
@@ -321,53 +315,26 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   doc.setFont("times", "italic");
   doc.setFontSize(15);
   doc.setTextColor(...INK);
-  doc.text(t(`${nombre}, tu perfil es una guía para querer mejor.`), W / 2, y, { align: "center" });
-  y += 9;
+  doc.splitTextToSize(t(`${nombre}, quédate con lo que te ayude a conocerte mejor.`), textW - 20).forEach((line: string) => {
+    doc.text(line, W / 2, y, { align: "center" });
+    y += 7;
+  });
+  y += 2;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
   doc.setTextColor(...MUTED);
   doc.splitTextToSize(t("Este informe es el punto de partida. En tu sesión con nuestra especialista profundizaremos en cada aspecto y diseñaremos un camino personalizado para ti."), textW - 30)
     .forEach((l: string) => { doc.text(l, W / 2, y, { align: "center" }); y += 5; });
 
-  // ── PLANES ───────────────────────────────
+  // ── ACOMPAÑAMIENTO ───────────────────────
   nuevaPagina();
-  titulo("Nuestros planes");
-  parrafo(`${nombre}, ahora que conoces tu perfil, el siguiente paso es trabajar con nuestra especialista en sesiones personales para conocer a la persona ideal para ti.`, 10.5, MUTED);
-  y += 6;
-
-  const cw = (textW - 10) / 2;
-  const ch = 78;
-  const planes = [
-    { nombre: "Esencial", precio: "99€", x: M, destacado: false, items: ["1 sesión mensual de 60 min", "Presentaciones compatibles"] },
-    { nombre: "Premium", precio: "169€", x: M + cw + 10, destacado: true, items: ["2 sesiones mensuales", "Presentaciones prioritarias"] },
-  ];
-  planes.forEach((p) => {
-    doc.setFillColor(28, 48, 96);
-    doc.setDrawColor(...(p.destacado ? GOLD : LINE));
-    doc.setLineWidth(p.destacado ? 0.6 : 0.3);
-    doc.rect(p.x, y, cw, ch, "FD");
-    const cx = p.x + cw / 2;
-    if (p.destacado) etiqueta("Recomendado", cx - 9, y + 10, GOLD);
-    doc.setFont("times", "normal");
-    doc.setFontSize(17);
-    doc.setTextColor(...INK);
-    doc.text(p.nombre, cx, y + 22, { align: "center" });
-    doc.setFontSize(28);
-    doc.setTextColor(...GOLD);
-    doc.text(t(p.precio), cx, y + 38, { align: "center" });
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(...MUTED);
-    doc.text("al mes", cx, y + 44, { align: "center" });
-    doc.setDrawColor(...LINE);
-    doc.setLineWidth(0.3);
-    doc.line(p.x + 10, y + 50, p.x + cw - 10, y + 50);
-    doc.setFontSize(9);
-    doc.setTextColor(...INK);
-    p.items.forEach((it, i) => doc.text(t(it), cx, y + 58 + i * 6.5, { align: "center" }));
-  });
-  y += ch + 14;
-  parrafo("Reserva tu primera sesión gratuita de 15 minutos y descubre cómo podemos ayudarte a encontrar a tu persona.", 10.5, MUTED, "italic");
+  titulo("Tu siguiente paso con Afín");
+  parrafo("¿Y si por el precio de una sesión de psicología pudieras dar un paso mucho más grande en tu vida sentimental?", 17, GOLD, "italic");
+  parrafo("En Afín no somos una aplicación de citas. Somos psicólogos especializados en relaciones de pareja que te acompañamos en un proceso de autoconocimiento y búsqueda de pareja.", 11);
+  parrafo("Analizamos tu personalidad, tus valores, tus prioridades y lo que realmente necesitas para encontrar a alguien compatible contigo.", 11);
+  parrafo("Porque encontrar pareja no debería ser cuestión de suerte, sino de conocerte y saber elegir.", 11);
+  parrafo(`${nombre}, en una sesión podemos comentar qué partes de este informe te representan y cuáles no, hablar de tus experiencias y aclarar qué buscas ahora. No tienes que traer todas las respuestas: podemos empezar por lo que te preocupa o por lo que te gustaría que fuera diferente en tu próxima relación.`, 10.5, MUTED);
+  parrafo("Tu próxima relación puede empezar aquí.", 17, GOLD, "italic");
 
   // ── PIE (todas menos la portada) ─────────
   const total = doc.getNumberOfPages();
