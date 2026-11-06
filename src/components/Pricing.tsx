@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import { RESERVA_DESCUBRIMIENTO } from "@/lib/enlaces";
 import { PRECIOS_PUBLICOS } from "@/lib/preciosPublicos";
 import { Button } from "@/components/ui/button";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const plans = [
 {
@@ -50,7 +51,11 @@ const Pricing = () => {
             ¿Y si por el precio de una sesión de psicología pudieras dar un paso{' '}
             <span className="text-gold">mucho más grande</span> en tu vida sentimental?
           </h2>
-          <div className="space-y-4 max-w-2xl mx-auto font-body text-base md:text-lg text-muted-foreground leading-relaxed">
+          <Accordion type="single" collapsible className="max-w-2xl mx-auto text-left">
+            <AccordionItem value="quienes-somos" className="border-border">
+              <AccordionTrigger className="font-display text-2xl text-foreground">Quiénes somos</AccordionTrigger>
+              <AccordionContent>
+          <div className="space-y-4 font-body text-base md:text-lg text-muted-foreground leading-relaxed">
             <p>
               En Afín <strong className="text-foreground">no somos una aplicación de citas</strong>. Somos
               psicólogos especializados en relaciones de pareja que te acompañamos en un proceso de
@@ -65,6 +70,9 @@ const Pricing = () => {
               <strong className="text-foreground">conocerte y saber elegir</strong>.
             </p>
           </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
           <p className="mt-6 font-display text-xl md:text-2xl text-gold font-semibold">
             Tu próxima relación puede empezar aquí.
           </p>
