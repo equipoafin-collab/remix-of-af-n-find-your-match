@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Check } from "lucide-react";
 import { RESERVA_DESCUBRIMIENTO } from "@/lib/enlaces";
 import { PRECIOS_PUBLICOS } from "@/lib/preciosPublicos";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 
 const plans = [
@@ -34,7 +33,6 @@ const plans = [
 
 
 const Pricing = () => {
-  const navigate = useNavigate();
   return (
     <section id="precios" className="py-10 md:py-14 bg-card">
       <div className="max-w-6xl mx-auto px-6">
@@ -114,13 +112,15 @@ const Pricing = () => {
           </a>
         </motion.div>
 
-        {/* Paid plans */}
-        <Accordion type="single" collapsible className="max-w-4xl mx-auto">
-          <AccordionItem value="precios" className="border-border">
-            <AccordionTrigger className="font-display text-2xl text-foreground py-6">
-              Quiénes somos
-            </AccordionTrigger>
-            <AccordionContent className="pt-4 pb-8">
+
+      </div>
+    </section>);
+
+};
+
+export const PaidPlans = () => {
+  const navigate = useNavigate();
+  return (
         <div className="grid md:grid-cols-2 gap-6 md:gap-8 items-stretch">
           {plans.map((plan, i) =>
           <motion.div
@@ -169,12 +169,7 @@ const Pricing = () => {
             </motion.div>
           )}
         </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </div>
-    </section>);
-
+  );
 };
 
 export default Pricing;

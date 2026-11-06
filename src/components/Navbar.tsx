@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
+import { PaidPlans } from "@/components/Pricing";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [pricesOpen, setPricesOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -47,9 +51,9 @@ const Navbar = () => {
           <button onClick={() => handleAnchor("#testimonios")} className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors">
             Testimonios
           </button>
-          <button onClick={() => handleAnchor("#precios")} className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors">
+          <Button variant="ghost" onClick={() => setPricesOpen(true)} className="h-auto p-0 text-sm font-body text-muted-foreground hover:text-foreground">
             Precios
-          </button>
+          </Button>
           <button onClick={handleCTA} className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity">
             Comenzar
           </button>
@@ -80,13 +84,22 @@ const Navbar = () => {
           <button onClick={() => handleAnchor("#como-funciona")} className="text-sm text-muted-foreground text-left">Cómo funciona</button>
           <button onClick={() => handleAnchor("#diferencia")} className="text-sm text-muted-foreground text-left">Nuestra diferencia</button>
           <button onClick={() => handleAnchor("#testimonios")} className="text-sm text-muted-foreground text-left">Testimonios</button>
-          <button onClick={() => handleAnchor("#precios")} className="text-sm text-muted-foreground text-left">Precios</button>
+          <Button variant="ghost" onClick={() => { setIsOpen(false); setPricesOpen(true); }} className="h-auto justify-start p-0 text-sm text-muted-foreground">Precios</Button>
           
           <button onClick={handleCTA} className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium w-full">
             Comenzar
           </button>
         </motion.div>
       )}
+      <Dialog open={pricesOpen} onOpenChange={setPricesOpen}>
+        <DialogContent className="max-w-4xl max-h-[85dvh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display text-2xl">Precios</DialogTitle>
+            <DialogDescription>Planes Esencial y Premium</DialogDescription>
+          </DialogHeader>
+          <PaidPlans />
+        </DialogContent>
+      </Dialog>
     </motion.nav>
   );
 };
