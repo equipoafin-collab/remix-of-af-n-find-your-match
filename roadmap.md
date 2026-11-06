@@ -6,4 +6,6 @@
 - [x] Incorporar el texto de Afín en precios y en el informe DISC, sin precios en el PDF
 - [x] Ampliar el informe DISC con narrativa cercana y personalizada
 - [x] Cambiar el enlace del test DISC a «Pulsa aquí» y comprobar el resultado
-- [ ] Mostrar precios comerciales solo en la sección Precios, quitándolos del perfil y del diálogo de planes
+- [x] Mostrar precios comerciales solo en la sección Precios, quitándolos del perfil y del diálogo de planes
+- [x] Cambiar precios publicados a Esencial 69 €/mes y Premium 120 €/mes, visibles solo al abrir un desplegable
+- [x] Actualizar llamada DISC a «¿Quieres saber cuál es tu DISC y cómo eres en pareja? Pulsa aquí»

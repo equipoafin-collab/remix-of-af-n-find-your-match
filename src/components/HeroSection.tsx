@@ -67,7 +67,7 @@ const HeroSection = () => {
           <p className="text-primary-foreground/70 text-sm font-body leading-relaxed text-center max-w-md">
             DISC es una metodología usada en RRHH y en Psicología que revela cómo te relacionas, comunicas y conectas con los demás para potenciar tus relaciones personales.
           </p>
-          <p className="font-display text-xl text-primary-foreground">¿Quieres saber cuál es tu DISC?</p>
+          <p className="font-display text-xl text-primary-foreground">¿Quieres saber cuál es tu DISC y cómo eres en pareja?</p>
           <Button
             onClick={() => navigate("/quiz")}
             className="group relative px-10 py-4 rounded-full bg-gold text-accent-foreground font-semibold text-base shadow-[0_8px_30px_-6px_hsl(var(--gold)/0.5)] hover:shadow-[0_12px_40px_-4px_hsl(var(--gold)/0.6)] hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 overflow-hidden"

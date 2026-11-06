@@ -2,11 +2,14 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Check } from "lucide-react";
 import { RESERVA_DESCUBRIMIENTO } from "@/lib/enlaces";
+import { PRECIOS_PUBLICOS } from "@/lib/preciosPublicos";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 
 const plans = [
 {
   name: "Esencial",
-  price: "99",
+  price: PRECIOS_PUBLICOS.esencial,
   period: "/mes",
   features: [
   "1 sesión mensual de 60 minutos — Proceso de autoconocimiento guiado por psicólogos especializados en relaciones",
@@ -17,7 +20,7 @@ const plans = [
 },
 {
   name: "Premium",
-  price: "169",
+  price: PRECIOS_PUBLICOS.premium,
   period: "/mes",
   features: [
   "2 sesiones mensuales — Proceso de autoconocimiento guiado por psicólogos especializados en relaciones",
@@ -87,7 +90,7 @@ const Pricing = () => {
             Primera sesión gratis
           </p>
           <p className="font-body text-xs tracking-wide uppercase text-muted-foreground mb-4">
-            Sesión de bienvenida · 15 minutos · 0 €
+            Sesión de bienvenida · 15 minutos
           </p>
           <p className="font-body text-sm text-muted-foreground leading-relaxed mb-5 max-w-2xl mx-auto">
             Diagnóstico DISC y entrevista personal de 15 min con un especialista. Clarifica qué buscas y si Afín es para ti.
@@ -112,7 +115,13 @@ const Pricing = () => {
         </motion.div>
 
         {/* Paid plans */}
-        <div className="grid md:grid-cols-2 gap-6 md:gap-8 items-stretch max-w-4xl mx-auto">
+        <Accordion type="single" collapsible className="max-w-4xl mx-auto">
+          <AccordionItem value="precios" className="border-border">
+            <AccordionTrigger className="font-display text-2xl text-foreground py-6">
+              Ver planes y precios
+            </AccordionTrigger>
+            <AccordionContent className="pt-4 pb-8">
+        <div className="grid md:grid-cols-2 gap-6 md:gap-8 items-stretch">
           {plans.map((plan, i) =>
           <motion.div
             key={plan.name}
@@ -147,7 +156,7 @@ const Pricing = () => {
               )}
               </ul>
 
-              <button
+              <Button
               onClick={() => navigate("/perfil")}
               className={`w-full py-3.5 rounded-full font-medium text-sm transition-opacity hover:opacity-90 ${
               plan.highlighted ?
@@ -156,10 +165,13 @@ const Pricing = () => {
               }>
 
                 {plan.cta}
-              </button>
+              </Button>
             </motion.div>
           )}
         </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
     </section>);
 

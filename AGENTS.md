@@ -1,0 +1,1 @@
+- Keep published marketing prices separate from billing configuration so presentation changes never alter payment amounts implicitly.
