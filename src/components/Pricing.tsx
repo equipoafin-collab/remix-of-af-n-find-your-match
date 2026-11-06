@@ -118,7 +118,7 @@ const Pricing = () => {
         <Accordion type="single" collapsible className="max-w-4xl mx-auto">
           <AccordionItem value="precios" className="border-border">
             <AccordionTrigger className="font-display text-2xl text-foreground py-6">
-              Ver planes y precios
+              Quiénes somos
             </AccordionTrigger>
             <AccordionContent className="pt-4 pb-8">
         <div className="grid md:grid-cols-2 gap-6 md:gap-8 items-stretch">
