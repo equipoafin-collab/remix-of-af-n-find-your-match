@@ -7,3 +7,5 @@
 - [x] Ampliar el informe DISC con narrativa cercana y personalizada
 - [x] Cambiar el enlace del test DISC a «Pulsa aquí» y comprobar el resultado
 - [ ] Mostrar precios comerciales solo en la sección Precios, quitándolos del perfil y del diálogo de planes
+- [ ] Cambiar precios publicados a Esencial 69 €/mes y Premium 120 €/mes, visibles solo al abrir un desplegable
+- [ ] Actualizar llamada DISC a «¿Quieres saber cuál es tu DISC y cómo eres en pareja? Pulsa aquí»
