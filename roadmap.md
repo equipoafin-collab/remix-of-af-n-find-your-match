@@ -11,3 +11,4 @@
 - [x] Actualizar llamada DISC a «¿Quieres saber cuál es tu DISC y cómo eres en pareja? Pulsa aquí»
 - [ ] Sustituir el desplegable principal por «Cómo lo hacemos» con el texto de entrevistas e informe previo
 - [ ] Mostrar «Entrevista personal · 20 minutos» en lugar de 15 minutos
+- [ ] Destacar el cuadro «Empieza sin compromiso» y la primera sesión gratis de 20 minutos
