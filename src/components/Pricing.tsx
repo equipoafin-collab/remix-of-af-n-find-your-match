@@ -52,22 +52,27 @@ const Pricing = () => {
             <span className="text-gold">mucho más grande</span> en tu vida sentimental?
           </h2>
           <Accordion type="single" collapsible className="max-w-2xl mx-auto text-left">
-            <AccordionItem value="quienes-somos" className="border-border">
-              <AccordionTrigger className="font-display text-2xl text-foreground">Quiénes somos</AccordionTrigger>
+            <AccordionItem value="como-lo-hacemos" className="border-border">
+              <AccordionTrigger className="font-display text-2xl text-foreground">Cómo lo hacemos</AccordionTrigger>
               <AccordionContent>
           <div className="space-y-4 font-body text-base md:text-lg text-muted-foreground leading-relaxed">
             <p>
-              En Afín <strong className="text-foreground">no somos una aplicación de citas</strong>. Somos
-              psicólogos especializados en relaciones de pareja que te acompañamos en un proceso de
-              autoconocimiento y búsqueda de pareja.
+              <strong className="text-foreground">Antes de que conozcas a alguien, hablamos con esa persona.</strong>
             </p>
+            <p>La entrevistamos para conocer:</p>
+            <ul className="space-y-2 list-disc pl-5">
+              <li>Su historia</li>
+              <li>Sus valores</li>
+              <li>Qué busca realmente</li>
+              <li>Qué relación quiere construir</li>
+            </ul>
             <p>
-              Analizamos tu personalidad, tus valores, tus prioridades y lo que realmente necesitas para
-              encontrar a alguien compatible contigo.
+              De esta forma, cuando dos personas se encuentran, no necesitan convertir la cita en una entrevista.
             </p>
+            <h3 className="font-display text-xl font-semibold text-foreground pt-2">Antes de quedar recibirás un pequeño informe</h3>
             <p>
-              Porque encontrar pareja no debería ser cuestión de suerte, sino de{' '}
-              <strong className="text-foreground">conocerte y saber elegir</strong>.
+              Sus inquietudes, intereses y su forma de ver las relaciones. No es un currículum.
+              Es simplemente una forma de que la conversación empiece desde un lugar más natural.
             </p>
           </div>
               </AccordionContent>
@@ -96,10 +101,10 @@ const Pricing = () => {
             Primera sesión gratis
           </p>
           <p className="font-body text-xs tracking-wide uppercase text-muted-foreground mb-4">
-            Sesión de bienvenida · 15 minutos
+            Entrevista personal · 20 minutos
           </p>
           <p className="font-body text-sm text-muted-foreground leading-relaxed mb-5 max-w-2xl mx-auto">
-            Diagnóstico DISC y entrevista personal de 15 min con un especialista. Clarifica qué buscas y si Afín es para ti.
+            Diagnóstico DISC y entrevista personal de 20 minutos con un especialista. Clarifica qué buscas y si Afín es para ti.
           </p>
           <ul className="flex flex-col sm:flex-row gap-3 justify-center text-sm font-body text-foreground mb-5">
             <li className="flex items-center gap-2">
