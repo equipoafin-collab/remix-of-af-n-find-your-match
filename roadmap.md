@@ -9,3 +9,5 @@
 - [x] Mostrar precios comerciales solo en la sección Precios, quitándolos del perfil y del diálogo de planes
 - [x] Cambiar precios publicados a Esencial 69 €/mes y Premium 120 €/mes, visibles solo al abrir un desplegable
 - [x] Actualizar llamada DISC a «¿Quieres saber cuál es tu DISC y cómo eres en pareja? Pulsa aquí»
+- [ ] Sustituir el desplegable principal por «Cómo lo hacemos» con el texto de entrevistas e informe previo
+- [ ] Mostrar «Entrevista personal · 20 minutos» en lugar de 15 minutos
