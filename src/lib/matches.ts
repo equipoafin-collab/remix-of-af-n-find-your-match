@@ -1,3 +1,4 @@
+import type { TablesInsert } from "@/integrations/supabase/types";
 import type { MatchEstado } from "@/types/admin";
 
 // En el orden del flujo (sección 3.1). El informe es opcional: con plan Esencial se pasa de propuesto a la cita.
@@ -34,4 +35,24 @@ export const MAX_LARGO_MOTIVO = 160;
 export function limpiarMotivos(texto: string) {
   const motivos = texto.split("\n").map((m) => m.trim().slice(0, MAX_LARGO_MOTIVO)).filter(Boolean);
   return [...new Set(motivos)].slice(0, MAX_MOTIVOS_CLIENTE);
+}
+
+/**
+ * T6.6 · Match creado a mano por la psicóloga desde la ficha (sin sugerencia): se presenta ya en el área de los dos
+ * y, si trae fecha, con la cita agendada. `fechaCita` en ISO.
+ */
+export function nuevoMatchManual(m: { perfilA: string; perfilB: string; motivos: string[]; fechaCita: string | null; lugar: string }, ahora = new Date()): TablesInsert<"matches"> {
+  return {
+    perfil_a: m.perfilA,
+    perfil_b: m.perfilB,
+    motivos_cliente: m.motivos,
+    presentado_at: ahora.toISOString(),
+    ...(m.fechaCita && { estado: "cita_agendada" as const, fecha_cita: m.fechaCita, lugar: m.lugar.trim() || null }),
+  };
+}
+
+/** T6.6 · Aviso al cliente de su match nuevo. Sin el nombre del otro ni nada sensible: un correo lo puede leer cualquiera. */
+export function avisoNuevoMatch(nombreCompleto: string, enlace: string, conCita: boolean) {
+  const nombre = nombreCompleto.trim().split(/\s+/)[0];
+  return `Hola, ${nombre}:\n\nTu psicóloga te ha presentado a alguien en Afín${conCita ? " y ya tenéis una cita" : ""}. Entra en tu área para ver quién es y por qué creemos que encajáis:\n${enlace}\n\nUn saludo,\nAfín`;
 }

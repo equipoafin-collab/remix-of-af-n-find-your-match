@@ -11,6 +11,7 @@ import { ESTADO_MATCH as ESTADO } from "@/lib/matches";
 import PanelInforme from "./PanelInforme";
 import PanelFeedback from "./PanelFeedback";
 import PresentarMatch from "./PresentarMatch";
+import CrearMatch from "./CrearMatch";
 
 const badge = "px-2 py-0.5 rounded-full text-xs font-body font-medium border";
 const campo = "mt-1 w-full px-3 py-2 rounded-lg border border-border bg-background font-body text-sm";
@@ -110,7 +111,7 @@ export const FilaMatch = ({ match, perfilId }: { match: MatchConPersonas; perfil
           <div className="flex items-center gap-3 flex-wrap">
             {perfilId ? (
               <Persona p={match.perfil_a === perfilId ? match.b : match.a}>
-                <span>· {match.perfil_a === perfilId ? "lo propuso este cliente" : "lo propuso el otro cliente"}</span>
+                <span>· {!match.sugerencia_id ? "creado a mano" : match.perfil_a === perfilId ? "lo propuso este cliente" : "lo propuso el otro cliente"}</span>
               </Persona>
             ) : (
               <>
@@ -168,16 +169,17 @@ export const FilaMatch = ({ match, perfilId }: { match: MatchConPersonas; perfil
   );
 };
 
-// T6.1 · Los matches se crean al aceptar una sugerencia (trigger en la BD), con su informe (T6.3) y feedback (T6.5).
+// T6.1 · Los matches se crean al aceptar una sugerencia (trigger en la BD) o a mano (T6.6), con su informe (T6.3) y feedback (T6.5).
 const MatchesTab = ({ perfil }: { perfil: Perfil }) => {
   const { data: matches = [], isLoading, error } = useMatches(perfil.id);
 
   return (
     <section className="bg-card border border-border rounded-2xl overflow-hidden">
-      <div className="p-5">
+      <div className="p-5 flex items-center justify-between gap-3">
         <h3 className="font-display text-sm font-semibold text-foreground flex items-center gap-2">
           <Heart className="w-4 h-4 text-gold" /> Matches
         </h3>
+        <CrearMatch perfilId={perfil.id} />
       </div>
       {error ? (
         <p className="px-5 py-4 border-t border-border font-body text-sm text-rose-700">No se pudieron cargar los matches: {error.message}</p>
@@ -185,7 +187,7 @@ const MatchesTab = ({ perfil }: { perfil: Perfil }) => {
         <p className="px-5 py-4 border-t border-border font-body text-sm text-muted-foreground">Cargando matches…</p>
       ) : matches.length === 0 ? (
         <p className="px-5 py-4 border-t border-border font-body text-sm text-muted-foreground">
-          Aún no hay matches. Se crean al aceptar una sugerencia en Sugerencias IA.
+          Aún no hay matches. Se crean al aceptar una sugerencia en Sugerencias IA o con "Crear match".
         </p>
       ) : (
         <ul>{matches.map((m) => <FilaMatch key={m.id} match={m} perfilId={perfil.id} />)}</ul>
