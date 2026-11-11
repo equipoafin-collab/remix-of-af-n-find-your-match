@@ -17,7 +17,7 @@ const MatchesAprobados = () => {
 
   const embudo = embudoMatches(matches);
   const pasos = [
-    { label: "Propuestos", valor: embudo.propuestos, detalle: "Sugerencias aceptadas" },
+    { label: "Propuestos", valor: embudo.propuestos, detalle: "Sugerencias aceptadas o creados a mano" },
     { label: "Con cita", valor: embudo.conCita, detalle: `${pct(embudo.conCita, embudo.propuestos)} de los propuestos` },
     { label: "Continúan", valor: embudo.continuan, detalle: `${pct(embudo.continuan, embudo.conCita)} de los que tuvieron cita` },
   ];
