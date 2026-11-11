@@ -1,6 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { TablesUpdate } from "@/integrations/supabase/types";
+import type { TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 import { toast } from "@/hooks/use-toast";
 import { mensajeDeFuncion } from "./mensajeDeFuncion";
 import { useActualizarAprendizaje } from "./useAprendizaje";
@@ -27,6 +27,13 @@ export type MatchConPersonas = NonNullable<ReturnType<typeof useMatches>["data"]
 
 // La cita de un match cuenta como próxima cita de los dos en v_clientes (cuelga de ["perfiles"]) y los cambios
 // de estado crean o completan tareas automáticas (T6.4).
+const invalidarMatches = (queryClient: QueryClient) => Promise.all([
+  queryClient.invalidateQueries({ queryKey: ["matches"] }),
+  queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
+  queryClient.invalidateQueries({ queryKey: ["tareas"] }),
+  queryClient.invalidateQueries({ queryKey: ["alertas"] }),
+]);
+
 export function useActualizarMatch() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -34,12 +41,20 @@ export function useActualizarMatch() {
       const { error } = await supabase.from("matches").update(cambios).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["matches"] }),
-      queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
-      queryClient.invalidateQueries({ queryKey: ["tareas"] }),
-      queryClient.invalidateQueries({ queryKey: ["alertas"] }),
-    ]),
+    onSuccess: () => invalidarMatches(queryClient),
+  });
+}
+
+/** T6.6 · Match creado a mano desde la ficha. Uno por pareja, como los de las sugerencias (índice único). */
+export function useCrearMatch() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (match: TablesInsert<"matches">) => {
+      const { error } = await supabase.from("matches").insert(match);
+      if (error?.code === "23505") throw new Error("Ya tienen un match: está en su lista de matches.");
+      if (error) throw error;
+    },
+    onSuccess: () => invalidarMatches(queryClient),
   });
 }
 
@@ -90,12 +105,7 @@ export function useGuardarFeedback() {
     onSuccess: (_, { match }) => {
       aprender.mutate(match.perfil_a);
       aprender.mutate(match.perfil_b);
-      return Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["matches"] }),
-        queryClient.invalidateQueries({ queryKey: ["tareas"] }),
-        queryClient.invalidateQueries({ queryKey: ["perfiles"] }),
-        queryClient.invalidateQueries({ queryKey: ["alertas"] }),
-      ]);
+      return invalidarMatches(queryClient);
     },
     onError: (error) => toast({ title: "No se pudo guardar el feedback", description: error.message, variant: "destructive" }),
   });
