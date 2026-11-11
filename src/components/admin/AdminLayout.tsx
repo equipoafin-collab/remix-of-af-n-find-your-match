@@ -18,6 +18,7 @@ const NAV = [
   { to: "/admin/seguimiento", icon: CheckCircle2, label: "Seguimiento" },
   { to: "/admin/notas", icon: StickyNote, label: "Notas Privadas" },
   { to: "/admin/pagos", icon: CreditCard, label: "Pagos" },
+  { to: "/admin/disc", icon: ClipboardList, label: "Test DISC" },
   { to: "/admin/configuracion", icon: Settings, label: "Configuración" },
 ];
 

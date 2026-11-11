@@ -15,6 +15,7 @@ const AdminDashboardHome = lazy(() => import("./pages/admin/Dashboard"));
 const PerfilesList = lazy(() => import("./pages/admin/PerfilesList"));
 const PerfilDetalle = lazy(() => import("./pages/admin/PerfilDetalle"));
 const Pagos = lazy(() => import("./pages/admin/Pagos"));
+const TestDisc = lazy(() => import("./pages/admin/TestDisc"));
 const Tareas = lazy(() => import("./pages/admin/Tareas"));
 const Alertas = lazy(() => import("./pages/admin/Alertas"));
 const Configuracion = lazy(() => import("./pages/admin/Configuracion"));
@@ -76,6 +77,7 @@ const App = () => (
               <Route path="tareas" element={<FiltrosDeUrl><Tareas /></FiltrosDeUrl>} />
               <Route path="alertas" element={<FiltrosDeUrl><Alertas /></FiltrosDeUrl>} />
               <Route path="pagos" element={<Pagos />} />
+              <Route path="disc" element={<TestDisc />} />
               <Route path="configuracion" element={<Configuracion />} />
             </Route>
             {/* T6.3: el informe se genera ahora dentro de cada match (ficha → Matches). */}

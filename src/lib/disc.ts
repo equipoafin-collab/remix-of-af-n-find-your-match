@@ -61,3 +61,15 @@ export function resumenDisc(scores: Record<DiscType, number> | null) {
     percents: { D: porcentaje("D"), I: porcentaje("I"), S: porcentaje("S"), C: porcentaje("C") } as Record<DiscType, number>,
   };
 }
+
+const normalizarEmail = (email: string) => email.trim().toLowerCase();
+
+/**
+ * T10.5 · Cada test con la ficha de su email. La base de datos enlaza la ficha con el test más reciente;
+ * si la persona repitió el test, los anteriores llevan a la misma ficha.
+ */
+export function conFicha<T extends { email: string; perfiles: { id: string }[] }>(tests: T[]) {
+  const fichas = new Map<string, string>();
+  for (const t of tests) if (t.perfiles[0]) fichas.set(normalizarEmail(t.email), t.perfiles[0].id);
+  return tests.map((t) => ({ ...t, ficha: fichas.get(normalizarEmail(t.email)) ?? null }));
+}
