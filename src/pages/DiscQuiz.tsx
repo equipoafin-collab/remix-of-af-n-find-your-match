@@ -312,6 +312,26 @@ const DiscQuiz = () => {
                     </span>
                   </div>
                 </motion.div>
+
+                {/* T10.6 · Cómo funciona Afín: el vídeo va en public/ (sin terceros ni cookies). */}
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.7, duration: 0.5 }}
+                  className="space-y-3"
+                >
+                  <p className="font-body text-sm font-semibold text-foreground">¿Cómo funciona Afín?</p>
+                  <video
+                    controls
+                    playsInline
+                    preload="metadata"
+                    poster="/videos/como-funciona.jpg"
+                    aria-label="Vídeo: cómo funciona Afín"
+                    className="w-full aspect-video rounded-2xl shadow-lg bg-primary"
+                  >
+                    <source src="/videos/como-funciona.mp4" type="video/mp4" />
+                  </video>
+                </motion.div>
               </motion.div>
             )}
 
