@@ -931,6 +931,27 @@ const Perfil = () => {
                     </TabsContent>
                   </Tabs>
 
+                  {/* T15.4 · Cómo activar su área: solo se abre con el plan pagado (T15.1), al pagar (T15.3) o con el enlace de la ficha. */}
+                  <section className="rounded-2xl border border-border bg-card p-4 space-y-3">
+                    <h3 className="font-display text-base font-bold text-foreground">Activa tu área en Afín</h3>
+                    <p className="font-body text-xs text-muted-foreground leading-relaxed">
+                      En tu área privada verás tus citas, tus matches y tu perfil. Así se activa:
+                    </p>
+                    <ol className="list-decimal pl-4 space-y-1.5 font-body text-xs text-foreground leading-relaxed">
+                      <li>
+                        <a href={enlaceReserva(RESERVA_DESCUBRIMIENTO, form.nombre_completo, form.email)} target="_blank" rel="noopener noreferrer" className="font-semibold text-gold-texto underline">
+                          Reserva tu sesión de descubrimiento
+                        </a>{" "}
+                        gratuita.
+                      </li>
+                      <li>Si eliges un plan, al pagarlo crearás tu contraseña. También puedes hacerlo con el enlace que te envíe tu psicóloga.</li>
+                      <li>Después, entra en tu área con tu email{form.email ? ` (${form.email})` : ""} y tu contraseña.</li>
+                    </ol>
+                    <button onClick={() => navigate("/mi-area/login")} className="font-body text-xs font-semibold text-gold-texto underline">
+                      ¿Ya tienes cuenta? Entra en tu área
+                    </button>
+                  </section>
+
                   <PlanBookingDialog plan={bookingPlan} open={!!bookingPlan} onOpenChange={(open) => { if (!open) setBookingPlan(null); }} />
 
                   {/* Compact action row */}
