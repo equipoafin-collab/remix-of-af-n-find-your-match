@@ -352,6 +352,12 @@ Caché: las sugerencias se guardan en `match_sugerencias`. Al abrir la ficha se 
   - Aceptación: cambios reflejados en cabecera, listado y vista.
   > Nota de implementación: sin migración. Botón "Plan" junto a la etiqueta del plan en la cabecera (`EditarPlan`), que además muestra las fechas del plan. Al cambiar plan o fechas se propone `sesiones_por_plan[plan] × meses` (`src/lib/plan.ts`, con tests; meses = días entre fechas, ambas incluidas, / 30,44, redondeado y mínimo 1) y se puede ajustar a mano; al dar de alta un plan el inicio por defecto es hoy. "Sin plan" devuelve el perfil a lead. Fechas al revés o sesiones no enteras bloquean el guardado (solo en el formulario: no hay `CHECK` en BD). Guarda con `useUpdatePerfil`, que refresca cabecera, listado y `v_clientes`.
 
+- [x] **T2.5 · "Grabación de la primera sesión" y subida de vídeos grandes** · Depende de T2.3
+  - Añadida el 11/11/2026. El bloque de T2.3 se llamaba "Vídeo de presentación" y no decía que es la grabación de la primera sesión ni cómo hacerla; nunca se había subido un vídeo grande.
+  - Renombrar a "Grabación de la primera sesión" (también en la pestaña Sesiones) y explicar cómo grabarla, el límite y que hace falta el consentimiento expreso del cliente. Comprobar que un fichero grande llega a Storage.
+  - Aceptación: un fichero cercano a 500 MB se sube con su barra de progreso y se puede borrar.
+  > Nota de implementación: solo textos en `VideoPresentacion.tsx` y `SesionesTab.tsx`; la columna (`video_presentacion_path`), la ruta y el bucket no cambian. Probado en local con "vicente sanchez gil" (perfil de prueba), con ficheros de relleno de 60 MB y de 450 MB: los dos subieron (el de 450 MB, en algo más de un minuto) y, tras borrarlo desde la ficha, en Storage no queda nada y el perfil no tiene ruta. El límite global de subida de Lovable Cloud está, por tanto, por encima de los 50 MB de fábrica de Supabase; el que manda es el del bucket, 500 MB, comprobado también en el navegador antes de subir. Pendiente: el consentimiento para grabar, en los textos de la asesoría (T10.4).
+
 ### FASE 3 — Sesiones y resumen automático con IA
 
 - [x] **T3.1 · CRUD de sesiones** · Depende de T1.3, T2.1
@@ -1003,3 +1009,4 @@ Fases 15-19, área del cliente (añadidas el 20/10/2026): **F15 Acceso** → **T
 | 11/11/2026 | T6.6 | "Crear match" en la ficha: la psicóloga empareja al cliente con quien quiera, se lo presenta a los dos en su área (con la cita si la pone) y les manda el aviso por correo o WhatsApp. |
 | 11/11/2026 | T15.4 | El final del cuestionario explica cómo activar el área: reservar la sesión de descubrimiento, crear la contraseña al pagar el plan (o con el enlace de su psicóloga) y entrar con su email. |
 | 11/11/2026 | T10.6 | La portada del test DISC (`/quiz`) tiene el vídeo "¿Cómo funciona Afín?" bajo "Comenzar", alojado en la propia web. |
+| 11/11/2026 | T2.5 | "Vídeo de presentación" pasa a llamarse "Grabación de la primera sesión", con instrucciones y el aviso del consentimiento; comprobado que se sube un fichero de 450 MB. |
