@@ -752,6 +752,12 @@ Decisiones (valores por defecto; confirmar con Vero):
   - Aceptación: pagar → crear contraseña → dentro del área, sin que intervenga la psicóloga.
   > Nota de implementación: sin migración. `success_url` lleva `?session_id={CHECKOUT_SESSION_ID}`. `acceso-cliente` gana `info_pago` y `activar_pago`: lee la sesión de Stripe con `STRIPE_SECRET_KEY` y solo la acepta si `pagoCobradoReciente` (completa, cobrada y de hace 7 días como mucho; `_shared/stripe.ts`, con test) y si es de un pago nuestro de ese perfil (`pagos.stripe_checkout_id` y `client_reference_id`). Si el aviso de Stripe aún no ha llegado, llama a `confirmar_pago_stripe` como él (idempotente), así el plan ya está activo al entrar. Solo crea la cuenta si el perfil no tiene: después, "Entrar", y la contraseña se cambia con el enlace de la ficha. La creación de la cuenta es la de T15.1, y la cuenta suelta con el mismo email que se enlaza excluye ya al propio perfil. La auditoría guarda `via: enlace | pago`. En `/pago/ok?session_id=…`: "Crea tu contraseña" o "Tu plan ya está activo" con "Entrar en mi área"; sin `session_id`, o si no se puede (cancelado, pago diferido aún sin cobrar…), la página de siempre. El formulario (`CrearContrasena`) y la llamada (`llamarAccesoCliente`) se comparten con `/mi-area/acceso`. Probado: `deno check` de `acceso-cliente`, `stripe-checkout` y `stripe-webhook`; en local, con la función simulada en el navegador, los dos estados y el envío. `stripe-checkout` ya existía: tras fusionar hay que pedir a Lovable que la vuelva a desplegar.
 
+- [x] **T15.4 · Al final del cuestionario, cómo activar el área** · Depende de T15.1, T15.3
+  - Añadida el 11/11/2026. El final de `/perfil` enseña el DISC y los planes, pero no dice que hay un área ni cómo entrar.
+  - Bloque "Activa tu área en Afín" bajo los planes: qué hay en el área y los pasos (reservar la sesión de descubrimiento, crear la contraseña al pagar el plan o con el enlace de su psicóloga, y entrar con su email), más "¿Ya tienes cuenta? Entra en tu área".
+  - Aceptación: al terminar el cuestionario se ve cómo activar el área y el enlace lleva a `/mi-area/login`.
+  > Nota de implementación: solo texto en `Perfil.tsx`, sin migración. No se crea la cuenta al terminar: el área solo se abre con el plan pagado (`perfil_tiene_area`), y crearla sin verificar el email dejaría a cualquiera quedarse con la cuenta de otra persona; para eso harían falta los emails de la Fase 12. Probado en local abriendo la pantalla final sin enviar el cuestionario (en local se guardaría en los datos reales): el bloque se ve bajo los planes y el enlace lleva al login del área.
+
 ### FASE 16 — Mi perfil y mi plan
 
 - [x] **T16.1 · Ver mi perfil** · Depende de T15.2
@@ -990,3 +996,4 @@ Fases 15-19, área del cliente (añadidas el 20/10/2026): **F15 Acceso** → **T
 | 03/11/2026 | — | Plan: T11.6, limpieza de los datos de prueba de producción antes del lanzamiento, con el inventario de hoy. |
 | 11/11/2026 | T10.5 | El test DISC se enlaza solo con la ficha del mismo email (también lo que quedó suelto desde el 02/10) y `/admin/disc` lista quién lo ha hecho, con su estilo y su ficha o "Sin ficha". |
 | 11/11/2026 | T6.6 | "Crear match" en la ficha: la psicóloga empareja al cliente con quien quiera, se lo presenta a los dos en su área (con la cita si la pone) y les manda el aviso por correo o WhatsApp. |
+| 11/11/2026 | T15.4 | El final del cuestionario explica cómo activar el área: reservar la sesión de descubrimiento, crear la contraseña al pagar el plan (o con el enlace de su psicóloga) y entrar con su email. |
