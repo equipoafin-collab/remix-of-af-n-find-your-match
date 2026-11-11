@@ -9,7 +9,7 @@ import type { Perfil } from "@/types/admin";
 
 const onError = (error: Error) => toast({ title: "Error", description: error.message, variant: "destructive" });
 
-/** Vídeo de la primera sesión: bucket privado, reproducción con URL firmada de 1 h. */
+/** Grabación de la primera sesión (T2.3; nombre de T2.5): bucket privado, reproducción con URL firmada de 1 h. */
 const VideoPresentacion = ({ perfil }: { perfil: Perfil }) => {
   const input = useRef<HTMLInputElement>(null);
   const subir = useSubirVideo(perfil);
@@ -24,12 +24,12 @@ const VideoPresentacion = ({ perfil }: { perfil: Perfil }) => {
     if ("error" in v) return toast({ title: "No se puede subir", description: v.error, variant: "destructive" });
     subir.mutate(
       { file, ext: v.ext },
-      { onSuccess: () => toast({ title: "Vídeo subido", description: file.name }), onError },
+      { onSuccess: () => toast({ title: "Grabación subida", description: file.name }), onError },
     );
   };
 
   const borrar = () => {
-    if (!confirm("¿Eliminar el vídeo de presentación? No se puede deshacer.")) return;
+    if (!confirm("¿Eliminar la grabación de la primera sesión? No se puede deshacer.")) return;
     eliminar.mutate(undefined, { onError });
   };
 
@@ -37,7 +37,7 @@ const VideoPresentacion = ({ perfil }: { perfil: Perfil }) => {
     <section className="bg-card border border-border rounded-2xl p-5 space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <h3 className="font-display text-sm font-semibold text-foreground flex items-center gap-2">
-          <Video className="w-4 h-4 text-gold" /> Vídeo de presentación
+          <Video className="w-4 h-4 text-gold" /> Grabación de la primera sesión
         </h3>
         <div className="flex items-center gap-2">
           <input ref={input} type="file" accept="video/mp4,video/quicktime" className="hidden" onChange={(e) => elegir(e.target.files?.[0])} />
@@ -46,7 +46,7 @@ const VideoPresentacion = ({ perfil }: { perfil: Perfil }) => {
             disabled={ocupado}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-background font-body text-sm hover:border-gold disabled:opacity-50"
           >
-            <Upload className="w-4 h-4" /> {perfil.video_presentacion_path ? "Reemplazar" : "Subir vídeo"}
+            <Upload className="w-4 h-4" /> {perfil.video_presentacion_path ? "Reemplazar" : "Subir grabación"}
           </button>
           {perfil.video_presentacion_path && (
             <button
@@ -63,7 +63,7 @@ const VideoPresentacion = ({ perfil }: { perfil: Perfil }) => {
       {subir.progreso !== null && (
         <div>
           <div className="flex justify-between font-body text-xs text-muted-foreground mb-1">
-            <span>Subiendo vídeo… no cierres esta pestaña</span>
+            <span>Subiendo la grabación… no cierres esta pestaña</span>
             <span className="tabular-nums">{Math.round(subir.progreso * 100)}%</span>
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -76,12 +76,14 @@ const VideoPresentacion = ({ perfil }: { perfil: Perfil }) => {
         url ? (
           <video key={url} src={url} controls preload="metadata" onPlay={() => registrarLectura("ver_video", [perfil.id])} className="w-full max-h-[420px] rounded-xl bg-black" />
         ) : (
-          <p className="font-body text-sm text-muted-foreground">{firmando ? "Cargando vídeo…" : "No se pudo cargar el vídeo."}</p>
+          <p className="font-body text-sm text-muted-foreground">{firmando ? "Cargando la grabación…" : "No se pudo cargar la grabación."}</p>
         )
       ) : (
         subir.progreso === null && (
           <p className="font-body text-sm text-muted-foreground">
-            Aún no hay vídeo de la primera sesión. Formatos .mp4 o .mov, hasta {VIDEO_MAX_MB} MB.
+            Aún no hay grabación. Grábala con el móvil o con Zoom/Meet y súbela aquí: .mp4 o .mov, hasta {VIDEO_MAX_MB} MB.
+            Una hora grabada con el móvil suele pasar de ese tamaño: si no cabe, comprímela antes (por ejemplo, a 720p).
+            Graba solo con el consentimiento expreso del cliente.
           </p>
         )
       )}

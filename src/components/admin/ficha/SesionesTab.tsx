@@ -120,7 +120,7 @@ const FilaSesion = ({ sesion, perfil }: { sesion: Sesion; perfil: Perfil }) => {
             {sesion.tipo === "primera" && <span className={`${badge} bg-gold/15 text-foreground border-gold/40`}>Primera sesión</span>}
             {sesion.tipo === "primera" && perfil.video_presentacion_path && (
               <Link to="?tab=resumen" className="inline-flex items-center gap-1 text-gold-texto hover:underline">
-                <Video className="w-3 h-3" /> Vídeo
+                <Video className="w-3 h-3" /> Grabación
               </Link>
             )}
           </p>
