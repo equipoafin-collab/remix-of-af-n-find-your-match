@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { calculateDisc } from "@/components/DiscSurvey";
-import { DISC_META, resumenDisc } from "../disc";
+import { DISC_META, conFicha, resumenDisc } from "../disc";
 
 describe("resumenDisc", () => {
   it("principal y secundario por puntuación, con porcentajes redondeados", () => {
@@ -36,5 +36,16 @@ describe("resumenDisc", () => {
       m.description, m.enPareja, m.querer, m.conflicto, ...m.fortalezas, ...m.mejoras, ...m.necesidades,
     ]);
     expect(textos.some((s) => /\bamar\b|\bamor\b|\bama\b|\bamando\b|\bamado\b/i.test(s))).toBe(false);
+  });
+});
+
+describe("conFicha", () => {
+  it("un test repetido lleva a la ficha enlazada al último; sin ficha, null", () => {
+    const tests = [
+      { email: "Ana@Ej.com ", perfiles: [{ id: "f-ana" }] },
+      { email: "ana@ej.com", perfiles: [] },
+      { email: "dani@ej.com", perfiles: [] },
+    ];
+    expect(conFicha(tests).map((t) => t.ficha)).toEqual(["f-ana", "f-ana", null]);
   });
 });

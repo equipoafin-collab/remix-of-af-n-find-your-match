@@ -191,7 +191,7 @@ const Captacion = () => {
         Perfiles sin revisar: <strong className="text-foreground">{sinRevisar.data ?? "…"}</strong>
       </Link>
       <Link to="/admin/pagos" className="hover:text-foreground">Pagos registrados: <strong className="text-foreground">{nPagos}</strong></Link>
-      <span>Conversión test DISC → pago: <strong className="text-foreground">{leads > 0 ? Math.round((nPagos / leads) * 100) : 0} %</strong></span>
+      <Link to="/admin/disc" className="hover:text-foreground">Conversión test DISC → pago: <strong className="text-foreground">{leads > 0 ? Math.round((nPagos / leads) * 100) : 0} %</strong></Link>
     </p>
   );
 };
