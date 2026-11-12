@@ -249,7 +249,7 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   doc.setTextColor(...MUTED);
   doc.text(doc.splitTextToSize(t(sec.description), textW - 8)[0] ?? "", M + 5, y + 13);
   y += 24;
-  parrafo(`${nombre}, además de tu estilo ${pri.title.toLowerCase()}, aparece un lado ${sec.title.toLowerCase()} en tus respuestas. ${sec.enPareja} Quizá lo reconozcas más cuando ya tienes confianza con alguien. No necesitas encajar en una sola descripción: quédate con lo que te resulte familiar y comenta lo que no te representa.`, 10, MUTED);
+  parrafo(`Además de tu estilo ${pri.title.toLowerCase()}, aparece un lado ${sec.title.toLowerCase()} en tus respuestas. ${sec.enPareja} Quizá lo reconozcas más cuando ya tienes confianza con alguien. No necesitas encajar en una sola descripción: quédate con lo que te resulte familiar y comenta lo que no te representa.`, 10, MUTED);
 
   // ── ANÁLISIS ─────────────────────────────
   titulo("Tus fortalezas");
@@ -259,7 +259,7 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
     S: "Tu manera de cuidar se nota en el día a día: escuchar, acordarte de lo que le preocupa a la otra persona y estar cuando hace falta. No necesitas montar un gran plan para demostrar interés. En una relación, esa constancia ayuda a que haya confianza. Cuando tú también cuentas lo que necesitas, el cuidado deja de ir en una sola dirección y podéis apoyaros mutuamente.",
     C: "Te fijas en los detalles y te importa que lo que alguien dice tenga sentido con lo que hace. Cuando te comprometes, procuras cumplir. Eso puede dar tranquilidad a tu pareja: sabe que te tomas la relación en serio. Un plan pensado con cuidado o recordar algo importante para la otra persona son formas muy tuyas de mostrar que te interesa.",
   };
-  parrafo(`${nombre}, ${fortalezas[primary].charAt(0).toLowerCase()}${fortalezas[primary].slice(1)}`);
+  parrafo(fortalezas[primary]);
   titulo("Áreas de crecimiento");
   const mejoras: Record<DiscType, string> = {
     D: "Cuando quieres resolver algo rápido, puedes ir por delante de la otra persona sin darte cuenta. Antes de decidir un plan por los dos, prueba a preguntarle qué le apetece. Y si te cuenta algo que le preocupa, escucha un poco antes de ofrecer una solución. A veces no necesita que lo arregles: necesita que entiendas cómo se siente.",
@@ -279,7 +279,7 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
 
   titulo("Tu forma de querer");
   parrafo(pri.querer);
-  parrafo(`${nombre}, piensa en cómo sueles demostrar interés cuando alguien te gusta. Puede que para ti esté clarísimo y que la otra persona no lo interprete igual. Contarle cómo expresas el cariño y preguntarle qué le hace sentirse tenida en cuenta evita muchos malentendidos. No tenéis que hacerlo todo igual para entenderos.`, 10.5, MUTED);
+  parrafo("Piensa en cómo sueles demostrar interés cuando alguien te gusta. Puede que para ti esté clarísimo y que la otra persona no lo interprete igual. Contarle cómo expresas el cariño y preguntarle qué le hace sentirse tenida en cuenta evita muchos malentendidos. No tenéis que hacerlo todo igual para entenderos.", 10.5, MUTED);
 
   titulo("Lo que necesitas");
   parrafo(`En tus respuestas aparecen necesidades relacionadas con ${pri.necesidades.map((n) => n.charAt(0).toLowerCase() + n.slice(1)).join(", ")}. Fíjate en cuáles tienen más peso para ti: quizá disfrutes de muchos planes juntos, pero también necesites tiempo a solas; o quizá te importe más la constancia que hablar durante horas.`);
@@ -295,7 +295,7 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
 
   titulo("Compatibilidad ideal");
   parrafo(pri.compatibility);
-  parrafo(`${nombre}, estos estilos son una orientación, no una lista de personas que debas buscar o descartar. La compatibilidad también depende de vuestros valores, de cómo queréis vivir y de si buscáis el mismo tipo de relación. Observa si puedes hablar con naturalidad, si se respetan tus límites y si lo que te cuenta esa persona se corresponde con lo que hace.`, 10.5, MUTED);
+  parrafo("Estos estilos son una orientación, no una lista de personas que debas buscar o descartar. La compatibilidad también depende de vuestros valores, de cómo queréis vivir y de si buscáis el mismo tipo de relación. Observa si puedes hablar con naturalidad, si se respetan tus límites y si lo que te cuenta esa persona se corresponde con lo que hace.", 10.5, MUTED);
   titulo("Comunicación en pareja");
   parrafo(pri.comunicacion);
   titulo("Planes que os acercan");
@@ -333,7 +333,7 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   parrafo("En Afín no somos una aplicación de citas. Somos psicólogos especializados en relaciones de pareja que te acompañamos en un proceso de autoconocimiento y búsqueda de pareja.", 11);
   parrafo("Analizamos tu personalidad, tus valores, tus prioridades y lo que realmente necesitas para encontrar a alguien compatible contigo.", 11);
   parrafo("Porque encontrar pareja no debería ser cuestión de suerte, sino de conocerte y saber elegir.", 11);
-  parrafo(`${nombre}, en una sesión podemos comentar qué partes de este informe te representan y cuáles no, hablar de tus experiencias y aclarar qué buscas ahora. No tienes que traer todas las respuestas: podemos empezar por lo que te preocupa o por lo que te gustaría que fuera diferente en tu próxima relación.`, 10.5, MUTED);
+  parrafo("En una sesión podemos comentar qué partes de este informe te representan y cuáles no, hablar de tus experiencias y aclarar qué buscas ahora. No tienes que traer todas las respuestas: podemos empezar por lo que te preocupa o por lo que te gustaría que fuera diferente en tu próxima relación.", 10.5, MUTED);
   parrafo("Tu próxima relación puede empezar aquí.", 17, GOLD, "italic");
 
   // ── PIE (todas menos la portada) ─────────
