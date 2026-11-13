@@ -62,6 +62,26 @@ const HowItWorks = () => {
             </motion.div>
           ))}
         </div>
+
+        {/* Vídeo: cómo funciona Afín (servido desde public/, sin terceros ni cookies). */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mt-14 max-w-3xl mx-auto"
+        >
+          <video
+            controls
+            playsInline
+            preload="metadata"
+            poster="/videos/como-funciona.jpg"
+            aria-label="Vídeo: cómo funciona Afín"
+            className="w-full aspect-video rounded-2xl shadow-lg bg-primary"
+          >
+            <source src="/videos/como-funciona.mp4" type="video/mp4" />
+          </video>
+        </motion.div>
       </div>
     </section>
   );
