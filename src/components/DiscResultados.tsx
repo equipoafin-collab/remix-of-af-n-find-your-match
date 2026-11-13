@@ -4,7 +4,7 @@ import { DISC_META, type DiscType } from "@/lib/disc";
 
 const ORDEN: DiscType[] = ["D", "I", "S", "C"];
 // Mismos tonos apagados que el PDF.
-const COLOR: Record<DiscType, string> = { D: "#a8483e", I: "#be913c", S: "#568062", C: "#48628c" };
+const COLOR: Record<DiscType, string> = { D: "#a05a4c", I: "#be913c", S: "#568062", C: "#48628c" };
 
 const PESTANAS = [
   { id: "fortalezas", label: "Fortalezas" },

@@ -78,7 +78,7 @@ const Pricing = () => {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-          <p className="mt-6 font-display text-xl md:text-2xl text-gold font-semibold">
+          <p className="mt-6 font-display text-2xl md:text-3xl text-gold-texto font-extrabold italic underline decoration-gold-texto/40 decoration-[3px] underline-offset-8">
             Tu próxima relación puede empezar aquí.
           </p>
         </motion.div>

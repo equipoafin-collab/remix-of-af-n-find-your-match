@@ -1,14 +1,4 @@
-- [x] Informe DISC en PDF con estilo cósmico y elegante
-- [x] Resultado DISC del perfil más llamativo y narrativo
-- [x] Fondos en azul marino corporativo (vista y PDF), nada en negro
-- [x] Frases del DISC más cercanas y de calle (sin tono filosófico)
-- [x] Frase del Influyente: más cercana y personal (no "hazme reír y te lo doy todo")
-- [x] Incorporar el texto de Afín en precios y en el informe DISC, sin precios en el PDF
-- [x] Ampliar el informe DISC con narrativa cercana y personalizada
-- [x] Cambiar el enlace del test DISC a «Pulsa aquí» y comprobar el resultado
-- [x] Mostrar precios comerciales solo en la sección Precios, quitándolos del perfil y del diálogo de planes
-- [x] Cambiar precios publicados a Esencial 69 €/mes y Premium 120 €/mes, visibles solo al abrir un desplegable
-- [x] Actualizar llamada DISC a «¿Quieres saber cuál es tu DISC y cómo eres en pareja? Pulsa aquí»
-- [x] Sustituir el desplegable principal por «Cómo lo hacemos» con el texto de entrevistas e informe previo
-- [x] Mostrar «Entrevista personal · 20 minutos» en lugar de 15 minutos
-- [x] Destacar el cuadro «Empieza sin compromiso» y la primera sesión gratis de 20 minutos
+# Tareas
+- [x] DISC: rojo más suave + 4 preguntas nuevas
+- [x] Pricing: destacar «Tu próxima relación puede empezar aquí»
+- [ ] Vídeo «cómo funciona Afín» en la página principal

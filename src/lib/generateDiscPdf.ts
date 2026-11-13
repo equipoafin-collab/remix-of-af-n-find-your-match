@@ -39,7 +39,7 @@ const IVORY: RGB = [18, 34, 72]; // azul marino corporativo
 const LINE: RGB = [62, 84, 130];
 
 const DISC_COLORS: Record<DiscType, RGB> = {
-  D: [236, 120, 132],
+  D: [198, 118, 122],
   I: [240, 196, 110],
   S: [120, 214, 178],
   C: [130, 168, 255],

@@ -85,6 +85,42 @@ const DISC_QUESTIONS: Question[] = [
       { text: "Planificación y detalles cuidados", disc: "C" },
     ],
   },
+  {
+    question: "Un sábado por la noche ideal con tu pareja sería:",
+    options: [
+      { text: "Improvisar algo emocionante sobre la marcha", disc: "D" },
+      { text: "Salir con amigos y conocer gente nueva", disc: "I" },
+      { text: "Quedaros en casa, tranquilos y a vuestra manera", disc: "S" },
+      { text: "Un plan bien organizado con antelación", disc: "C" },
+    ],
+  },
+  {
+    question: "Cuando tu pareja está pasando por un mal momento, tú:",
+    options: [
+      { text: "Buscas soluciones concretas para ayudarle", disc: "D" },
+      { text: "Le animas y consigues sacarle una sonrisa", disc: "I" },
+      { text: "Le acompañas y escuchas sin prisa", disc: "S" },
+      { text: "Le ayudas a analizar la situación con calma", disc: "C" },
+    ],
+  },
+  {
+    question: "¿Qué te hace sentir más querido/a?",
+    options: [
+      { text: "Que confíen en mí para tomar decisiones", disc: "D" },
+      { text: "Las palabras bonitas y las muestras de cariño", disc: "I" },
+      { text: "Los gestos constantes del día a día", disc: "S" },
+      { text: "Que respeten mi espacio y mis tiempos", disc: "C" },
+    ],
+  },
+  {
+    question: "Si tuvieras que describir el amor ideal, sería:",
+    options: [
+      { text: "Un equipo que conquista retos juntos", disc: "D" },
+      { text: "Una aventura llena de risas y sorpresas", disc: "I" },
+      { text: "Un refugio de calma y confianza", disc: "S" },
+      { text: "Una construcción sólida, paso a paso", disc: "C" },
+    ],
+  },
 ];
 
 const LETTER_LABELS = ["A", "B", "C", "D"];
@@ -123,7 +159,7 @@ const DiscSurvey = ({ value, onChange }: DiscSurveyProps) => {
         Test de personalidad DISC
       </legend>
       <p className="font-body text-sm text-muted-foreground -mt-4">
-        Responde las 8 preguntas seleccionando la opción que más te identifique. ({answeredCount}/8)
+        Responde las {DISC_QUESTIONS.length} preguntas seleccionando la opción que más te identifique. ({answeredCount}/{DISC_QUESTIONS.length})
       </p>
 
       {DISC_QUESTIONS.map((q, qi) => (
