@@ -35,7 +35,7 @@ const Differentiators = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <p className="text-gold font-body text-sm tracking-[0.2em] uppercase mb-4">
+          <p className="text-gold-texto font-body text-sm tracking-[0.2em] uppercase font-semibold mb-4">
             Nuestra diferencia
           </p>
           <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground">
