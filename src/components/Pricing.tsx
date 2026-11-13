@@ -49,7 +49,7 @@ const Pricing = () => {
           </p>
           <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground leading-tight mb-6">
             ¿Y si por el precio de una sesión de psicología pudieras dar un paso{' '}
-            <span className="text-gold">mucho más grande</span> en tu vida sentimental?
+            <span className="text-gold-texto italic font-extrabold underline decoration-gold-texto/40 decoration-[3px] underline-offset-8">mucho más grande</span> en tu vida sentimental?
           </h2>
           <Accordion type="single" collapsible className="max-w-2xl mx-auto text-left">
             <AccordionItem value="como-lo-hacemos" className="border-border">
