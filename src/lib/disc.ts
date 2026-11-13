@@ -5,7 +5,7 @@
 export type DiscType = "D" | "I" | "S" | "C";
 
 export const DISC_META: Record<DiscType, { title: string; emoji: string; description: string; bg: string; text: string; gradient: string; ring: string; fortalezas: string[]; mejoras: string[]; enPareja: string; querer: string; necesidades: string[]; conflicto: string; compatibility: string; comunicacion: string; actividades: string }> = {
-  D: { title: "Dominante", emoji: "⚡", bg: "bg-red-50", text: "text-red-700", gradient: "from-red-500 to-red-600", ring: "ring-red-400",
+  D: { title: "Dominante", emoji: "🎯", bg: "bg-red-50", text: "text-red-700", gradient: "from-red-500 to-red-600", ring: "ring-red-400",
     description: "Vas al grano, decides rápido y te gusta llevar la iniciativa.",
     fortalezas: ["Decides con rapidez y confianza", "Tiras del carro con energía", "Afrontas los problemas de frente"],
     mejoras: ["A veces suenas impaciente o con ganas de controlarlo todo", "Te cuesta ceder el control", "Puedes quitarle importancia a lo que siente el otro"],
@@ -15,7 +15,7 @@ export const DISC_META: Record<DiscType, { title: string; emoji: string; descrip
     conflicto: "Vas de frente y discutes sin rodeos. Te toca escuchar antes de contestar.",
     compatibility: "Combinas mejor con perfiles S (estabilidad) e I (entusiasmo).",
     comunicacion: "Dilo claro y sin rodeos.", actividades: "Deportes de aventura, viajes espontáneos, retos en pareja." },
-  I: { title: "Influyente", emoji: "✨", bg: "bg-amber-50", text: "text-amber-700", gradient: "from-amber-400 to-amber-500", ring: "ring-amber-400",
+  I: { title: "Influyente", emoji: "🥂", bg: "bg-amber-50", text: "text-amber-700", gradient: "from-amber-400 to-amber-500", ring: "ring-amber-400",
     description: "Sociable y entusiasta: necesitas conexión, diversión y que te lo digan.",
     fortalezas: ["Contagias las ganas sin proponértelo", "Hablas con cualquiera con facilidad", "Arreglas los roces con empatía"],
     mejoras: ["A veces esquivas las conversaciones difíciles", "Te lanzas por impulso", "Te cuesta sostener las rutinas"],
@@ -25,7 +25,7 @@ export const DISC_META: Record<DiscType, { title: string; emoji: string; descrip
     conflicto: "Buscas arreglarlo rápido, a veces sin hablar de lo de verdad.",
     compatibility: "Encajas bien con perfiles C (estructura) y S (constancia).",
     comunicacion: "Cuenta lo que sientes y deja que te escuchen.", actividades: "Eventos sociales, viajes con amigos, cenas románticas." },
-  S: { title: "Estable", emoji: "🌿", bg: "bg-emerald-50", text: "text-emerald-700", gradient: "from-emerald-500 to-emerald-600", ring: "ring-emerald-400",
+  S: { title: "Estable", emoji: "🏡", bg: "bg-emerald-50", text: "text-emerald-700", gradient: "from-emerald-500 to-emerald-600", ring: "ring-emerald-400",
     description: "Paciente y estable: valoras la tranquilidad y la lealtad.",
     fortalezas: ["Das apoyo constante y lealtad", "Escuchas de verdad, sin juzgar", "Creas un ambiente donde se está tranquilo"],
     mejoras: ["Te cuesta abrirte a los cambios", "Te guardas lo que necesitas", "Acumulas enfados sin decirlos"],
@@ -35,7 +35,7 @@ export const DISC_META: Record<DiscType, { title: string; emoji: string; descrip
     conflicto: "Evitas discutir y cedes para que no haya tensión.",
     compatibility: "Combinas con perfiles D (decisión) e I (energía).",
     comunicacion: "Necesitas tiempo para pensarlo; la paciencia te ayuda.", actividades: "Tardes tranquilas, cocinar juntos, paseos por la naturaleza." },
-  C: { title: "Concienzudo", emoji: "💎", bg: "bg-blue-50", text: "text-blue-700", gradient: "from-blue-500 to-blue-600", ring: "ring-blue-400",
+  C: { title: "Concienzudo", emoji: "🧭", bg: "bg-blue-50", text: "text-blue-700", gradient: "from-blue-500 to-blue-600", ring: "ring-blue-400",
     description: "Analítico y cuidadoso: buscas coherencia y un compromiso de verdad.",
     fortalezas: ["Planificas con cuidado", "Cuidas la calidad y la coherencia", "Aportas estructura y confianza"],
     mejoras: ["Puedes ser muy exigente contigo", "Te cuesta improvisar", "Le das muchas vueltas a las cosas"],
