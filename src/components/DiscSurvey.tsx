@@ -68,33 +68,6 @@ const DISC_QUESTIONS: Question[] = [
     ],
   },
   {
-    question: "¿Cómo reaccionas ante cambios importantes en la relación?",
-    options: [
-      { text: "Tomo acción inmediata", disc: "D" },
-      { text: "Me adapto con entusiasmo", disc: "I" },
-      { text: "Prefiero cambios graduales", disc: "S" },
-      { text: "Evalúo antes de actuar", disc: "C" },
-    ],
-  },
-  {
-    question: "Proyecto ideal en pareja:",
-    options: [
-      { text: "Aventuras y retos juntos", disc: "D" },
-      { text: "Momentos sociales y divertidos", disc: "I" },
-      { text: "Rutina estable y segura", disc: "S" },
-      { text: "Planificación y detalles cuidados", disc: "C" },
-    ],
-  },
-  {
-    question: "Un sábado por la noche ideal con tu pareja sería:",
-    options: [
-      { text: "Improvisar algo emocionante sobre la marcha", disc: "D" },
-      { text: "Salir con amigos y conocer gente nueva", disc: "I" },
-      { text: "Quedaros en casa, tranquilos y a vuestra manera", disc: "S" },
-      { text: "Un plan bien organizado con antelación", disc: "C" },
-    ],
-  },
-  {
     question: "Cuando tu pareja está pasando por un mal momento, tú:",
     options: [
       { text: "Buscas soluciones concretas para ayudarle", disc: "D" },

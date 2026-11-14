@@ -39,7 +39,7 @@ const IVORY: RGB = [18, 34, 72]; // azul marino corporativo
 const LINE: RGB = [62, 84, 130];
 
 const DISC_COLORS: Record<DiscType, RGB> = {
-  D: [198, 118, 122],
+  D: [148, 58, 72],
   I: [240, 196, 110],
   S: [120, 214, 178],
   C: [130, 168, 255],
@@ -199,6 +199,19 @@ export function generateDiscPdf({ userName, primary, secondary, percents, pri, s
   doc.setTextColor(...priCol);
   doc.text(t(pri.title), M, y + 2);
   y += 10;
+  // Recuadro destacado con el perfil resultante: lo primero que debe verse.
+  doc.setFillColor(priCol[0], priCol[1], priCol[2]);
+  doc.roundedRect(M, y, textW, 22, 3, 3, "F");
+  doc.setFont("times", "bold");
+  doc.setFontSize(16);
+  doc.setTextColor(255, 255, 255);
+  doc.text(`Tu perfil: ${t(pri.title)}`, M + 8, y + 10);
+  doc.setFontSize(20);
+  doc.text(`${percents[primary]}%`, W - M - 8, y + 11, { align: "right" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text(`con un toque ${t(sec.title)} (${percents[secondary]}%)`, M + 8, y + 17.5);
+  y += 30;
   parrafo(pri.description, 11);
   parrafo(`${nombre}, este resultado recoge cómo has respondido hoy. No cuenta todo lo que eres ni determina con quién vas a encajar. Puede ayudarte a poner palabras a esas cosas que a veces notas cuando conoces a alguien: qué te da confianza, qué te cuesta decir y qué necesitas para estar a gusto.`, 10.5, MUTED);
   parrafo("El porcentaje más alto señala el estilo que más aparece en tus respuestas, no cuánto vales como pareja. Todos tenemos algo de los cuatro estilos, y podemos actuar de forma distinta según la persona, el momento y la confianza que tengamos.", 10, MUTED);

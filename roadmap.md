@@ -1,4 +1,4 @@
 # Tareas
-- [x] DISC: rojo más suave + 4 preguntas nuevas
-- [x] Pricing: destacar «Tu próxima relación puede empezar aquí»
-- [x] Vídeo «cómo funciona Afín» solo en la página principal (quitado del DISC)
+- [x] DISC: 9 preguntas enfocadas a personalidad
+- [x] PDF DISC: recuadro destacado con el perfil resultante
+- [x] Colores DISC: rojo hacia granate
