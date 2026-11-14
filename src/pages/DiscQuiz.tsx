@@ -65,6 +65,56 @@ const QUESTIONS: QuizQuestion[] = [
       { text: "Precisión y responsabilidad", disc: "C", icon: <Zap className="w-6 h-6" /> },
     ],
   },
+  {
+    question: "En una cena con amigos, tú sueles:",
+    subtitle: "Piensa en cómo eres de verdad",
+    options: [
+      { text: "Liderar la conversación y proponer planes", disc: "D", icon: <Target className="w-6 h-6" /> },
+      { text: "Contar historias y hacer reír a todos", disc: "I", icon: <Sun className="w-6 h-6" /> },
+      { text: "Escuchar y cuidar que todos estén a gusto", disc: "S", icon: <Shield className="w-6 h-6" /> },
+      { text: "Observar y hablar cuando tengo algo que aportar", disc: "C", icon: <Zap className="w-6 h-6" /> },
+    ],
+  },
+  {
+    question: "Cuando tomas una decisión importante:",
+    subtitle: "¿Cómo decides en la vida?",
+    options: [
+      { text: "Decido rápido y sin mirar atrás", disc: "D", icon: <Target className="w-6 h-6" /> },
+      { text: "Me dejo llevar por la intuición", disc: "I", icon: <Sun className="w-6 h-6" /> },
+      { text: "Consulto con las personas de confianza", disc: "S", icon: <Shield className="w-6 h-6" /> },
+      { text: "Hago una lista de pros y contras", disc: "C", icon: <Zap className="w-6 h-6" /> },
+    ],
+  },
+  {
+    question: "¿Qué te hace sentir más querido/a?",
+    subtitle: "Eso que necesitas de tu pareja",
+    options: [
+      { text: "Que confíen en mí para decidir", disc: "D", icon: <Target className="w-6 h-6" /> },
+      { text: "Las palabras bonitas y el cariño", disc: "I", icon: <Sun className="w-6 h-6" /> },
+      { text: "Los gestos constantes del día a día", disc: "S", icon: <Shield className="w-6 h-6" /> },
+      { text: "Que respeten mi espacio y mis tiempos", disc: "C", icon: <Zap className="w-6 h-6" /> },
+    ],
+  },
+  {
+    question: "Un sábado por la noche ideal para ti es:",
+    subtitle: "Tu plan perfecto",
+    options: [
+      { text: "Probar algo nuevo y emocionante", disc: "D", icon: <Target className="w-6 h-6" /> },
+      { text: "Salir con amigos y conocer gente", disc: "I", icon: <Sun className="w-6 h-6" /> },
+      { text: "Una noche tranquila en casa", disc: "S", icon: <Shield className="w-6 h-6" /> },
+      { text: "Un plan bien organizado con antelación", disc: "C", icon: <Zap className="w-6 h-6" /> },
+    ],
+  },
+  {
+    question: "Si tuvieras que describir el amor ideal, sería:",
+    subtitle: "Imagina tu relación perfecta",
+    options: [
+      { text: "Un equipo que conquista retos juntos", disc: "D", icon: <Target className="w-6 h-6" /> },
+      { text: "Una aventura llena de risas y sorpresas", disc: "I", icon: <Sun className="w-6 h-6" /> },
+      { text: "Un refugio de calma y confianza", disc: "S", icon: <Shield className="w-6 h-6" /> },
+      { text: "Una construcción sólida, paso a paso", disc: "C", icon: <Zap className="w-6 h-6" /> },
+    ],
+  },
 ];
 
 // Mismos textos que el perfil del área del cliente (lib/disc), para que el tono no cambie entre pantallas.
@@ -196,8 +246,8 @@ const DiscQuiz = () => {
     goNext();
   };
 
-  const progressPercent = step >= 1 && step <= 4 ? (step / 4) * 100 : 0;
-  const totalSteps = 6;
+  const progressPercent = step >= 1 && step <= 9 ? (step / 9) * 100 : 0;
+  const totalSteps = 11;
 
   return (
     <main className="min-h-screen bg-background flex flex-col">
@@ -212,9 +262,9 @@ const DiscQuiz = () => {
             {step === 0 ? "Inicio" : "Atrás"}
           </button>
 
-          {step >= 1 && step <= 4 && (
+          {step >= 1 && step <= 9 && (
             <span className="text-xs font-body font-medium text-muted-foreground tracking-wide uppercase">
-              {step} / 4
+              {step} / 9
             </span>
           )}
 
@@ -224,7 +274,7 @@ const DiscQuiz = () => {
         </div>
 
         {/* Progress bar */}
-        {step >= 1 && step <= 4 && (
+        {step >= 1 && step <= 9 && (
           <div className="h-1 bg-muted">
             <motion.div
               className="h-full bg-gradient-to-r from-disc to-disc-glow rounded-r-full"
@@ -279,7 +329,7 @@ const DiscQuiz = () => {
                     transition={{ delay: 0.4, duration: 0.5 }}
                     className="font-body text-muted-foreground text-base md:text-lg max-w-sm mx-auto leading-relaxed"
                   >
-                    Responde 4 preguntas rápidas y obtén tu perfil DISC en pareja
+                    Responde 9 preguntas rápidas y obtén tu perfil DISC en pareja
                   </motion.p>
                 </div>
 
@@ -304,7 +354,7 @@ const DiscQuiz = () => {
                     </span>
                     <span className="flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                      4 preguntas
+                      9 preguntas
                     </span>
                     <span className="flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
@@ -317,7 +367,7 @@ const DiscQuiz = () => {
             )}
 
             {/* STEPS 1-4: Questions */}
-            {step >= 1 && step <= 4 && (
+            {step >= 1 && step <= 9 && (
               <motion.div
                 key={`q-${step}`}
                 custom={direction}
@@ -406,8 +456,8 @@ const DiscQuiz = () => {
               </motion.div>
             )}
 
-            {/* STEP 5: Contact info */}
-            {step === 5 && (
+            {/* STEP 10: Contact info */}
+            {step === 10 && (
               <motion.div
                 key="contact"
                 custom={direction}
@@ -515,7 +565,7 @@ const DiscQuiz = () => {
             )}
 
             {/* STEP 6: Results */}
-            {step === 6 && result && (() => {
+            {step === 11 && result && (() => {
               const pri = DISC_DESCRIPTIONS[result.primary];
               const sec = DISC_DESCRIPTIONS[result.secondary];
               const priColors = DISC_COLORS[result.primary];
