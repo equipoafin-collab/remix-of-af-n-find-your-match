@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Check } from "lucide-react";
+import { Check, BookOpen, Heart, Compass, Users, FileText } from "lucide-react";
 import { RESERVA_DESCUBRIMIENTO } from "@/lib/enlaces";
 import { PRECIOS_PUBLICOS } from "@/lib/preciosPublicos";
 import { Button } from "@/components/ui/button";
@@ -55,25 +55,39 @@ const Pricing = () => {
             <AccordionItem value="como-lo-hacemos" className="border-border">
               <AccordionTrigger className="font-display text-2xl text-foreground">Cómo lo hacemos</AccordionTrigger>
               <AccordionContent>
-          <div className="space-y-4 font-body text-base md:text-lg text-muted-foreground leading-relaxed">
-            <p>
-              <strong className="text-foreground">Antes de que conozcas a alguien, hablamos con esa persona.</strong>
+          <div className="space-y-6 font-body text-base text-muted-foreground leading-relaxed pt-2">
+            <p className="text-center font-display text-lg md:text-xl text-foreground font-semibold">
+              Antes de que conozcas a alguien, hablamos con esa persona.
             </p>
-            <p>La entrevistamos para conocer:</p>
-            <ul className="space-y-2 list-disc pl-5">
-              <li>Su historia</li>
-              <li>Sus valores</li>
-              <li>Qué busca realmente</li>
-              <li>Qué relación quiere construir</li>
-            </ul>
-            <p>
+            <p className="text-center">La entrevistamos para conocer:</p>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { icon: BookOpen, titulo: "Su historia" },
+                { icon: Heart, titulo: "Sus valores" },
+                { icon: Compass, titulo: "Qué busca realmente" },
+                { icon: Users, titulo: "Qué relación quiere construir" },
+              ].map(({ icon: Icon, titulo }) => (
+                <div key={titulo} className="flex flex-col items-center gap-2 rounded-xl border border-border bg-background px-3 py-4 text-center">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gold/15">
+                    <Icon className="h-5 w-5 text-gold-texto" />
+                  </span>
+                  <span className="font-body text-sm font-medium text-foreground">{titulo}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-center italic">
               De esta forma, cuando dos personas se encuentran, no necesitan convertir la cita en una entrevista.
             </p>
-            <h3 className="font-display text-xl font-semibold text-foreground pt-2">Antes de quedar recibirás un pequeño informe</h3>
-            <p>
-              Sus inquietudes, intereses y su forma de ver las relaciones. No es un currículum.
-              Es simplemente una forma de que la conversación empiece desde un lugar más natural.
-            </p>
+            <div className="rounded-xl border-2 border-gold/50 bg-gold/10 px-5 py-4 text-center space-y-2">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gold/20">
+                <FileText className="h-5 w-5 text-gold-texto" />
+              </span>
+              <h3 className="font-display text-lg font-semibold text-foreground">Antes de quedar recibirás un pequeño informe</h3>
+              <p className="text-sm">
+                Sus inquietudes, intereses y su forma de ver las relaciones. No es un currículum:
+                es una forma de que la conversación empiece desde un lugar más natural.
+              </p>
+            </div>
           </div>
               </AccordionContent>
             </AccordionItem>
